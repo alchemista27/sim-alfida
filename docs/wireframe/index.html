@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indeks Navigasi Wireframe — SIM-Alfida</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+<style>
+  :root{--primary:#454545;--secondary:#06bfa2;--tertiary:#0f7f6d;--on-tertiary:#F7F8F8;--neutral:#F7F8F8;--surface:#FFFFFF;--border:#E3E8E7;--font-heading:'Roboto',sans-serif;--font-body:'Inter',sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font-body);background:var(--neutral);color:var(--primary);padding:40px 20px;}
+  .container{max-width:900px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;}
+  .logo{font-family:var(--font-heading);font-weight:700;font-size:2rem;color:var(--tertiary);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+  .title{font-size:1.2rem;color:#666;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.05);margin-bottom:32px;}
+  .group{margin-bottom:32px;}
+  .group:last-child{margin-bottom:0;}
+  .group-title{font-family:var(--font-heading);font-size:1.2rem;font-weight:700;color:var(--tertiary);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:2px solid #e6f4f1;padding-bottom:8px;}
+  .list{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;}
+  .item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--neutral);border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--primary);transition:all 0.2s;}
+  .item:hover{background:#e6f4f1;border-color:var(--secondary);transform:translateY(-2px);}
+  .item .material-symbols-rounded{color:#999;transition:color 0.2s;}
+  .item:hover .material-symbols-rounded{color:var(--tertiary);}
+  .item-title{font-weight:600;font-size:.9rem;}
+  .item-desc{font-size:.75rem;color:#777;margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo"><span class="material-symbols-rounded" style="font-size:40px;">hub</span> SIM-Alfida</div>
+    <div class="title">Indeks Wireframe HTML (24 Halaman)</div>
+  </div>
+
+  <div class="card">
+    <div class="group">
+      <div class="group-title"><span class="material-symbols-rounded">login</span> 1. Autentikasi & Modul Utama</div>
+      <div class="list">
+        <a href="01-login.html" class="item">
+          <span class="material-symbols-rounded">login</span>
+          <div><div class="item-title">01 - Login</div><div class="item-desc">Halaman Masuk (Semua Role)</div></div>
+        </a>
+        <a href="02-register.html" class="item">
+          <span class="material-symbols-rounded">person_add</span>
+          <div><div class="item-title">02 - Register</div><div class="item-desc">Halaman Daftar Akun Orang Tua</div></div>
+        </a>
+        <a href="03-modules.html" class="item">
+          <span class="material-symbols-rounded">apps</span>
+          <div><div class="item-title">03 - Pilih Modul</div><div class="item-desc">Pemilihan modul SIM berdasarkan hak akses</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="material-symbols-rounded">shield_person</span> 2. Super Admin</div>
+      <div class="list">
+        <a href="04-admin-dashboard.html" class="item">
+          <span class="material-symbols-rounded">dashboard</span>
+          <div><div class="item-title">04 - Dashboard Super Admin</div><div class="item-desc">Statistik yayasan dan daftar seluruh unit</div></div>
+        </a>
+        <a href="05-admin-units.html" class="item">
+          <span class="material-symbols-rounded">domain</span>
+          <div><div class="item-title">05 - Kelola Unit Pendidikan</div><div class="item-desc">Manajemen TK, SD, SMP, SMA, Pesantren</div></div>
+        </a>
+        <a href="06-admin-unit-detail.html" class="item">
+          <span class="material-symbols-rounded">edit_square</span>
+          <div><div class="item-title">06 - Detail Unit</div><div class="item-desc">Pengaturan informasi dan assign Admin Unit</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="material-symbols-rounded">manage_accounts</span> 3. Admin Unit (PPDB)</div>
+      <div class="list">
+        <a href="07-unit-dashboard.html" class="item">
+          <span class="material-symbols-rounded">speed</span>
+          <div><div class="item-title">07 - Dashboard Unit</div><div class="item-desc">Ringkasan pendaftaran unit tertentu</div></div>
+        </a>
+        <a href="08-unit-settings.html" class="item">
+          <span class="material-symbols-rounded">tune</span>
+          <div><div class="item-title">08 - Settings Unit</div><div class="item-desc">Atur identitas, kepsek, logo, ttd, rekening bank</div></div>
+        </a>
+        <a href="09-unit-ppdb-overview.html" class="item">
+          <span class="material-symbols-rounded">overview</span>
+          <div><div class="item-title">09 - Overview PPDB</div><div class="item-desc">Pengelolaan Tahun Ajaran PPDB</div></div>
+        </a>
+        <a href="10-unit-ppdb-registrations.html" class="item">
+          <span class="material-symbols-rounded">list_alt</span>
+          <div><div class="item-title">10 - Daftar Pendaftaran</div><div class="item-desc">Daftar calon siswa dengan filter status</div></div>
+        </a>
+        <a href="11-unit-ppdb-payments.html" class="item">
+          <span class="material-symbols-rounded">receipt_long</span>
+          <div><div class="item-title">11 - Verifikasi Bayar</div><div class="item-desc">Pengecekan bukti transfer pendaftar</div></div>
+        </a>
+        <a href="12-unit-ppdb-verification.html" class="item">
+          <span class="material-symbols-rounded">folder_open</span>
+          <div><div class="item-title">12 - Verifikasi Berkas</div><div class="item-desc">Pengecekan dokumen (KTP, KK, Akte, dll)</div></div>
+        </a>
+        <a href="13-unit-ppdb-observations.html" class="item">
+          <span class="material-symbols-rounded">event_note</span>
+          <div><div class="item-title">13 - Observasi</div><div class="item-desc">Kelola Jadwal & Lihat Hasil Observasi</div></div>
+        </a>
+        <a href="14-unit-ppdb-classes.html" class="item">
+          <span class="material-symbols-rounded">class</span>
+          <div><div class="item-title">14 - Penempatan Kelas</div><div class="item-desc">Mapping siswa yang diterima ke kelas</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="material-symbols-rounded">family_restroom</span> 4. Orang Tua (Portal PPDB)</div>
+      <div class="list">
+        <a href="15-ppdb-dashboard.html" class="item">
+          <span class="material-symbols-rounded">home</span>
+          <div><div class="item-title">15 - Dashboard Ortu</div><div class="item-desc">Progress bar (stepper) pendaftaran & pengumuman</div></div>
+        </a>
+        <a href="16-ppdb-select-unit.html" class="item">
+          <span class="material-symbols-rounded">school</span>
+          <div><div class="item-title">16 - Pilih Unit</div><div class="item-desc">Pemilihan unit pendidikan (TK/SD/SMP/SMA/Pesantren)</div></div>
+        </a>
+        <a href="17-ppdb-payment.html" class="item">
+          <span class="material-symbols-rounded">payments</span>
+          <div><div class="item-title">17 - Pembayaran Pendaftaran</div><div class="item-desc">Info rekening dan form upload bukti bayar</div></div>
+        </a>
+        <a href="18-ppdb-form-student.html" class="item">
+          <span class="material-symbols-rounded">assignment</span>
+          <div><div class="item-title">18 - Form Calon Siswa</div><div class="item-desc">Input data diri anak</div></div>
+        </a>
+        <a href="19-ppdb-form-parents.html" class="item">
+          <span class="material-symbols-rounded">group</span>
+          <div><div class="item-title">19 - Form Orang Tua</div><div class="item-desc">Input data ayah dan ibu</div></div>
+        </a>
+        <a href="20-ppdb-documents.html" class="item">
+          <span class="material-symbols-rounded">upload_file</span>
+          <div><div class="item-title">20 - Upload Berkas</div><div class="item-desc">Upload pasfoto, KTP, Akte, KK</div></div>
+        </a>
+        <a href="21-ppdb-medical.html" class="item">
+          <span class="material-symbols-rounded">local_hospital</span>
+          <div><div class="item-title">21 - Surat Pengantar IMC</div><div class="item-desc">Download rujukan dan upload hasil lab/IMC</div></div>
+        </a>
+        <a href="22-ppdb-observation.html" class="item">
+          <span class="material-symbols-rounded">event_available</span>
+          <div><div class="item-title">22 - Jadwal Observasi</div><div class="item-desc">Pilih sesi wawancara/observasi</div></div>
+        </a>
+        <a href="23-ppdb-result.html" class="item">
+          <span class="material-symbols-rounded">emoji_events</span>
+          <div><div class="item-title">23 - Hasil Seleksi</div><div class="item-desc">Pengumuman kelulusan siswa</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="material-symbols-rounded">rate_review</span> 5. Observer</div>
+      <div class="list">
+        <a href="24-observer-input.html" class="item">
+          <span class="material-symbols-rounded">edit_note</span>
+          <div><div class="item-title">24 - Input Nilai Observasi</div><div class="item-desc">Penilaian wawancara calon siswa & ortu</div></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIM-Alfida - Detail Unit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #454545;
+            --color-secondary: #06bfa2;
+            --color-tertiary: #0f7f6d;
+            --color-on-tertiary: #F7F8F8;
+            --color-neutral: #F7F8F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E3E8E7;
+            --font-heading: 'Roboto', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-neutral);
+            color: var(--color-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+        }
+
+        /* Topbar */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--spacing-lg);
+            z-index: 1000;
+        }
+
+        .topbar-logo {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-tertiary);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background-color: var(--color-secondary);
+            color: var(--color-on-tertiary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            width: 250px;
+            background-color: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            overflow-y: auto;
+            padding: var(--spacing-md) 0;
+            z-index: 900;
+        }
+
+        .sidebar-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .sidebar-group-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #888;
+            padding: 0 var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 10px var(--spacing-lg);
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .sidebar-link:hover {
+            background-color: var(--color-neutral);
+        }
+
+        .sidebar-link.active {
+            background-color: #e6f2f0;
+            color: var(--color-tertiary);
+            border-right: 3px solid var(--color-tertiary);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            margin-left: 250px;
+            padding: var(--spacing-lg);
+            flex-grow: 1;
+            overflow-y: auto;
+            height: calc(100vh - 60px);
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: var(--spacing-md);
+        }
+        .breadcrumb a {
+            color: var(--color-tertiary);
+            text-decoration: none;
+        }
+        
+        .page-layout {
+            display: flex;
+            gap: var(--spacing-lg);
+        }
+        
+        .col-left {
+            flex: 0 0 60%;
+        }
+        
+        .col-right {
+            flex: 0 0 calc(40% - var(--spacing-lg));
+        }
+
+        /* Card */
+        .card {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .card-header h2 {
+            font-size: 16px;
+        }
+        
+        .card-body {
+            padding: var(--spacing-md);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 14px;
+        }
+        
+        .form-control[readonly] {
+            background-color: #f9fafa;
+            color: #666;
+        }
+
+        /* Switch */
+        .switch-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--color-secondary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-tertiary {
+            background-color: var(--color-tertiary);
+            color: var(--color-on-tertiary);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--color-tertiary);
+            border: 1px solid var(--color-tertiary);
+        }
+        
+        .btn-danger {
+            background-color: transparent;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+
+        /* Lists */
+        .list-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: var(--spacing-md);
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background-color: #f9fafa;
+        }
+        .user-info { display: flex; flex-direction: column; gap: 4px; }
+        .user-name { font-weight: 500; font-size: 14px; }
+        .user-role { font-size: 12px; color: #666; }
+        
+        .search-add {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Placeholders */
+        .placeholder-box {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #ccc;
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            margin-bottom: var(--spacing-sm);
+            background-color: #f9fafa;
+        }
+        
+        .placeholder-box.wide {
+            width: 100%;
+            height: 80px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+            .page-layout { flex-direction: column; }
+            .col-left, .col-right { flex: 1 1 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="topbar-logo">SIM-Alfida</div>
+        <div class="user-profile">
+            <span style="font-size: 14px; font-weight: 500;">Budi Santoso (Super Admin)</span>
+            <div class="avatar">BS</div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-group">
+            <div class="sidebar-group-title">Auth</div>
+            <a href="01-login.html" class="sidebar-link">Login</a>
+            <a href="02-register.html" class="sidebar-link">Register</a>
+        </div>
+        <div class="sidebar-group">
+            <div class="sidebar-group-title">Dashboard</div>
+            <a href="03-modules.html" class="sidebar-link">Pilih Modul</a>
+        </div>
+        <div class="sidebar-group">
+            <div class="sidebar-group-title">Super Admin</div>
+            <a href="04-admin-dashboard.html" class="sidebar-link">Dashboard</a>
+            <a href="05-admin-units.html" class="sidebar-link">Daftar Unit</a>
+            <a href="06-admin-unit-detail.html" class="sidebar-link active">Detail Unit</a>
+        </div>
+        <div class="sidebar-group">
+            <div class="sidebar-group-title">Admin Unit</div>
+            <a href="07-admin-unit-dashboard.html" class="sidebar-link">Dashboard Unit</a>
+            <a href="08-admin-unit-settings.html" class="sidebar-link">Settings Unit</a>
+            <a href="09-admin-unit-ppdb.html" class="sidebar-link">Overview PPDB</a>
+            <a href="10-admin-unit-registration.html" class="sidebar-link">Pendaftaran</a>
+            <a href="11-admin-unit-payment.html" class="sidebar-link">Verifikasi Bayar</a>
+            <a href="12-admin-unit-document.html" class="sidebar-link">Verifikasi Berkas</a>
+            <a href="13-admin-unit-observation.html" class="sidebar-link">Observasi</a>
+            <a href="14-admin-unit-class.html" class="sidebar-link">Penempatan Kelas</a>
+        </div>
+        <div class="sidebar-group">
+            <div class="sidebar-group-title">Orang Tua</div>
+            <a href="15-parent-dashboard.html" class="sidebar-link">Dashboard Ortu</a>
+            <a href="16-parent-unit.html" class="sidebar-link">Pilih Unit</a>
+            <a href="17-parent-payment.html" class="sidebar-link">Pembayaran</a>
+            <a href="18-parent-student.html" class="sidebar-link">Form Siswa</a>
+            <a href="19-parent-parents.html" class="sidebar-link">Form Ortu</a>
+            <a href="20-parent-document.html" class="sidebar-link">Upload Berkas</a>
+            <a href="21-parent-imc.html" class="sidebar-link">Surat IMC</a>
+            <a href="22-parent-observation.html" class="sidebar-link">Jadwal Observasi</a>
+            <a href="23-parent-result.html" class="sidebar-link">Hasil Seleksi</a>
+        </div>
+        <div class="sidebar-group">
+            <div class="sidebar-group-title">Observer</div>
+            <a href="24-observer-input.html" class="sidebar-link">Input Observasi</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="breadcrumb">
+            <a href="#">Super Admin</a> &gt; <a href="05-admin-units.html">Unit</a> &gt; <span>TK Islam Terpadu Auladuna 1</span>
+        </div>
+        
+        <div class="page-layout">
+            <!-- Left Column -->
+            <div class="col-left">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Informasi Unit</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Nama Unit</label>
+                            <input type="text" class="form-control" value="TK Islam Terpadu Auladuna 1">
+                        </div>
+                        <div class="form-group">
+                            <label>Jenjang</label>
+                            <select class="form-control">
+                                <option value="TK" selected>TK</option>
+                                <option value="SD">SD</option>
+                                <option value="SMP">SMP</option>
+                                <option value="SMA">SMA</option>
+                                <option value="Pesantren">Pesantren</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Slug</label>
+                            <input type="text" class="form-control" value="tk-auladuna-1" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Status Aktif</label>
+                            <div class="switch-wrapper">
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span style="font-size: 14px;">PPDB Aktif</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-tertiary" style="margin-top: 16px;">Simpan Perubahan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-right">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Admin Unit</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-item">
+                                <div class="user-info">
+                                    <span class="user-name">Nur Hidayah</span>
+                                    <span class="user-role">admin_unit</span>
+                                </div>
+                                <button class="btn btn-sm btn-danger"><span class="material-symbols-rounded" style="font-size: 18px;">delete</span></button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: var(--spacing-md);">
+                            <label>Tambah Admin Baru</label>
+                            <div class="search-add">
+                                <input type="text" class="form-control" placeholder="Cari pengguna...">
+                                <button class="btn btn-tertiary btn-sm">Tambah</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Settings Unit</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Logo Unit</label>
+                            <div class="placeholder-box">
+                                <span class="material-symbols-rounded">photo_camera</span>
+                                <span style="font-size: 12px; margin-top: 8px;">120x120px</span>
+                            </div>
+                            <button class="btn btn-sm btn-secondary">Upload Logo</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Kepala Sekolah</label>
+                            <input type="text" class="form-control" value="Ibu Nur Hidayah S.Pd.">
+                        </div>
+                        <div class="form-group">
+                            <label>NIP</label>
+                            <input type="text" class="form-control" value="197805152003122001">
+                        </div>
+                        <div class="form-group">
+                            <label>Tanda Tangan Kepala Sekolah</label>
+                            <div class="placeholder-box wide">
+                                <span class="material-symbols-rounded">draw</span>
+                                <span style="font-size: 12px; margin-top: 8px;">Preview TTD</span>
+                            </div>
+                            <button class="btn btn-sm btn-secondary">Upload TTD</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

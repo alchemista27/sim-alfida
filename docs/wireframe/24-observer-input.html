@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIM-Alfida - Input Hasil Observasi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #454545;
+            --color-secondary: #06bfa2;
+            --color-tertiary: #0f7f6d;
+            --color-on-tertiary: #F7F8F8;
+            --color-neutral: #F7F8F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E3E8E7;
+            --font-heading: 'Roboto', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            
+            --color-success: #28a745;
+            --color-warning: #ffc107;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--color-primary);
+            background-color: var(--color-neutral);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+        }
+
+        /* Layout */
+        .sidebar {
+            width: 260px;
+            background-color: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 64px;
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--spacing-lg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .content {
+            padding: var(--spacing-lg);
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Sidebar Nav */
+        .nav-group {
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .nav-group-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #888;
+            padding: 0 var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background-color: var(--color-neutral);
+        }
+
+        .nav-link.active {
+            background-color: var(--color-neutral);
+            color: var(--color-tertiary);
+            font-weight: 600;
+            border-right: 3px solid var(--color-tertiary);
+        }
+
+        /* Topbar Items */
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-tertiary);
+            text-decoration: none;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--color-tertiary);
+            color: var(--color-on-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Components */
+        .card {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-md);
+            background: #f8f9fa;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-sm);
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Candidate Card */
+        .candidate-card {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .candidate-card.saved {
+            border: 2px solid var(--color-success);
+        }
+        
+        .candidate-card.unsaved {
+            border: 2px dashed var(--color-warning);
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: var(--spacing-sm);
+        }
+        
+        .candidate-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-tertiary);
+        }
+        
+        .candidate-id {
+            font-size: 14px;
+            color: #666;
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input[type="number"] {
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 18px;
+            font-weight: 600;
+            width: 100px;
+            color: var(--color-primary);
+        }
+        
+        textarea {
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            width: 100%;
+        }
+
+        .btn-tertiary {
+            background-color: var(--color-tertiary);
+            color: var(--color-on-tertiary);
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            align-self: flex-end;
+        }
+        
+        .btn-large {
+            padding: 16px 24px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .bottom-bar {
+            margin-top: var(--spacing-lg);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-saved { background: #d4edda; color: #155724; }
+        .status-unsaved { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div style="padding: 20px;">
+            <a href="#" class="logo">SIM-Alfida</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Auth</div>
+            <a href="01-login.html" class="nav-link">Login</a>
+            <a href="02-register.html" class="nav-link">Register</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Dashboard</div>
+            <a href="03-modules.html" class="nav-link">Pilih Modul</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Orang Tua</div>
+            <a href="15-parent-dashboard.html" class="nav-link">Dashboard Ortu</a>
+            <a href="16-select-unit.html" class="nav-link">Pilih Unit</a>
+            <a href="17-payment.html" class="nav-link">Pembayaran</a>
+            <a href="18-student-form.html" class="nav-link">Form Siswa</a>
+            <a href="19-parent-form.html" class="nav-link">Form Ortu</a>
+            <a href="20-ppdb-documents.html" class="nav-link">Upload Berkas</a>
+            <a href="21-ppdb-medical.html" class="nav-link">Surat IMC</a>
+            <a href="22-ppdb-observation.html" class="nav-link">Jadwal Observasi</a>
+            <a href="23-ppdb-result.html" class="nav-link">Hasil Seleksi</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Observer</div>
+            <a href="24-observer-input.html" class="nav-link active">Input Observasi</a>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="topbar">
+            <div>
+                <a href="#" class="logo">SIM-Alfida</a>
+            </div>
+            <div class="user-profile">
+                <span>Ustadz Farid (Observer)</span>
+                <div class="avatar">F</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="breadcrumb">
+                <span>Observer</span>
+                <span class="material-symbols-rounded" style="font-size: 16px;">chevron_right</span>
+                <span style="color: var(--color-primary); font-weight: 500;">Sesi 10 Agu 2026</span>
+            </div>
+            
+            <h2 style="margin-bottom: var(--spacing-md);">Input Hasil Observasi</h2>
+            
+            <div class="card" style="padding: var(--spacing-md);">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Tanggal</span>
+                        <span class="info-value">10 Agustus 2026</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Waktu</span>
+                        <span class="info-value">08:00 – 12:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Unit</span>
+                        <span class="info-value">TK Islam Terpadu Auladuna 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 24px 0 16px 0;">Daftar Kandidat (3)</h3>
+
+            <!-- Candidate 1 (Saved) -->
+            <div class="candidate-card saved">
+                <div class="candidate-header">
+                    <div class="candidate-name">Muhammad Rizki Hidayat</div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="candidate-id">No. Pendaftaran: PPDB-2026-001</span>
+                        <span class="status-badge status-saved">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">check_circle</span> Tersimpan
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Skor Observasi (0-100)</label>
+                    <input type="number" min="0" max="100" step="0.5" value="87.5">
+                </div>
+                
+                <div class="form-group">
+                    <label>Catatan Observasi</label>
+                    <textarea rows="3">Anak sangat aktif dan mudah bergaul. Kemampuan motorik halus baik, mampu mengikuti instruksi dengan baik.</textarea>
+                </div>
+                
+                <button class="btn-tertiary btn-small" style="background-color: var(--color-secondary);">Update Skor</button>
+            </div>
+
+            <!-- Candidate 2 (Saved) -->
+            <div class="candidate-card saved">
+                <div class="candidate-header">
+                    <div class="candidate-name">Fatimah Zahra</div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="candidate-id">No. Pendaftaran: PPDB-2026-014</span>
+                        <span class="status-badge status-saved">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">check_circle</span> Tersimpan
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Skor Observasi (0-100)</label>
+                    <input type="number" min="0" max="100" step="0.5" value="82.0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Catatan Observasi</label>
+                    <textarea rows="3">Sedikit pemalu di awal, namun perlahan bisa mengikuti kegiatan. Kemampuan kognitif sesuai usia.</textarea>
+                </div>
+                
+                <button class="btn-tertiary btn-small" style="background-color: var(--color-secondary);">Update Skor</button>
+            </div>
+
+            <!-- Candidate 3 (Unsaved) -->
+            <div class="candidate-card unsaved">
+                <div class="candidate-header">
+                    <div class="candidate-name">Yusuf Al-Hafidz</div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="candidate-id">No. Pendaftaran: PPDB-2026-025</span>
+                        <span class="status-badge status-unsaved">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">pending</span> Belum Disimpan
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Skor Observasi (0-100)</label>
+                    <input type="number" min="0" max="100" step="0.5" placeholder="0.0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Catatan Observasi</label>
+                    <textarea rows="3" placeholder="Catatan perilaku, kemampuan, atau hal yang perlu diperhatikan..."></textarea>
+                </div>
+                
+                <button class="btn-tertiary btn-small">Simpan Skor</button>
+            </div>
+
+            <div class="bottom-bar">
+                <p style="color: #666; font-size: 14px; margin-bottom: 16px;">Pastikan semua skor telah diisi dan disimpan sebelum mengirimkan hasil akhir.</p>
+                <button class="btn-tertiary btn-large">
+                    <span class="material-symbols-rounded">send</span>
+                    Selesai & Kirim Semua
+                </button>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

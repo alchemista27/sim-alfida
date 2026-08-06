@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Unit - SIM-Alfida</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #454545;
+            --color-secondary: #06bfa2;
+            --color-tertiary: #0f7f6d;
+            --color-on-tertiary: #F7F8F8;
+            --color-neutral: #F7F8F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E3E8E7;
+            --font-heading: 'Roboto', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); color: var(--color-primary); background: var(--color-neutral); display: flex; min-height: 100vh; }
+        h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+        .sidebar { width: 250px; background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--spacing-md); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+        .sidebar-brand { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--color-tertiary); margin-bottom: var(--spacing-lg); text-align: center; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: var(--spacing-sm); }
+        .sidebar-menu-group { font-size: 12px; font-weight: 600; color: #888; margin-top: var(--spacing-md); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu a { text-decoration: none; color: var(--color-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .sidebar-menu a:hover { background: var(--color-neutral); }
+        .sidebar-menu a.active { background: var(--color-tertiary); color: var(--color-on-tertiary); }
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .topbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .user-profile { display: flex; align-items: center; gap: var(--spacing-sm); }
+        .avatar { width: 36px; height: 36px; background: var(--color-tertiary); color: var(--color-on-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .user-info { font-size: 14px; }
+        .user-role { font-size: 12px; color: #888; }
+        .content { padding: var(--spacing-lg); max-width: 1200px; margin: 0 auto; width: 100%; }
+        .breadcrumb { font-size: 14px; color: #888; margin-bottom: var(--spacing-md); }
+        .breadcrumb span { color: var(--color-tertiary); font-weight: 500; }
+        .page-title { margin-bottom: var(--spacing-lg); font-size: 24px; }
+        
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+        .card-stat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-md); }
+        .stat-icon { width: 48px; height: 48px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; background: var(--color-neutral); color: var(--color-primary); }
+        .stat-icon.amber { color: #f59e0b; background: #fef3c7; }
+        .stat-icon.green { color: #10b981; background: #d1fae5; }
+        .stat-icon.tertiary { color: var(--color-tertiary); background: #e0f2fe; }
+        .stat-value { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .stat-label { font-size: 14px; color: #666; }
+        
+        .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .card-title { font-size: 18px; margin-bottom: var(--spacing-md); }
+        
+        .progress-container { background: var(--color-neutral); border-radius: 999px; height: 24px; width: 100%; overflow: hidden; margin-top: var(--spacing-sm); }
+        .progress-bar { background: var(--color-tertiary); height: 100%; display: flex; align-items: center; padding-left: var(--spacing-sm); color: var(--color-on-tertiary); font-size: 12px; font-weight: 600; width: 60%; }
+        .progress-label { font-size: 14px; margin-bottom: 8px; font-weight: 500; }
+        
+        .grid-shortcuts { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); }
+        .shortcut-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-primary); transition: all 0.2s; text-align: center; }
+        .shortcut-card:hover { border-color: var(--color-tertiary); background: var(--color-neutral); }
+        .shortcut-icon { font-size: 32px; color: var(--color-tertiary); margin-bottom: var(--spacing-sm); }
+        .shortcut-title { font-weight: 600; margin-bottom: 4px; }
+        .shortcut-desc { font-size: 12px; color: #888; }
+        .badge-pending { background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-top: 8px; }
+        
+        @media (max-width: 768px) {
+            .grid-shortcuts { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-brand">SIM-Alfida</div>
+        <ul class="sidebar-menu">
+            <div class="sidebar-menu-group">Auth</div>
+            <li><a href="01-login.html"><span class="material-symbols-rounded">login</span> Login</a></li>
+            <li><a href="02-register.html"><span class="material-symbols-rounded">person_add</span> Register</a></li>
+            
+            <div class="sidebar-menu-group">Dashboard</div>
+            <li><a href="03-modules.html"><span class="material-symbols-rounded">apps</span> Pilih Modul</a></li>
+            
+            <div class="sidebar-menu-group">Super Admin</div>
+            <li><a href="04-super-dashboard.html"><span class="material-symbols-rounded">dashboard</span> Dashboard</a></li>
+            <li><a href="05-super-unit-list.html"><span class="material-symbols-rounded">domain</span> Daftar Unit</a></li>
+            
+            <div class="sidebar-menu-group">Admin Unit</div>
+            <li><a href="07-unit-dashboard.html" class="active"><span class="material-symbols-rounded">dashboard</span> Dashboard Unit</a></li>
+            <li><a href="08-unit-settings.html"><span class="material-symbols-rounded">settings</span> Settings Unit</a></li>
+            <li><a href="09-unit-ppdb-overview.html"><span class="material-symbols-rounded">overview</span> Overview PPDB</a></li>
+            <li><a href="10-unit-ppdb-registrations.html"><span class="material-symbols-rounded">list_alt</span> Pendaftaran</a></li>
+            <li><a href="11-unit-verify-payment.html"><span class="material-symbols-rounded">receipt_long</span> Verifikasi Bayar</a></li>
+            <li><a href="12-unit-verify-docs.html"><span class="material-symbols-rounded">folder_open</span> Verifikasi Berkas</a></li>
+            <li><a href="13-unit-observation.html"><span class="material-symbols-rounded">event</span> Observasi</a></li>
+            <li><a href="14-unit-class-placement.html"><span class="material-symbols-rounded">class_</span> Penempatan Kelas</a></li>
+            
+            <div class="sidebar-menu-group">Orang Tua</div>
+            <li><a href="15-parent-dashboard.html"><span class="material-symbols-rounded">dashboard</span> Dashboard Ortu</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h2>SIM-Alfida</h2>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div style="font-weight: 600;">Nur Hidayah</div>
+                    <div class="user-role">Admin Unit - TK Auladuna 1</div>
+                </div>
+                <div class="avatar">NH</div>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="breadcrumb">Admin Unit &gt; <span>TK Islam Terpadu Auladuna 1</span></div>
+            <h1 class="page-title">Dashboard Admin Unit</h1>
+
+            <div class="grid-stats">
+                <div class="card-stat">
+                    <div class="stat-icon"><span class="material-symbols-rounded">how_to_reg</span></div>
+                    <div>
+                        <div class="stat-value">18</div>
+                        <div class="stat-label">Pendaftar</div>
+                    </div>
+                </div>
+                <div class="card-stat">
+                    <div class="stat-icon amber"><span class="material-symbols-rounded">schedule</span></div>
+                    <div>
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Pending Bayar</div>
+                    </div>
+                </div>
+                <div class="card-stat">
+                    <div class="stat-icon green"><span class="material-symbols-rounded">verified</span></div>
+                    <div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Berkas Diverifikasi</div>
+                    </div>
+                </div>
+                <div class="card-stat">
+                    <div class="stat-icon tertiary"><span class="material-symbols-rounded">check_circle</span></div>
+                    <div>
+                        <div class="stat-value">11</div>
+                        <div class="stat-label">Diterima</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">PPDB Progress</h3>
+                <div class="progress-label">18 dari 30 kuota terisi</div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 60%;">60%</div>
+                </div>
+            </div>
+
+            <div class="grid-shortcuts">
+                <a href="11-unit-verify-payment.html" class="shortcut-card">
+                    <span class="material-symbols-rounded shortcut-icon">receipt_long</span>
+                    <div class="shortcut-title">Verifikasi Pembayaran</div>
+                    <div class="shortcut-desc">Cek bukti transfer</div>
+                    <span class="badge-pending">3 Pending</span>
+                </a>
+                <a href="12-unit-verify-docs.html" class="shortcut-card">
+                    <span class="material-symbols-rounded shortcut-icon">folder_open</span>
+                    <div class="shortcut-title">Verifikasi Berkas</div>
+                    <div class="shortcut-desc">Periksa dokumen siswa</div>
+                    <span class="badge-pending">2 Pending</span>
+                </a>
+                <a href="13-unit-observation.html" class="shortcut-card">
+                    <span class="material-symbols-rounded shortcut-icon">event</span>
+                    <div class="shortcut-title">Jadwal Observasi</div>
+                    <div class="shortcut-desc">Atur jadwal tes/observasi</div>
+                </a>
+                <a href="14-unit-class-placement.html" class="shortcut-card">
+                    <span class="material-symbols-rounded shortcut-icon">class_</span>
+                    <div class="shortcut-title">Penempatan Kelas</div>
+                    <div class="shortcut-desc">Assign siswa lulus ke kelas</div>
+                    <span class="badge-pending">11 Siap Assign</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overview PPDB - SIM-Alfida</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #454545;
+            --color-secondary: #06bfa2;
+            --color-tertiary: #0f7f6d;
+            --color-on-tertiary: #F7F8F8;
+            --color-neutral: #F7F8F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E3E8E7;
+            --font-heading: 'Roboto', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); color: var(--color-primary); background: var(--color-neutral); display: flex; min-height: 100vh; }
+        h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+        .sidebar { width: 250px; background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--spacing-md); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+        .sidebar-brand { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--color-tertiary); margin-bottom: var(--spacing-lg); text-align: center; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: var(--spacing-sm); }
+        .sidebar-menu-group { font-size: 12px; font-weight: 600; color: #888; margin-top: var(--spacing-md); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu a { text-decoration: none; color: var(--color-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .sidebar-menu a:hover { background: var(--color-neutral); }
+        .sidebar-menu a.active { background: var(--color-tertiary); color: var(--color-on-tertiary); }
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .topbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .user-profile { display: flex; align-items: center; gap: var(--spacing-sm); }
+        .avatar { width: 36px; height: 36px; background: var(--color-tertiary); color: var(--color-on-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .user-info { font-size: 14px; }
+        .user-role { font-size: 12px; color: #888; }
+        .content { padding: var(--spacing-lg); max-width: 1200px; margin: 0 auto; width: 100%; }
+        .breadcrumb { font-size: 14px; color: #888; margin-bottom: var(--spacing-md); }
+        .breadcrumb span { color: var(--color-tertiary); font-weight: 500; }
+        .page-title { margin-bottom: var(--spacing-lg); font-size: 24px; }
+        
+        .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .card.active-year { border-color: var(--color-secondary); box-shadow: 0 4px 6px -1px rgba(6, 191, 162, 0.1); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-sm); }
+        .card-title { font-size: 18px; font-weight: 600; }
+        
+        .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-inactive { background: #f3f4f6; color: #4b5563; }
+        
+        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+        .info-item { display: flex; flex-direction: column; }
+        .info-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+        .info-value { font-size: 16px; font-weight: 600; }
+        
+        .btn { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent; }
+        .btn-danger-outline { background: transparent; color: #dc2626; border-color: #dc2626; }
+        .btn-primary { background: var(--color-tertiary); color: var(--color-on-tertiary); }
+        
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px var(--spacing-md); border-bottom: 1px solid var(--color-border); font-size: 14px; }
+        th { background: #f9fafb; font-weight: 600; color: #4b5563; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .modal { background: var(--color-surface); border-radius: var(--radius-md); width: 100%; max-width: 500px; padding: var(--spacing-lg); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .close-btn { cursor: pointer; color: #6b7280; }
+        
+        .form-group { margin-bottom: var(--spacing-md); }
+        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; }
+        
+        .toggle-wrap { display: flex; align-items: center; gap: 8px; margin-top: var(--spacing-md); }
+        .toggle { width: 40px; height: 20px; background: #e5e7eb; border-radius: 999px; position: relative; }
+        .toggle.active { background: var(--color-secondary); }
+        .toggle-knob { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; }
+        .toggle.active .toggle-knob { left: 22px; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-brand">SIM-Alfida</div>
+        <ul class="sidebar-menu">
+            <div class="sidebar-menu-group">Admin Unit</div>
+            <li><a href="07-unit-dashboard.html"><span class="material-symbols-rounded">dashboard</span> Dashboard Unit</a></li>
+            <li><a href="08-unit-settings.html"><span class="material-symbols-rounded">settings</span> Settings Unit</a></li>
+            <li><a href="09-unit-ppdb-overview.html" class="active"><span class="material-symbols-rounded">overview</span> Overview PPDB</a></li>
+            <li><a href="10-unit-ppdb-registrations.html"><span class="material-symbols-rounded">list_alt</span> Pendaftaran</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h2>SIM-Alfida</h2>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div style="font-weight: 600;">Nur Hidayah</div>
+                    <div class="user-role">Admin Unit - TK Auladuna 1</div>
+                </div>
+                <div class="avatar">NH</div>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="breadcrumb">Admin Unit &gt; PPDB &gt; <span>Overview</span></div>
+            <h1 class="page-title">Overview PPDB</h1>
+
+            <div class="card active-year">
+                <div class="card-header">
+                    <div class="card-title">Tahun Ajaran Aktif</div>
+                    <span class="badge badge-success">PPDB Aktif</span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Tahun Ajaran</span>
+                        <span class="info-value">2026/2027</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Periode Pendaftaran</span>
+                        <span class="info-value">1 Jan 2026 - 30 Jun 2026</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Kuota</span>
+                        <span class="info-value">30 slot</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Terdaftar</span>
+                        <span class="info-value">18/30</span>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-danger-outline">Nonaktifkan PPDB</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="border:none; margin-bottom: 0;">
+                    <h3 class="card-title">Riwayat Tahun Ajaran</h3>
+                    <button class="btn btn-primary">+ Tambah Tahun Ajaran</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tahun Ajaran</th>
+                                <th>Mulai</th>
+                                <th>Selesai</th>
+                                <th>Kuota</th>
+                                <th>Terdaftar</th>
+                                <th>Status PPDB</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2025/2026</td>
+                                <td>1 Jan 2025</td>
+                                <td>30 Jun 2025</td>
+                                <td>30</td>
+                                <td>28</td>
+                                <td><span class="badge badge-inactive">Nonaktif</span></td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>2024/2025</td>
+                                <td>1 Jan 2024</td>
+                                <td>30 Jun 2024</td>
+                                <td>25</td>
+                                <td>25</td>
+                                <td><span class="badge badge-inactive">Nonaktif</span></td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Form (Visible in wireframe) -->
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Tambah Tahun Ajaran</h3>
+                <span class="material-symbols-rounded close-btn">close</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nama Tahun Ajaran</label>
+                <input type="text" class="form-control" placeholder="Contoh: 2027/2028">
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <div class="form-group" style="flex:1;">
+                    <label class="form-label">Tanggal Mulai</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label class="form-label">Tanggal Selesai</label>
+                    <input type="date" class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kuota</label>
+                <input type="number" class="form-control" placeholder="Contoh: 30">
+            </div>
+            <div class="toggle-wrap">
+                <div class="toggle"><div class="toggle-knob"></div></div>
+                <span style="font-size: 14px;">Aktifkan PPDB langsung</span>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 8px;">
+                <button class="btn" style="background:#f3f4f6; color:#4b5563;">Batal</button>
+                <button class="btn btn-primary">Simpan</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

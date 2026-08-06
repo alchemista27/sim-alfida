@@ -1,0 +1,30 @@
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Local Database & User-space Postgres
+.pgdata/
+*.log
+
+# IDE & OS
+.DS_Store
+*.pem
+.vscode/
+.idea/
+
+sistem-data/

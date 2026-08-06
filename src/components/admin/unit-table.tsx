@@ -1,0 +1,98 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { UnitLevel } from "@prisma/client";
+
+// DTO for Unit in Table
+export interface UnitTableRow {
+  id: string;
+  name: string;
+  level: UnitLevel;
+  isActive: boolean;
+  quota: number;
+  registered: number;
+  adminName: string | null;
+  ppdbActive: boolean;
+}
+
+interface UnitTableProps {
+  data: UnitTableRow[];
+}
+
+export function UnitTable({ data }: UnitTableProps) {
+  const getLevelBadge = (level: UnitLevel) => {
+    switch (level) {
+      case "tk":
+        return <Badge variant="teal">TK</Badge>;
+      case "sd":
+        return <Badge className="bg-blue-100 text-blue-700">SD</Badge>;
+      case "smp":
+        return <Badge className="bg-orange-100 text-orange-700">SMP</Badge>;
+      case "sma":
+        return <Badge className="bg-purple-100 text-purple-700">SMA</Badge>;
+      case "pesantren":
+        return <Badge className="bg-green-100 text-green-700">Pesantren</Badge>;
+      default:
+        return <Badge variant="gray">{level}</Badge>;
+    }
+  };
+
+  return (
+    <div className="overflow-x-auto bg-surface rounded-xl border border-border">
+      <table className="w-full text-sm text-left text-gray-600">
+        <thead className="text-xs text-gray-500 uppercase bg-neutral/50 border-b border-border">
+          <tr>
+            <th className="px-6 py-4 font-semibold">Nama Unit</th>
+            <th className="px-6 py-4 font-semibold">Jenjang</th>
+            <th className="px-6 py-4 font-semibold">Status PPDB</th>
+            <th className="px-6 py-4 font-semibold">Kuota</th>
+            <th className="px-6 py-4 font-semibold">Terdaftar</th>
+            <th className="px-6 py-4 font-semibold">Admin</th>
+            <th className="px-6 py-4 font-semibold text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {data.map((unit) => (
+            <tr key={unit.id} className="hover:bg-neutral/30 transition-colors">
+              <td className="px-6 py-4 font-medium text-primary">
+                {unit.name}
+              </td>
+              <td className="px-6 py-4">{getLevelBadge(unit.level)}</td>
+              <td className="px-6 py-4">
+                {unit.ppdbActive ? (
+                  <Badge className="bg-green-100 text-green-700">Aktif</Badge>
+                ) : (
+                  <Badge variant="gray">Nonaktif</Badge>
+                )}
+              </td>
+              <td className="px-6 py-4">{unit.quota}</td>
+              <td className="px-6 py-4">{unit.registered}</td>
+              <td className="px-6 py-4 text-gray-500">
+                {unit.adminName || "-"}
+              </td>
+              <td className="px-6 py-4 text-right">
+                <Link href={`/admin/units/${unit.id}`} passHref>
+                  <Button variant="outline" size="sm">
+                    <Icon name="settings" className="mr-1" />
+                    Kelola
+                  </Button>
+                </Link>
+              </td>
+            </tr>
+          ))}
+          {data.length === 0 && (
+            <tr>
+              <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                Belum ada data unit pendidikan.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}

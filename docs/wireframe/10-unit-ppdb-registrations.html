@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Pendaftaran PPDB - SIM-Alfida</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #454545;
+            --color-secondary: #06bfa2;
+            --color-tertiary: #0f7f6d;
+            --color-on-tertiary: #F7F8F8;
+            --color-neutral: #F7F8F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E3E8E7;
+            --font-heading: 'Roboto', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); color: var(--color-primary); background: var(--color-neutral); display: flex; min-height: 100vh; }
+        h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+        .sidebar { width: 250px; background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--spacing-md); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+        .sidebar-brand { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--color-tertiary); margin-bottom: var(--spacing-lg); text-align: center; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: var(--spacing-sm); }
+        .sidebar-menu-group { font-size: 12px; font-weight: 600; color: #888; margin-top: var(--spacing-md); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu a { text-decoration: none; color: var(--color-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .sidebar-menu a:hover { background: var(--color-neutral); }
+        .sidebar-menu a.active { background: var(--color-tertiary); color: var(--color-on-tertiary); }
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .topbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .user-profile { display: flex; align-items: center; gap: var(--spacing-sm); }
+        .avatar { width: 36px; height: 36px; background: var(--color-tertiary); color: var(--color-on-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .user-info { font-size: 14px; }
+        .user-role { font-size: 12px; color: #888; }
+        .content { padding: var(--spacing-lg); max-width: 1200px; margin: 0 auto; width: 100%; }
+        .page-title { margin-bottom: var(--spacing-lg); font-size: 24px; }
+        
+        .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-lg); }
+        .filter-bar { display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); align-items: center; }
+        .form-control { padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; }
+        .btn-primary { background: var(--color-tertiary); color: var(--color-on-tertiary); border: none; padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; }
+        
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px var(--spacing-md); border-bottom: 1px solid var(--color-border); font-size: 14px; }
+        th { background: #f9fafb; font-weight: 600; color: #4b5563; }
+        
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; text-align: center; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-amber { background: #fef3c7; color: #b45309; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-gray { background: #f3f4f6; color: #4b5563; }
+        
+        .btn-outline { background: transparent; color: var(--color-tertiary); border: 1px solid var(--color-tertiary); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-brand">SIM-Alfida</div>
+        <ul class="sidebar-menu">
+            <div class="sidebar-menu-group">Admin Unit</div>
+            <li><a href="07-unit-dashboard.html"><span class="material-symbols-rounded">dashboard</span> Dashboard Unit</a></li>
+            <li><a href="08-unit-settings.html"><span class="material-symbols-rounded">settings</span> Settings Unit</a></li>
+            <li><a href="09-unit-ppdb-overview.html"><span class="material-symbols-rounded">overview</span> Overview PPDB</a></li>
+            <li><a href="10-unit-ppdb-registrations.html" class="active"><span class="material-symbols-rounded">list_alt</span> Pendaftaran</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h2>SIM-Alfida</h2>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div style="font-weight: 600;">Nur Hidayah</div>
+                    <div class="user-role">Admin Unit - TK Auladuna 1</div>
+                </div>
+                <div class="avatar">NH</div>
+            </div>
+        </header>
+
+        <div class="content">
+            <h1 class="page-title">Daftar Pendaftaran PPDB</h1>
+
+            <div class="card">
+                <div class="filter-bar">
+                    <select class="form-control" style="width: 200px;">
+                        <option>Semua Status</option>
+                        <option>Pending Bayar</option>
+                        <option>Bayar Diunggah</option>
+                        <option>Terverifikasi</option>
+                        <option>Ditolak</option>
+                        <option>Lulus</option>
+                    </select>
+                    <input type="text" class="form-control" placeholder="Cari nama siswa..." style="flex:1;">
+                    <button class="btn-primary">Filter</button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No. Daftar</th>
+                                <th>Nama Calon Siswa</th>
+                                <th>Tanggal Daftar</th>
+                                <th>Status Bayar</th>
+                                <th>Status Berkas</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PPDB-TKA1-2026-0001</td>
+                                <td>Muhammad Rizki Hidayat</td>
+                                <td>2 Agu 2026</td>
+                                <td><span class="badge badge-green">Terverifikasi</span></td>
+                                <td><span class="badge badge-green">Lengkap</span></td>
+                                <td><span class="badge badge-blue">Observasi</span></td>
+                                <td><button class="btn-outline">Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td>PPDB-TKA1-2026-0002</td>
+                                <td>Siti Nur Aisyah</td>
+                                <td>3 Agu 2026</td>
+                                <td><span class="badge badge-amber">Menunggu</span></td>
+                                <td><span class="badge badge-gray">-</span></td>
+                                <td><span class="badge badge-amber">Pending Bayar</span></td>
+                                <td><button class="btn-outline">Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td>PPDB-TKA1-2026-0003</td>
+                                <td>Ahmad Farhan Wijaya</td>
+                                <td>3 Agu 2026</td>
+                                <td><span class="badge badge-blue">Diunggah</span></td>
+                                <td><span class="badge badge-gray">-</span></td>
+                                <td><span class="badge badge-blue">Bayar Diunggah</span></td>
+                                <td><button class="btn-outline">Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td>PPDB-TKA1-2026-0004</td>
+                                <td>Fatimah Zahra Salsabila</td>
+                                <td>4 Agu 2026</td>
+                                <td><span class="badge badge-green">Terverifikasi</span></td>
+                                <td><span class="badge badge-amber">Kurang</span></td>
+                                <td><span class="badge badge-blue">Isi Formulir</span></td>
+                                <td><button class="btn-outline">Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td>PPDB-TKA1-2026-0005</td>
+                                <td>Umar Abdullah Hafidz</td>
+                                <td>5 Agu 2026</td>
+                                <td><span class="badge badge-red">Ditolak</span></td>
+                                <td><span class="badge badge-gray">-</span></td>
+                                <td><span class="badge badge-red">Ditolak</span></td>
+                                <td><button class="btn-outline">Detail</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

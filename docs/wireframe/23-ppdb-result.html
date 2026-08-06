@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIM-Alfida - Hasil Seleksi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #454545;
+            --color-secondary: #06bfa2;
+            --color-tertiary: #0f7f6d;
+            --color-on-tertiary: #F7F8F8;
+            --color-neutral: #F7F8F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E3E8E7;
+            --font-heading: 'Roboto', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            
+            --color-success: #28a745;
+            --color-danger: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--color-primary);
+            background-color: var(--color-neutral);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+        }
+
+        /* Layout */
+        .sidebar {
+            width: 260px;
+            background-color: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 64px;
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--spacing-lg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .content {
+            padding: var(--spacing-lg);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Sidebar Nav */
+        .nav-group {
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .nav-group-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #888;
+            padding: 0 var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background-color: var(--color-neutral);
+        }
+
+        .nav-link.active {
+            background-color: var(--color-neutral);
+            color: var(--color-tertiary);
+            font-weight: 600;
+            border-right: 3px solid var(--color-tertiary);
+        }
+
+        /* Topbar Items */
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-tertiary);
+            text-decoration: none;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--color-tertiary);
+            color: var(--color-on-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Components */
+        .result-card {
+            background-color: var(--color-surface);
+            border: 2px solid var(--color-success);
+            border-radius: var(--radius-md);
+            padding: 40px;
+            margin-bottom: var(--spacing-lg);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+        }
+        
+        .result-card-rejected {
+            border-color: #ccc;
+            box-shadow: none;
+            background-color: #fafafa;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        .icon-large {
+            font-size: 64px;
+            color: var(--color-success);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .icon-rejected {
+            color: var(--color-danger);
+        }
+
+        .result-title {
+            font-size: 24px;
+            color: var(--color-success);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .result-title-rejected {
+            color: var(--color-danger);
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin-bottom: 30px;
+            text-align: left;
+            background: var(--color-neutral);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-sm);
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .btn-tertiary {
+            background-color: var(--color-tertiary);
+            color: var(--color-on-tertiary);
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--color-tertiary);
+            border: 1px solid var(--color-tertiary);
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .info-box {
+            width: 100%;
+            max-width: 600px;
+            background-color: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            padding: var(--spacing-lg);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+        
+        .info-box h4 {
+            color: #0c5460;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: #0c5460;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div style="padding: 20px;">
+            <a href="#" class="logo">SIM-Alfida</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Auth</div>
+            <a href="01-login.html" class="nav-link">Login</a>
+            <a href="02-register.html" class="nav-link">Register</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Dashboard</div>
+            <a href="03-modules.html" class="nav-link">Pilih Modul</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Orang Tua</div>
+            <a href="15-parent-dashboard.html" class="nav-link">Dashboard Ortu</a>
+            <a href="16-select-unit.html" class="nav-link">Pilih Unit</a>
+            <a href="17-payment.html" class="nav-link">Pembayaran</a>
+            <a href="18-student-form.html" class="nav-link">Form Siswa</a>
+            <a href="19-parent-form.html" class="nav-link">Form Ortu</a>
+            <a href="20-ppdb-documents.html" class="nav-link">Upload Berkas</a>
+            <a href="21-ppdb-medical.html" class="nav-link">Surat IMC</a>
+            <a href="22-ppdb-observation.html" class="nav-link">Jadwal Observasi</a>
+            <a href="23-ppdb-result.html" class="nav-link active">Hasil Seleksi</a>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Observer</div>
+            <a href="24-observer-input.html" class="nav-link">Input Observasi</a>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="topbar">
+            <div>
+                <h2 style="font-size: 18px;">Hasil Seleksi</h2>
+            </div>
+            <div class="user-profile">
+                <span>Bapak Ahmad</span>
+                <div class="avatar">A</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Accepted State -->
+            <div class="result-card">
+                <span class="material-symbols-rounded icon-large">emoji_events</span>
+                <h2 class="result-title">Selamat! Anda Diterima!</h2>
+                
+                <div class="student-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Nama Siswa</span>
+                        <span class="detail-value">Muhammad Rizki Hidayat</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Unit Tujuan</span>
+                        <span class="detail-value">TK Islam Terpadu Auladuna 1</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Tahun Ajaran</span>
+                        <span class="detail-value">2026/2027</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Peringkat Seleksi</span>
+                        <span class="detail-value" style="color: var(--color-success);">#1 dari 18 pendaftar</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Penempatan Kelas</span>
+                        <span class="detail-value">Kelas 1A</span>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn-tertiary">
+                        <span class="material-symbols-rounded">download</span>
+                        Download Surat Keterangan Lulus (PDF)
+                    </button>
+                    <button class="btn-secondary">
+                        Lanjut ke Modul Akademik
+                        <span class="material-symbols-rounded">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h4>Informasi Daftar Ulang</h4>
+                <ul>
+                    <li>Jadwal Daftar Ulang: 15 - 20 Agustus 2026</li>
+                    <li>Persyaratan: Membawa dokumen asli KK, Akte Kelahiran, dan KTP Orang Tua</li>
+                    <li>Kontak Sekolah: 0812-3456-7890 (Admin TK Auladuna 1)</li>
+                </ul>
+            </div>
+            
+            <!-- Rejected State Reference (dimmed) -->
+            <div class="result-card result-card-rejected">
+                <span class="material-symbols-rounded icon-large icon-rejected">cancel</span>
+                <h2 class="result-title result-title-rejected">Mohon Maaf, Anda Tidak Diterima</h2>
+                <p style="color: #666; margin-top: 16px;">Terima kasih atas partisipasi Anda dalam proses seleksi PPDB. Berdasarkan hasil observasi, calon siswa belum memenuhi kriteria yang ditetapkan.</p>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>

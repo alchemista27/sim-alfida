@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIM-Alfida - Pilih Modul</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #454545;
+      --color-secondary: #06bfa2;
+      --color-tertiary: #0f7f6d;
+      --color-on-tertiary: #F7F8F8;
+      --color-neutral: #F7F8F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E3E8E7;
+      --font-heading: 'Roboto', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      
+      --sidebar-width: 250px;
+      --topbar-height: 60px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: var(--font-body); 
+      color: var(--color-primary); 
+      background: var(--color-neutral);
+      display: flex;
+    }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+    
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .sidebar-header {
+      height: var(--topbar-height);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-lg);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sidebar-header h2 {
+      color: var(--color-tertiary);
+      font-size: 1.25rem;
+    }
+    .sidebar-nav {
+      padding: var(--spacing-md) 0;
+    }
+    .nav-group {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: #888;
+      margin-top: var(--spacing-sm);
+    }
+    .nav-link {
+      display: block;
+      padding: 10px var(--spacing-lg);
+      color: var(--color-primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-link:hover {
+      background: var(--color-neutral);
+      color: var(--color-tertiary);
+    }
+    .nav-link.active {
+      background: rgba(15, 127, 109, 0.1);
+      color: var(--color-tertiary);
+      font-weight: 500;
+      border-right: 3px solid var(--color-tertiary);
+    }
+    
+    /* Main Content */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Topbar */
+    .topbar {
+      height: var(--topbar-height);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-lg);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--color-tertiary);
+      color: var(--color-on-tertiary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .user-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* Content Area */
+    .content {
+      padding: var(--spacing-lg);
+      flex: 1;
+    }
+    .page-header {
+      margin-bottom: var(--spacing-lg);
+    }
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-sm);
+    }
+    .page-subtitle {
+      color: #666;
+      font-size: 0.95rem;
+    }
+    
+    /* Module Grid */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-lg);
+    }
+    @media (max-width: 900px) {
+      .module-grid { grid-template-columns: 1fr; }
+    }
+    
+    .module-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .module-card.active {
+      border: 2px solid var(--color-tertiary);
+    }
+    .module-card.disabled {
+      opacity: 0.7;
+    }
+    
+    .module-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: var(--spacing-md);
+    }
+    .module-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .module-card.active .module-icon {
+      background: rgba(15, 127, 109, 0.1);
+      color: var(--color-tertiary);
+    }
+    .module-card.disabled .module-icon {
+      background: #eee;
+      color: #888;
+    }
+    .module-icon span { font-size: 28px; }
+    
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-info {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .module-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+    }
+    .module-desc {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: var(--spacing-lg);
+      flex: 1;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--color-tertiary);
+      border: 1px solid var(--color-tertiary);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-outline:hover {
+      background: rgba(15, 127, 109, 0.05);
+    }
+    
+    .annotation {
+      margin-top: var(--spacing-lg);
+      font-size: 0.85rem;
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .annotation span { font-size: 16px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>SIM-Alfida</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group">Auth</div>
+      <a href="01-login.html" class="nav-link">01 Login</a>
+      <a href="02-register.html" class="nav-link">02 Register</a>
+      
+      <div class="nav-group">Dashboard</div>
+      <a href="03-modules.html" class="nav-link active">03 Pilih Modul</a>
+
+      <div class="nav-group">Super Admin</div>
+      <a href="04-dashboard.html" class="nav-link">04 Dashboard</a>
+      <a href="05-daftar-unit.html" class="nav-link">05 Daftar Unit</a>
+      <a href="06-detail-unit.html" class="nav-link">06 Detail Unit</a>
+
+      <div class="nav-group">Admin Unit</div>
+      <a href="07-dashboard-unit.html" class="nav-link">07 Dashboard Unit</a>
+      <a href="08-settings-unit.html" class="nav-link">08 Settings Unit</a>
+      <a href="09-overview-ppdb.html" class="nav-link">09 Overview PPDB</a>
+      <a href="10-pendaftaran.html" class="nav-link">10 Pendaftaran</a>
+      <a href="11-verifikasi-bayar.html" class="nav-link">11 Verifikasi Bayar</a>
+      <a href="12-verifikasi-berkas.html" class="nav-link">12 Verifikasi Berkas</a>
+      <a href="13-observasi.html" class="nav-link">13 Observasi</a>
+      <a href="14-penempatan-kelas.html" class="nav-link">14 Penempatan Kelas</a>
+
+      <div class="nav-group">Orang Tua</div>
+      <a href="15-dashboard-ortu.html" class="nav-link">15 Dashboard Ortu</a>
+      <a href="16-pilih-unit.html" class="nav-link">16 Pilih Unit</a>
+      <a href="17-pembayaran.html" class="nav-link">17 Pembayaran</a>
+      <a href="18-form-siswa.html" class="nav-link">18 Form Siswa</a>
+      <a href="19-form-ortu.html" class="nav-link">19 Form Ortu</a>
+      <a href="20-upload-berkas.html" class="nav-link">20 Upload Berkas</a>
+      <a href="21-surat-imc.html" class="nav-link">21 Surat IMC</a>
+      <a href="22-jadwal-observasi.html" class="nav-link">22 Jadwal Observasi</a>
+      <a href="23-hasil-seleksi.html" class="nav-link">23 Hasil Seleksi</a>
+
+      <div class="nav-group">Observer</div>
+      <a href="24-input-observasi.html" class="nav-link">24 Input Observasi</a>
+    </nav>
+  </aside>
+
+  <div class="main-wrapper">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <!-- Optional mobile menu toggle can go here -->
+      </div>
+      <div class="topbar-right">
+        <div class="user-profile">
+          <div class="avatar">AF</div>
+          <div class="user-name">Ahmad Fauzi (Orang Tua)</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+      <div class="page-header">
+        <h1 class="page-title">Pilih Modul</h1>
+        <p class="page-subtitle">Selamat datang, Ahmad Fauzi. Pilih modul yang ingin Anda akses.</p>
+      </div>
+
+      <div class="module-grid">
+        <!-- Module: PPDB -->
+        <div class="module-card active">
+          <div class="module-header">
+            <div class="module-icon">
+              <span class="material-symbols-rounded">school</span>
+            </div>
+          </div>
+          <h3 class="module-title">PPDB (Penerimaan Peserta Didik Baru)</h3>
+          <p class="module-desc">Pendaftaran dan seleksi siswa baru untuk berbagai unit sekolah Yayasan Alfida.</p>
+          <a href="15-dashboard-ortu.html" class="btn-outline">Buka Modul</a>
+        </div>
+
+        <!-- Module: Akademik -->
+        <div class="module-card disabled">
+          <div class="module-header">
+            <div class="module-icon">
+              <span class="material-symbols-rounded">menu_book</span>
+            </div>
+            <span class="badge badge-info">Segera Hadir</span>
+          </div>
+          <h3 class="module-title">Akademik</h3>
+          <p class="module-desc">Manajemen jadwal, nilai, dan absensi siswa dan guru.</p>
+        </div>
+
+        <!-- Module: Surat Menyurat -->
+        <div class="module-card disabled">
+          <div class="module-header">
+            <div class="module-icon">
+              <span class="material-symbols-rounded">mail</span>
+            </div>
+            <span class="badge badge-info">Segera Hadir</span>
+          </div>
+          <h3 class="module-title">Surat Menyurat</h3>
+          <p class="module-desc">Pengelolaan dokumen dan administrasi persuratan internal yayasan.</p>
+        </div>
+
+        <!-- Module: Manajemen Karyawan -->
+        <div class="module-card disabled">
+          <div class="module-header">
+            <div class="module-icon">
+              <span class="material-symbols-rounded">badge</span>
+            </div>
+            <span class="badge badge-info">Segera Hadir</span>
+          </div>
+          <h3 class="module-title">Manajemen Karyawan</h3>
+          <p class="module-desc">Pusat data karyawan, riwayat karir, dan absensi internal.</p>
+        </div>
+
+        <!-- Module: Payroll -->
+        <div class="module-card disabled">
+          <div class="module-header">
+            <div class="module-icon">
+              <span class="material-symbols-rounded">payments</span>
+            </div>
+            <span class="badge badge-info">Segera Hadir</span>
+          </div>
+          <h3 class="module-title">Payroll</h3>
+          <p class="module-desc">Penggajian, bonus, dan pencatatan finansial karyawan.</p>
+        </div>
+
+        <!-- Module: Rekrutmen -->
+        <div class="module-card disabled">
+          <div class="module-header">
+            <div class="module-icon">
+              <span class="material-symbols-rounded">work</span>
+            </div>
+            <span class="badge badge-info">Segera Hadir</span>
+          </div>
+          <h3 class="module-title">Rekrutmen</h3>
+          <p class="module-desc">Penerimaan karyawan baru dan seleksi tenaga pengajar.</p>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <span class="material-symbols-rounded">info</span> Akses modul dibatasi berdasarkan role Anda.
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>

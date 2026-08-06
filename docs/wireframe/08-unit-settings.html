@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Unit - SIM-Alfida</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #454545;
+            --color-secondary: #06bfa2;
+            --color-tertiary: #0f7f6d;
+            --color-on-tertiary: #F7F8F8;
+            --color-neutral: #F7F8F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E3E8E7;
+            --font-heading: 'Roboto', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); color: var(--color-primary); background: var(--color-neutral); display: flex; min-height: 100vh; }
+        h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+        .sidebar { width: 250px; background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--spacing-md); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+        .sidebar-brand { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--color-tertiary); margin-bottom: var(--spacing-lg); text-align: center; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: var(--spacing-sm); }
+        .sidebar-menu-group { font-size: 12px; font-weight: 600; color: #888; margin-top: var(--spacing-md); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu a { text-decoration: none; color: var(--color-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .sidebar-menu a:hover { background: var(--color-neutral); }
+        .sidebar-menu a.active { background: var(--color-tertiary); color: var(--color-on-tertiary); }
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .topbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .user-profile { display: flex; align-items: center; gap: var(--spacing-sm); }
+        .avatar { width: 36px; height: 36px; background: var(--color-tertiary); color: var(--color-on-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .user-info { font-size: 14px; }
+        .user-role { font-size: 12px; color: #888; }
+        .content { padding: var(--spacing-lg); max-width: 1200px; margin: 0 auto; width: 100%; }
+        .breadcrumb { font-size: 14px; color: #888; margin-bottom: var(--spacing-md); }
+        .breadcrumb span { color: var(--color-tertiary); font-weight: 500; }
+        .page-title { margin-bottom: var(--spacing-lg); font-size: 24px; }
+        
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); align-items: start; }
+        .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-sm); border-bottom: 1px solid var(--color-border); }
+        
+        .form-group { margin-bottom: var(--spacing-md); }
+        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; color: var(--color-primary); }
+        .form-control[readonly] { background: #f9fafb; color: #6b7280; }
+        
+        .upload-zone { border: 2px dashed var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-lg); text-align: center; cursor: pointer; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 150px; width: 200px; }
+        .upload-zone:hover { border-color: var(--color-secondary); }
+        .upload-icon { font-size: 32px; color: #888; margin-bottom: 8px; }
+        .upload-text { font-size: 12px; color: #666; }
+        
+        .btn-primary { background: var(--color-tertiary); color: var(--color-on-tertiary); border: none; padding: 12px 24px; border-radius: var(--radius-sm); font-weight: 500; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+        .btn-primary:hover { opacity: 0.9; }
+        
+        .form-actions { margin-top: var(--spacing-lg); display: flex; justify-content: flex-end; }
+        
+        @media (max-width: 768px) {
+            .grid-2col { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-brand">SIM-Alfida</div>
+        <ul class="sidebar-menu">
+            <div class="sidebar-menu-group">Auth</div>
+            <li><a href="01-login.html"><span class="material-symbols-rounded">login</span> Login</a></li>
+            
+            <div class="sidebar-menu-group">Admin Unit</div>
+            <li><a href="07-unit-dashboard.html"><span class="material-symbols-rounded">dashboard</span> Dashboard Unit</a></li>
+            <li><a href="08-unit-settings.html" class="active"><span class="material-symbols-rounded">settings</span> Settings Unit</a></li>
+            <li><a href="09-unit-ppdb-overview.html"><span class="material-symbols-rounded">overview</span> Overview PPDB</a></li>
+            <li><a href="10-unit-ppdb-registrations.html"><span class="material-symbols-rounded">list_alt</span> Pendaftaran</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h2>SIM-Alfida</h2>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div style="font-weight: 600;">Nur Hidayah</div>
+                    <div class="user-role">Admin Unit - TK Auladuna 1</div>
+                </div>
+                <div class="avatar">NH</div>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="breadcrumb">Admin Unit &gt; <span>Settings</span></div>
+            <h1 class="page-title">Settings Unit</h1>
+
+            <div class="grid-2col">
+                <div class="column-left">
+                    <div class="card">
+                        <div class="card-title">Identitas Unit</div>
+                        <div class="form-group">
+                            <label class="form-label">Nama Unit</label>
+                            <input type="text" class="form-control" value="TK Islam Terpadu Auladuna 1" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jenjang</label>
+                            <input type="text" class="form-control" value="TK" readonly>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Kepala Sekolah</div>
+                        <div class="form-group">
+                            <label class="form-label">Nama Lengkap & Gelar</label>
+                            <input type="text" class="form-control" value="Nur Hidayah S.Pd.">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">NIP</label>
+                            <input type="text" class="form-control" value="197805152003122001">
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Rekening Bank Yayasan</div>
+                        <div class="form-group">
+                            <label class="form-label">Bank</label>
+                            <input type="text" class="form-control" value="Bank Syariah Indonesia" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nomor Rekening</label>
+                            <input type="text" class="form-control" value="7121234567" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Atas Nama</label>
+                            <input type="text" class="form-control" value="Yayasan Alfida" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column-right">
+                    <div class="card">
+                        <div class="card-title">Logo Unit</div>
+                        <div class="upload-zone">
+                            <span class="material-symbols-rounded upload-icon">cloud_upload</span>
+                            <div class="upload-text">Klik atau drag logo unit<br>(JPG/PNG, maks 2MB)</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Tanda Tangan Kepala Sekolah</div>
+                        <div class="upload-zone">
+                            <span class="material-symbols-rounded upload-icon">cloud_upload</span>
+                            <div class="upload-text">Klik atau drag tanda tangan<br>(JPG/PNG, maks 2MB)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn-primary">Simpan Perubahan</button>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
