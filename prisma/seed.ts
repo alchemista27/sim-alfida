@@ -59,16 +59,45 @@ async function main() {
   console.log(`✓ ${createdUnits.length} Units & Settings created.`);
 
   // 3. Super Admin User
-  const superAdminPasswordHash = "managed_by_supabase";
+  const { createClient } = require("@supabase/supabase-js");
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  let superAdminId = "00000000-0000-0000-0000-000000000002";
+
+  // Try to sign in first to get the existing user ID
+  let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email: "admin@alfida.com",
+    password: "Password123!",
+  });
+
+  if (authError || !authData?.user) {
+    // If sign in fails, try to sign up
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: "admin@alfida.com",
+      password: "Password123!",
+    });
+    
+    if (signUpError || !signUpData?.user) {
+      console.warn("Could not create/fetch Supabase user, using default ID. Error:", signUpError?.message);
+    } else {
+      superAdminId = signUpData.user.id;
+    }
+  } else {
+    superAdminId = authData.user.id;
+  }
+
   const superAdmin = await prisma.user.upsert({
-    where: { email: "admin@alfida.sch.id" },
-    update: {},
+    where: { email: "admin@alfida.com" },
+    update: { id: superAdminId },
     create: {
-      id: "super_admin_1",
+      id: superAdminId,
       fullName: "Super Admin",
-      email: "admin@alfida.sch.id",
+      email: "admin@alfida.com",
       phone: "081234567890",
-      passwordHash: superAdminPasswordHash,
+      passwordHash: "managed_by_supabase",
       isActive: true,
     },
   });
