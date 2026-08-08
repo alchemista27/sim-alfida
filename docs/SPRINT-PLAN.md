@@ -53,7 +53,7 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 | S0-02 | Konfigurasi Prisma ORM | Install Prisma, setup `schema.prisma` dengan PostgreSQL provider, konfigurasi `DATABASE_URL` | 2 jam |
 | S0-03 | Definisi Database Schema | Implementasi seluruh 18 tabel + 4 ENUM dari `DB-SCHEMA.md` ke `schema.prisma` | 4 jam |
 | S0-04 | Seed Data Awal | Script seed: 8 unit pendidikan, 1 super admin, `foundation_settings`, tahun ajaran demo | 3 jam |
-| S0-05 | Docker Compose (Dev) | Setup container: Next.js (hot-reload), PostgreSQL 16, MinIO (S3-compatible) | 3 jam |
+| S0-05 | Docker Compose (Dev) | Setup container: Next.js (hot-reload), PostgreSQL 16, Cloudinary (S3-compatible) | 3 jam |
 | S0-06 | Design System & Token | Konfigurasi Tailwind dengan design tokens dari `DESIGN.md` (warna, typography, spacing) | 3 jam |
 | S0-07 | Shared UI Components | Buat komponen dasar: Button, Input, Badge, Card, Table, Modal skeleton | 4 jam |
 | S0-08 | Material Symbols Setup | Integrasi Google Material Symbols Rounded via CDN/self-host + Icon component wrapper | 1 jam |
@@ -66,7 +66,7 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 - [x] `pnpm dev` berjalan tanpa error
 - [x] `pnpm db:push` berhasil membuat seluruh 18 tabel di PostgreSQL
 - [x] `pnpm db:seed` mengisi data dummy 8 unit + 1 super admin
-- [x] `docker compose up` menjalankan app + DB + MinIO
+- [x] `docker compose up` menjalankan app + DB + Cloudinary
 - [x] `pnpm lint && pnpm tsc --noEmit` zero error
 - [x] CI pipeline green di GitHub Actions
 
@@ -120,9 +120,9 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 | S2-04 | CRUD Unit Pendidikan | Server Action: create, update unit. Validasi Zod. Auto-generate slug dari nama | 6 jam |
 | S2-05 | Detail Unit & Settings | Form edit: nama, jenjang, slug (readonly), toggle aktif. Upload logo unit | 6 jam |
 | S2-06 | Assign Admin Unit | Search user → assign role `admin_unit` scoped ke unit. Remove admin. List admin per unit | 6 jam |
-| S2-07 | Upload Logo Yayasan | Super Admin upload logo yayasan ke MinIO via presigned URL. Preview & replace | 4 jam |
+| S2-07 | Upload Logo Yayasan | Super Admin upload logo yayasan ke Cloudinary via presigned URL. Preview & replace | 4 jam |
 | S2-08 | Manajemen User Global | Tabel user (all), filter by role, status aktif/nonaktif. Reset password (future) | 6 jam |
-| S2-09 | Presigned URL Service | Utility function untuk generate MinIO/S3 presigned URL (upload & download) | 4 jam |
+| S2-09 | Presigned URL Service | Utility function untuk generate Cloudinary/S3 presigned URL (upload & download) | 4 jam |
 | S2-10 | Unit Tests Super Admin | Test: unit CRUD, role assignment, aggregation queries, presigned URL gen | 4 jam |
 | S2-11 | E2E Test: Admin Flow | Playwright: login admin → dashboard → create unit → assign admin → verify | 4 jam |
 
@@ -130,7 +130,7 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 - [x] Dashboard menampilkan statistik real-time dari database
 - [x] Super Admin bisa CRUD unit pendidikan (8 unit terisi)
 - [x] Assign/remove admin unit berfungsi dengan scope benar
-- [ ] Upload logo yayasan tersimpan di MinIO, preview di UI *(MinIO digunakan di prod, di-skip untuk dev lokal)*
+- [ ] Upload logo yayasan tersimpan di Cloudinary, preview di UI *(Cloudinary digunakan di prod, di-skip untuk dev lokal)*
 - [x] Non-super-admin mendapat 403 saat akses route ini
 
 ---
@@ -161,7 +161,7 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 - [x] Admin Unit hanya melihat data unitnya sendiri (tenant isolation verified)
 - [x] Tahun ajaran bisa dibuat/diaktifkan, kuota terset
 - [x] Daftar pendaftaran menampilkan data dengan filter & pagination
-- [x] Logo unit & TTD kepsek terupload & terpreview *(UI siap, integrasi MinIO ditangguhkan untuk dev)*
+- [x] Logo unit & TTD kepsek terupload & terpreview (Teringrasi penuh dengan Cloudinary)
 - [x] Dashboard unit menampilkan statistik real-time
 
 ---
@@ -180,7 +180,7 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 | S4-03 | Halaman Pilih Unit | Katalog 8 unit pendidikan. Card: nama, jenjang, kuota real-time, badge status. Disable jika penuh | 6 jam |
 | S4-04 | Create Registration | Server Action: buat `registration` baru, generate `registration_number` (format: PPDB-{SLUG}-{YEAR}-{SEQ}), set state `pending_payment` | 4 jam |
 | S4-05 | Halaman Pembayaran | Info rekening yayasan (BSI), nominal biaya, tombol salin rekening | 4 jam |
-| S4-06 | Upload Bukti Bayar | Drag-drop zone untuk unggah bukti transfer (JPG/PNG/PDF, max 5MB) ke MinIO. State → `payment_uploaded` | 6 jam |
+| S4-06 | Upload Bukti Bayar | Drag-drop zone untuk unggah bukti transfer (JPG/PNG/PDF, max 5MB) ke Cloudinary. State → `payment_uploaded` | 6 jam |
 | S4-07 | Verifikasi Pembayaran (Admin) | Halaman admin: tabel pending payments, preview bukti, tombol Verifikasi/Tolak + alasan. State → `payment_verified` atau kembali ke `pending_payment` | 8 jam |
 | S4-08 | Form Data Siswa | Form multi-field sesuai PRD (nama, panggilan, gender, TTL, NISN, alamat, transportasi, hobi, cita-cita). Validasi Zod. Simpan ke `student_data` | 8 jam |
 | S4-09 | Form Data Orang Tua | Tab Ayah/Ibu. Field: nama, NIK (16 digit), TTL, pendidikan, pekerjaan, penghasilan, no. HP, alamat. Simpan ke `parent_data` | 8 jam |
@@ -228,7 +228,7 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 | ID | Task | Detail | Estimasi |
 |----|------|--------|----------|
 | S5-01 | Halaman Upload Berkas | List 6 jenis dokumen: pasfoto, KTP ayah, KTP ibu, akte, KK, surat sekolah. Status uploaded/pending per dokumen | 6 jam |
-| S5-02 | Upload Service (Batch) | Multi-file upload ke MinIO via presigned URL. Validasi format (JPG/PNG/PDF) & size (max 5MB). Progress indicator | 8 jam |
+| S5-02 | Upload Service (Batch) | Multi-file upload ke Cloudinary via presigned URL. Validasi format (JPG/PNG/PDF) & size (max 5MB). Progress indicator | 8 jam |
 | S5-03 | Document Preview | Preview dokumen terupload (image viewer untuk JPG/PNG, PDF viewer embed). Tombol hapus & re-upload | 4 jam |
 | S5-04 | State → documents_uploaded | Auto-transition ketika semua required documents terupload. Guard: minimal 5 dokumen wajib | 3 jam |
 | S5-05 | Generate Surat IMC (PDF) | `@react-pdf/renderer` server-side: kop surat (logo yayasan + logo unit), data siswa, TTD kepsek, nomor surat otomatis | 8 jam |
@@ -350,7 +350,7 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 |--------|--------|--------------|----------|
 | VPS belum ready saat Sprint 8 | Deployment tertunda | Sedang | Gunakan Railway/Vercel sebagai staging sementara |
 | Perubahan requirement form PPDB | Rework Sprint 4-5 | Sedang | Lock requirement di akhir Sprint 3, tampung perubahan di backlog Phase 2 |
-| Integrasi MinIO kompleks | Upload gagal | Rendah | Fallback ke local filesystem storage di dev, MinIO di staging/prod |
+| Integrasi Cloudinary kompleks | Upload gagal | Rendah | Fallback ke local filesystem storage di dev, Cloudinary di staging/prod |
 | Performance query aggregasi lambat | Dashboard lemot | Rendah | Gunakan materialized view / caching Redis (add di Sprint 8 jika perlu) |
 | PDF generation memory-intensive | Server crash | Rendah | Limit concurrent PDF gen, gunakan queue (bull) jika diperlukan |
 

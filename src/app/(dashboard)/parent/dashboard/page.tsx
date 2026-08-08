@@ -73,6 +73,21 @@ export default async function ParentDashboardPage() {
                 <Button variant="primary">Lengkapi Formulir</Button>
               </Link>
             )}
+            {reg.status === "documents_uploaded" && (
+              <Link href="/parent/documents">
+                <Button variant="primary">Upload Berkas</Button>
+              </Link>
+            )}
+            {reg.status === "medical_pending" && (
+              <Link href="/parent/medical">
+                <Button variant="primary">Proses Tes Medis (IMC)</Button>
+              </Link>
+            )}
+            {reg.status === "medical_uploaded" && (
+              <div className="px-4 py-2 bg-amber-100 text-amber-700 text-sm font-medium rounded-md flex items-center gap-2">
+                <Icon name="hourglass_empty" className="text-sm" /> Antrian Verifikasi Berkas
+              </div>
+            )}
           </div>
 
           <PpdbStepper status={reg.status} />
@@ -87,8 +102,10 @@ export default async function ParentDashboardPage() {
               {reg.status === "payment_uploaded" && "Bukti pembayaran Anda sedang dicek oleh Admin Unit. Proses ini memakan waktu 1x24 jam kerja."}
               {reg.status === "payment_verified" && "Pembayaran Anda telah diverifikasi! Sistem sedang menyiapkan formulir Anda."}
               {reg.status === "form_filling" && "Harap lengkapi formulir data calon siswa dan data orang tua/wali."}
-              {reg.status === "documents_uploaded" && "Formulir sudah lengkap. Langkah selanjutnya adalah upload dokumen (Tersedia di tahap selanjutnya)."}
-              {["verification", "medical_pending", "medical_uploaded", "observation_scheduled", "observation_done"].includes(reg.status) && "Proses seleksi sedang berjalan. Harap pantau dashboard ini secara berkala."}
+              {reg.status === "documents_uploaded" && "Formulir lengkap! Silakan unggah dokumen persyaratan seperti KTP, Akte, dan KK."}
+              {reg.status === "medical_pending" && "Silakan cetak surat pengantar IMC dan unggah hasil lab untuk melanjutkan."}
+              {reg.status === "medical_uploaded" && "Berkas Anda sedang dalam proses verifikasi oleh Tim PPDB."}
+              {["verification", "observation_scheduled", "observation_done"].includes(reg.status) && "Proses seleksi sedang berjalan. Harap pantau dashboard ini secara berkala."}
             </div>
           </Card>
         </>

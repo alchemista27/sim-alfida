@@ -84,10 +84,18 @@ export async function createRegistrationAction(unitId: string) {
 }
 
 // ── S4-06: Upload Payment Receipt ──
-export async function uploadPaymentReceiptAction(registrationId: string) {
+export async function uploadPaymentReceiptAction(formData: FormData) {
   const user = await getParentUser();
+  const registrationId = formData.get("registrationId") as string;
+  const file = formData.get("file") as File;
+
+  if (!registrationId || !file) {
+    throw new Error("Data tidak lengkap.");
+  }
+
   const reg = await prisma.registration.findFirst({
     where: { id: registrationId, parentId: user.id },
+    include: { academicYear: { include: { unit: true } } },
   });
 
   if (!reg || reg.status !== RegistrationStatus.pending_payment) {
@@ -98,7 +106,15 @@ export async function uploadPaymentReceiptAction(registrationId: string) {
     throw new Error("Transisi status tidak diizinkan.");
   }
 
-  const MOCK_URL = "https://via.placeholder.com/600x800.png?text=Bukti+Bayar+Simulasi";
+  let uploadedUrl = "";
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const { uploadToCloudinary } = await import("@/lib/cloudinary");
+    uploadedUrl = await uploadToCloudinary(buffer, `sim-alfida/payments/${reg.academicYear.unit.slug}`, `pay-${reg.registrationNumber}-${Date.now()}`);
+  } catch (err: any) {
+    throw new Error("Gagal mengunggah file ke Cloudinary.");
+  }
 
   await prisma.$transaction([
     prisma.registration.update({
@@ -108,7 +124,7 @@ export async function uploadPaymentReceiptAction(registrationId: string) {
     prisma.payment.upsert({
       where: { registrationId },
       update: {
-        proofUrl: MOCK_URL,
+        proofUrl: uploadedUrl,
         amount: 250000,
         uploadedAt: new Date(),
         status: "pending",
@@ -116,7 +132,7 @@ export async function uploadPaymentReceiptAction(registrationId: string) {
       create: {
         registrationId,
         amount: 250000, // example nominal
-        proofUrl: MOCK_URL,
+        proofUrl: uploadedUrl,
         status: "pending",
       },
     }),

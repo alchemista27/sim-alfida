@@ -43,7 +43,7 @@ graph TB
     subgraph Data["Data Layer"]
         ORM["Prisma ORM"]
         DB[("PostgreSQL")]
-        S3["Object Storage (S3/MinIO)"]
+        S3["Object Storage (S3/Cloudinary)"]
     end
 
     subgraph External["Integrasi Eksternal"]
@@ -75,7 +75,7 @@ graph TB
 | Framework                          | Next.js App Router   | SSR/SSG bawaan, Server Components, Server Actions, API Routes terpadu                       |
 | ORM                                | Prisma               | Type-safe, Developer experience (DX) sangat baik, migrasi otomatis, populer di Next.js      |
 | Database                           | PostgreSQL           | Relasional, mendukung multi-tenant, open source                                             |
-| Object Storage                     | S3-compatible (MinIO)| Untuk file upload (berkas PPDB, logo, TTD). MinIO untuk dev, S3 untuk prod                  |
+| Object Storage                     | S3-compatible (Cloudinary)| Untuk file upload (berkas PPDB, logo, TTD). Cloudinary untuk dev, S3 untuk prod                  |
 | PDF Generation                     | `@react-pdf/renderer`| React-based, server-side rendering, sesuai dengan stack                                     |
 | Validasi                           | Zod                  | Type inference TypeScript, composable schemas, standar di ekosistem Next.js                 |
 | Auth                               | NextAuth.js (Auth.js)| Multi-provider, session management bawaan, mendukung SSO custom                             |
@@ -569,7 +569,7 @@ export const UploadDocumentSchema = z.object({
 
 | Aspek                | Detail                                                              |
 | -------------------- | ------------------------------------------------------------------- |
-| **Storage**          | S3-compatible (MinIO untuk dev, AWS S3 / Cloudflare R2 untuk prod)  |
+| **Storage**          | S3-compatible (Cloudinary untuk dev, AWS S3 / Cloudflare R2 untuk prod)  |
 | **Upload Method**    | Presigned URL — client upload langsung ke storage, server hanya generate URL |
 | **Max File Size**    | 5 MB per file                                                       |
 | **Allowed Types**    | `image/jpeg`, `image/png`, `application/pdf`                        |
@@ -768,12 +768,10 @@ DATABASE_URL=postgresql://user:password@localhost:5432/sim_alfida
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=generate-a-secure-random-string
 
-# ── Object Storage (S3-compatible) ───────────
-S3_ENDPOINT=http://localhost:9000
-S3_ACCESS_KEY=minioadmin
-S3_SECRET_KEY=minioadmin
-S3_BUCKET_NAME=sim-alfida
-S3_REGION=us-east-1
+# ── Object Storage (Cloudinary) ───────────
+CLOUDINARY_CLOUD_NAME=hb1ropwm
+CLOUDINARY_API_KEY=219453755147514
+CLOUDINARY_API_SECRET=QSQ-HbPN10B20hHzIz-sZ9LgJvo1
 
 # ── Email (future) ──────────────────────────
 # SMTP_HOST=
@@ -825,9 +823,9 @@ tests/e2e/admin-payment.spec.ts           # E2E test
 
 | Environment | Tujuan                    | Database           | Storage        | Host      |
 | ----------- | ------------------------- | ------------------ | -------------- | --------- |
-| **Local**   | Development               | PostgreSQL (Docker)| MinIO (Docker) | Localhost |
-| **Staging** | QA & UAT                  | PostgreSQL (Docker)| MinIO (Docker) | VPS       |
-| **Prod**    | Production                | PostgreSQL (Docker)| MinIO (Docker) | VPS       |
+| **Local**   | Development               | PostgreSQL (Docker)| Cloudinary (Docker) | Localhost |
+| **Staging** | QA & UAT                  | PostgreSQL (Docker)| Cloudinary (Docker) | VPS       |
+| **Prod**    | Production                | PostgreSQL (Docker)| Cloudinary (Docker) | VPS       |
 
 ### 12.2 VPS Stack (Docker Compose)
 
@@ -838,7 +836,7 @@ graph TB
         subgraph Docker["Docker Compose"]
             APP["Next.js App\n(Node.js container)"]
             DB[("PostgreSQL 16")]
-            MINIO["MinIO\n(Object Storage)"]
+            MINIO["Cloudinary\n(Object Storage)"]
         end
     end
 

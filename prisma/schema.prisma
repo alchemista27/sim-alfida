@@ -2,10 +2,12 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  schemas   = ["shared", "sim"]
 }
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 // ── Enums ──
@@ -15,6 +17,7 @@ enum UnitLevel {
   smp
   sma
   pesantren
+  @@schema("sim")
 }
 
 enum UserRole {
@@ -25,6 +28,7 @@ enum UserRole {
   orang_tua
   observer
   tim_ppdb
+  @@schema("sim")
 }
 
 enum RegistrationStatus {
@@ -41,6 +45,7 @@ enum RegistrationStatus {
   accepted
   rejected
   enrolled
+  @@schema("sim")
 }
 
 enum PaymentStatus {
@@ -48,17 +53,20 @@ enum PaymentStatus {
   uploaded
   verified
   rejected
+  @@schema("sim")
 }
 
 enum Gender {
   male
   female
+  @@schema("sim")
 }
 
 enum ParentType {
   father
   mother
   guardian
+  @@schema("sim")
 }
 
 enum DocumentType {
@@ -69,6 +77,7 @@ enum DocumentType {
   father_id
   mother_id
   medical_result
+  @@schema("sim")
 }
 
 // ── Tables ──
@@ -83,6 +92,7 @@ model FoundationSettings {
   updatedAt         DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("foundation_settings")
+  @@schema("sim")
 }
 
 model Unit {
@@ -100,6 +110,7 @@ model Unit {
   classes             Class[]
 
   @@map("units")
+  @@schema("sim")
 }
 
 model UnitSettings {
@@ -115,6 +126,7 @@ model UnitSettings {
   unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@map("unit_settings")
+  @@schema("sim")
 }
 
 model User {
@@ -132,6 +144,7 @@ model User {
   registrations Registration[]
 
   @@map("users")
+  @@schema("shared")
 }
 
 model UserRoleAssignment {
@@ -146,6 +159,7 @@ model UserRoleAssignment {
 
   @@unique([userId, role, unitId])
   @@map("user_roles")
+  @@schema("sim")
 }
 
 model Session {
@@ -158,6 +172,7 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+  @@schema("sim")
 }
 
 model AcademicYear {
@@ -178,6 +193,7 @@ model AcademicYear {
 
   @@unique([unitId, name])
   @@map("academic_years")
+  @@schema("sim")
 }
 
 model Registration {
@@ -201,6 +217,7 @@ model Registration {
   classAssignment    ClassAssignment?
 
   @@map("registrations")
+  @@schema("sim")
 }
 
 model Payment {
@@ -218,6 +235,7 @@ model Payment {
   registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+  @@schema("sim")
 }
 
 model StudentData {
@@ -241,6 +259,7 @@ model StudentData {
   registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
 
   @@map("student_data")
+  @@schema("sim")
 }
 
 model ParentData {
@@ -263,6 +282,7 @@ model ParentData {
 
   @@unique([registrationId, type])
   @@map("parent_data")
+  @@schema("sim")
 }
 
 model Document {
@@ -278,6 +298,7 @@ model Document {
   registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
 
   @@map("documents")
+  @@schema("sim")
 }
 
 model MedicalReferral {
@@ -291,6 +312,7 @@ model MedicalReferral {
   registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
 
   @@map("medical_referrals")
+  @@schema("sim")
 }
 
 model ObservationSchedule {
@@ -307,6 +329,7 @@ model ObservationSchedule {
   bookings     ObservationBooking[]
 
   @@map("observation_schedules")
+  @@schema("sim")
 }
 
 model ObservationBooking {
@@ -321,6 +344,7 @@ model ObservationBooking {
   result ObservationResult?
 
   @@map("observation_bookings")
+  @@schema("sim")
 }
 
 model ObservationResult {
@@ -335,6 +359,7 @@ model ObservationResult {
   booking ObservationBooking @relation(fields: [observationBookingId], references: [id], onDelete: Cascade)
 
   @@map("observation_results")
+  @@schema("sim")
 }
 
 model Class {
@@ -352,6 +377,7 @@ model Class {
 
   @@unique([unitId, academicYearId, name])
   @@map("classes")
+  @@schema("sim")
 }
 
 model ClassAssignment {
@@ -364,4 +390,5 @@ model ClassAssignment {
   class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@map("class_assignments")
+  @@schema("sim")
 }

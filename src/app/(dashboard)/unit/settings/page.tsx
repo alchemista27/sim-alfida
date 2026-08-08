@@ -45,6 +45,8 @@ export default async function UnitSettingsPage() {
           principalName: unit.unitSettings?.principalName ?? "",
           principalNip: unit.unitSettings?.principalNip ?? "",
         }}
+        logoUrl={unit.unitSettings?.logoUrl ?? undefined}
+        signatureUrl={unit.unitSettings?.principalSignatureUrl ?? undefined}
         bankName={foundation?.bankName ?? undefined}
         bankAccountNumber={foundation?.bankAccountNumber ?? undefined}
         bankAccountHolder={foundation?.bankAccountHolder ?? undefined}

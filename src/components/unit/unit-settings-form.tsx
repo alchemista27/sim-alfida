@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { unitSettingsSchema, UnitSettingsInput } from "@/lib/validations/unit";
-import { updateUnitSettingsAction } from "@/actions/unit";
+import { updateUnitSettingsAction, uploadUnitImageAction } from "@/actions/unit";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,8 @@ interface UnitSettingsFormProps {
     principalName: string;
     principalNip?: string;
   };
+  logoUrl?: string;
+  signatureUrl?: string;
   bankName?: string;
   bankAccountNumber?: string;
   bankAccountHolder?: string;
@@ -27,6 +29,8 @@ export function UnitSettingsForm({
   unitName,
   unitLevel,
   defaultValues,
+  logoUrl,
+  signatureUrl,
   bankName,
   bankAccountNumber,
   bankAccountHolder,
@@ -34,6 +38,36 @@ export function UnitSettingsForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingSignature, setIsUploadingSignature] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "signature") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Ukuran file maksimal 2MB");
+      return;
+    }
+
+    if (type === "logo") setIsUploadingLogo(true);
+    else setIsUploadingSignature(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("type", type);
+      formData.append("file", file);
+      await uploadUnitImageAction(unitId, formData);
+      setSuccess(true);
+    } catch (e: any) {
+      setError(e.message || `Gagal mengunggah ${type}.`);
+    } finally {
+      if (type === "logo") setIsUploadingLogo(false);
+      else setIsUploadingSignature(false);
+    }
+  };
 
   const {
     register,
@@ -134,23 +168,37 @@ export function UnitSettingsForm({
             </div>
           </div>
 
-          {/* Upload zones - placeholder for Sprint 5 */}
+          {/* Upload zones */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Logo Unit</label>
-              <div className="h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 text-gray-400 bg-neutral/30 cursor-pointer hover:bg-neutral/60 transition-colors">
-                <Icon name="cloud_upload" className="text-2xl" />
-                <span className="text-xs font-medium">Klik atau drag logo (JPG/PNG, maks 2MB)</span>
-              </div>
+              <label className={`h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors block relative overflow-hidden ${isUploadingLogo ? 'pointer-events-none bg-gray-50' : 'bg-neutral/30 hover:bg-neutral/60'}`}>
+                <input type="file" accept="image/jpeg, image/png" className="hidden" onChange={(e) => handleImageUpload(e, "logo")} disabled={isUploadingLogo} />
+                {logoUrl && !isUploadingLogo ? (
+                  <img src={logoUrl} alt="Logo" className="absolute inset-0 w-full h-full object-contain p-2" />
+                ) : (
+                  <>
+                    <Icon name={isUploadingLogo ? "sync" : "cloud_upload"} className={`text-2xl ${isUploadingLogo ? 'animate-spin text-gray-400' : 'text-gray-400'}`} />
+                    <span className="text-xs font-medium text-gray-500 text-center px-4">{isUploadingLogo ? 'Mengunggah...' : 'Klik atau drag logo (JPG/PNG, maks 2MB)'}</span>
+                  </>
+                )}
+              </label>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tanda Tangan Kepala Sekolah
               </label>
-              <div className="h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 text-gray-400 bg-neutral/30 cursor-pointer hover:bg-neutral/60 transition-colors">
-                <Icon name="draw" className="text-2xl" />
-                <span className="text-xs font-medium">Upload file tanda tangan (PNG transparan)</span>
-              </div>
+              <label className={`h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors block relative overflow-hidden ${isUploadingSignature ? 'pointer-events-none bg-gray-50' : 'bg-neutral/30 hover:bg-neutral/60'}`}>
+                <input type="file" accept="image/png" className="hidden" onChange={(e) => handleImageUpload(e, "signature")} disabled={isUploadingSignature} />
+                {signatureUrl && !isUploadingSignature ? (
+                  <img src={signatureUrl} alt="Signature" className="absolute inset-0 w-full h-full object-contain p-2" />
+                ) : (
+                  <>
+                    <Icon name={isUploadingSignature ? "sync" : "draw"} className={`text-2xl ${isUploadingSignature ? 'animate-spin text-gray-400' : 'text-gray-400'}`} />
+                    <span className="text-xs font-medium text-gray-500 text-center px-4">{isUploadingSignature ? 'Mengunggah...' : 'Upload file tanda tangan (PNG transparan)'}</span>
+                  </>
+                )}
+              </label>
             </div>
           </div>
 

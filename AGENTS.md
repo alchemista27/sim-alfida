@@ -9,6 +9,7 @@ This file gives AI coding agents the context they need to work effectively in th
 - **Framework**: Next.js (React · App Router)
 - **Database & Auth**: Supabase (PostgreSQL & Supabase Auth SSR)
 - **ORM**: Prisma (Connected via Supabase Transaction Pooler)
+- **Storage**: Cloudinary (Image & PDF storage)
 - **Icons**: Material UI Icons (Google) — Never use emojis for icons.
 
 ## Setup

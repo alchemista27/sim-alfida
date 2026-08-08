@@ -38,7 +38,40 @@ export async function updateUnitSettingsAction(
   });
 
   revalidatePath("/unit/settings");
+  revalidatePath("/unit/settings");
   revalidatePath(`/admin/units/${unitId}`);
+}
+
+// ── S3-05: Upload Logo & TTD (Cloudinary) ──
+export async function uploadUnitImageAction(unitId: string, formData: FormData) {
+  await requireRole([UserRole.admin_unit, UserRole.super_admin]);
+  const type = formData.get("type") as "logo" | "signature";
+  const file = formData.get("file") as File;
+
+  if (!type || !file) throw new Error("Data tidak lengkap.");
+
+  const unit = await prisma.unit.findUnique({ where: { id: unitId } });
+  if (!unit) throw new Error("Unit tidak ditemukan.");
+
+  let uploadedUrl = "";
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const { uploadToCloudinary } = await import("@/lib/cloudinary");
+    uploadedUrl = await uploadToCloudinary(buffer, `sim-alfida/units/${unit.slug}`, `${type}-${Date.now()}`);
+  } catch (err) {
+    throw new Error(`Gagal mengunggah ${type} ke Cloudinary.`);
+  }
+
+  const updateData = type === "logo" ? { logoUrl: uploadedUrl } : { principalSignatureUrl: uploadedUrl };
+  await prisma.unitSettings.update({
+    where: { unitId },
+    data: updateData,
+  });
+
+  revalidatePath("/unit/settings");
+  revalidatePath(`/admin/units/${unitId}`);
+  return uploadedUrl;
 }
 
 // ── S3-07: Create Academic Year ──

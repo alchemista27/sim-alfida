@@ -172,7 +172,7 @@ CREATE UNIQUE INDEX uq_foundation_settings_singleton ON foundation_settings ((tr
 | ---------------------- | -------------- | :------: | ------------------------------------- |
 | `id`                   | UUID           | ❌       | PK                                    |
 | `foundation_name`      | VARCHAR(200)   | ❌       | Nama yayasan                          |
-| `logo_url`             | TEXT           | ✅       | URL logo yayasan di object storage    |
+| `logo_url`             | TEXT           | ✅       | URL logo yayasan di Cloudinary    |
 | `bank_name`            | VARCHAR(100)   | ✅       | Nama bank rekening yayasan            |
 | `bank_account_number`  | VARCHAR(50)    | ✅       | Nomor rekening                        |
 | `bank_account_holder`  | VARCHAR(200)   | ✅       | Nama pemilik rekening                 |
@@ -252,7 +252,7 @@ CREATE TABLE unit_settings (
 | -------------------------- | ------------- | :------: | --------------------------------------- |
 | `id`                       | UUID          | ❌       | PK                                      |
 | `unit_id`                  | UUID          | ❌       | FK → units.id, UNIQUE (one-to-one)      |
-| `logo_url`                 | TEXT          | ✅       | URL logo unit di object storage         |
+| `logo_url`                 | TEXT          | ✅       | URL logo unit di Cloudinary         |
 | `principal_name`           | VARCHAR(200)  | ✅       | Nama kepala sekolah                     |
 | `principal_nip`            | VARCHAR(50)   | ✅       | NIP kepala sekolah                      |
 | `principal_signature_url`  | TEXT          | ✅       | URL gambar tanda tangan kepala sekolah  |
@@ -499,7 +499,7 @@ CREATE INDEX idx_payments_registration ON payments (registration_id);
 | `id`               | UUID           | ❌       | PK                                      |
 | `registration_id`  | UUID           | ❌       | FK → registrations.id, UNIQUE           |
 | `amount`           | DECIMAL(12,2)  | ❌       | Nominal pembayaran                      |
-| `proof_url`        | TEXT           | ✅       | URL bukti transfer di object storage    |
+| `proof_url`        | TEXT           | ✅       | URL bukti transfer di Cloudinary    |
 | `status`           | payment_status | ❌       | Status verifikasi                       |
 | `verified_by`      | UUID           | ✅       | FK → users.id (admin yang verifikasi)   |
 | `rejection_reason` | TEXT           | ✅       | Alasan penolakan (jika ditolak)         |
@@ -646,7 +646,7 @@ CREATE INDEX idx_documents_registration ON documents (registration_id);
 | `id`              | UUID           | ❌       | PK                                         |
 | `registration_id` | UUID           | ❌       | FK → registrations.id                      |
 | `doc_type`        | document_type  | ❌       | Jenis dokumen                              |
-| `file_url`        | TEXT           | ❌       | URL file di object storage                 |
+| `file_url`        | TEXT           | ❌       | URL file di Cloudinary                 |
 | `file_name`       | VARCHAR(255)   | ❌       | Nama file asli                             |
 | `file_size`       | INTEGER        | ❌       | Ukuran file dalam byte (max 5MB)           |
 | `mime_type`       | VARCHAR(100)   | ❌       | MIME type (jpeg, png, pdf)                 |
