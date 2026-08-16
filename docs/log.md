@@ -2,6 +2,25 @@
 
 ---
 
+**tanggal:** 16 Agustus 2026 (Sesi 2)
+**progress:** 
+- Menyelesaikan inisiatif **Sprint 8** (QA, Polish & Deployment Produksi).
+- Menerapkan _Multi-stage Build_ pada `Dockerfile` untuk optimalisasi *image* Next.js, dan membungkusnya dalam konfigurasi `docker-compose.prod.yml`.
+- Menambahkan konfigurasi *Reverse Proxy* dan _Security Headers_ menggunakan Nginx (`nginx/sim-alfida.conf`) serta menyesuaikan *next.config.ts*.
+- Merancang fondasi CI/CD *Pipeline* lewat GitHub Actions (`.github/workflows/deploy.yml`) untuk _auto-deploy_ ke VPS.
+- Melengkapi halaman ralat global (`error.tsx` dan `not-found.tsx`).
+- Menuliskan panduan produksi untuk administrator di `docs/DEPLOYMENT.md`.
+**commit message:** chore: finalize sprint 8 with dockerization, CI/CD, and production polish
+
+**tanggal:** 16 Agustus 2026
+**progress:** 
+- Menyelesaikan fungsionalitas **Sprint 7** (Penempatan Kelas & Finalisasi).
+- Membuat *Server Actions* untuk manajemen kelas (`classes.ts`) beserta antarmuka untuk menambah kelas dan memantau kapasitasnya (`class-management-client.tsx`).
+- Membangun fitur *Class Assignment* (`class-assignment.ts`) bagi Admin Unit untuk memindahkan siswa berstatus `accepted` ke dalam rombongan kelas tertentu.
+- Validasi transaksi basis data untuk memastikan batas kuota maksimal kelas tak terlampaui.
+- *State machine* selesai ditutup dengan status mutlak `enrolled`.
+**commit message:** feat: complete sprint 7 class management and final assignment flow
+
 **tanggal:** 08 Agustus 2026 (Sesi 2)
 **progress:** 
 - Menyelesaikan seluruh fungsionalitas **Sprint 6** (Observasi & Seleksi).

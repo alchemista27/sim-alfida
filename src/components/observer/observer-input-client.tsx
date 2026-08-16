@@ -8,6 +8,7 @@ export function ObserverInputClient({ observerId, bookings }: { observerId: stri
   const [score, setScore] = useState<number>(0);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +24,14 @@ export function ObserverInputClient({ observerId, bookings }: { observerId: stri
     setLoading(false);
 
     if (res.success) {
-      alert("Nilai berhasil disimpan!");
-      setSelectedBooking(null);
-      // Remove from list or trigger refresh (already handled by server action revalidatePath)
-      window.location.reload(); 
+      setShowSuccessModal(true);
     } else {
-      alert(res.error);
+      alert((res as any).error);
     }
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
       {/* List Panel */}
       <div className="md:col-span-1 space-y-3 h-[600px] overflow-y-auto pr-2">
         {bookings.map(b => (
@@ -110,6 +108,29 @@ export function ObserverInputClient({ observerId, bookings }: { observerId: stri
           </div>
         )}
       </div>
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-sm p-6 shadow-2xl text-center">
+            <div className="mx-auto w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-4">
+              <span className="material-symbols-rounded text-4xl">check_circle</span>
+            </div>
+            <h3 className="font-bold text-lg text-teal-700 mb-2">Nilai Berhasil Disimpan!</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Data penilaian observasi untuk calon siswa ini telah sukses dimasukkan ke dalam sistem.
+            </p>
+            <button 
+              className="w-full bg-teal-600 text-white font-medium py-2.5 rounded-lg hover:bg-teal-700 transition-colors"
+              onClick={() => {
+                setShowSuccessModal(false);
+                window.location.reload();
+              }}
+            >
+              Tutup & Lanjutkan
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

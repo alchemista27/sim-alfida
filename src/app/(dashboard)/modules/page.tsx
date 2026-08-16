@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getCurrentUser } from "@/actions/user";
 
 interface ModuleCardProps {
   title: string;
@@ -70,7 +71,18 @@ function ModuleCard({
   );
 }
 
-export default function ModulesPage() {
+export default async function ModulesPage() {
+  const user = await getCurrentUser();
+  const roles = user?.roles || [];
+  
+  let ppdbHref = "/parent/dashboard"; // Default to parent
+  
+  if (roles.some((r: any) => r.role === "super_admin")) {
+    ppdbHref = "/admin/dashboard";
+  } else if (roles.some((r: any) => r.role === "admin_unit")) {
+    ppdbHref = "/unit/dashboard";
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -78,7 +90,7 @@ export default function ModulesPage() {
           Pilih Modul SIM-Alfida
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Selamat datang. Pilih modul yang ingin Anda akses sesuai dengan peranan Anda.
+          Selamat datang, {user?.name || "Pengguna"}. Pilih modul yang ingin Anda akses sesuai dengan peranan Anda.
         </p>
       </div>
 
@@ -88,7 +100,7 @@ export default function ModulesPage() {
           subtitle="Modul pendaftaran calon siswa baru, verifikasi berkas, observasi, dan seleksi."
           icon="school"
           active={true}
-          href="/ppdb/dashboard"
+          href={ppdbHref}
         />
 
         <ModuleCard

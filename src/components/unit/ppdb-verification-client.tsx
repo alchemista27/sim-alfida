@@ -11,13 +11,14 @@ export function VerificationClient({ registrations }: { registrations: any[] }) 
   const [selectedReg, setSelectedReg] = useState<any | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleApprove = async (regId: string) => {
-    if (!confirm("Terima dan teruskan ke tahap observasi?")) return;
     setProcessingId(regId);
     try {
       await verifyDocumentsAction(regId, "approve");
+      setIsApproving(false);
       setSelectedReg(null);
     } catch (e: any) {
       alert(e.message || "Gagal memproses persetujuan");
@@ -85,7 +86,7 @@ export function VerificationClient({ registrations }: { registrations: any[] }) 
                   <Button 
                     variant="primary" 
                     size="sm" 
-                    onClick={() => handleApprove(reg.id)}
+                    onClick={() => { setIsApproving(true); setSelectedReg(reg); }}
                     disabled={processingId === reg.id}
                   >
                     Loloskan
@@ -106,10 +107,27 @@ export function VerificationClient({ registrations }: { registrations: any[] }) 
       </div>
 
       <DocumentViewerModal 
-        isOpen={selectedReg !== null && !isRejecting} 
+        isOpen={selectedReg !== null && !isRejecting && !isApproving} 
         onClose={() => setSelectedReg(null)} 
         docs={selectedReg?.documents || []} 
       />
+
+      {isApproving && selectedReg && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl">
+            <h3 className="font-bold text-lg text-primary mb-2">Terima Berkas</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Anda yakin ingin meloloskan verifikasi berkas untuk siswa <strong>{selectedReg.studentData?.fullName}</strong>? Calon siswa akan diteruskan ke tahap observasi/tes wawancara.
+            </p>
+            <div className="flex justify-end gap-3 mt-5">
+              <Button variant="outline" onClick={() => { setIsApproving(false); setSelectedReg(null); }}>Batal</Button>
+              <Button variant="primary" onClick={() => handleApprove(selectedReg.id)} disabled={processingId === selectedReg.id}>
+                {processingId === selectedReg.id ? "Memproses..." : "Konfirmasi Lolos"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isRejecting && selectedReg && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">

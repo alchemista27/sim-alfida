@@ -63,12 +63,7 @@ export default async function ParentDashboardPage() {
                 <Icon name="hourglass_empty" className="text-sm" /> Menunggu Verifikasi Bayar
               </div>
             )}
-            {reg.status === "payment_verified" && (
-              <div className="px-4 py-2 bg-teal-100 text-tertiary text-sm font-medium rounded-md flex items-center gap-2">
-                <Icon name="check_circle" className="text-sm" /> Pembayaran Diterima
-              </div>
-            )}
-            {reg.status === "form_filling" && (
+            {(reg.status === "payment_verified" || reg.status === "form_filling") && (
               <Link href="/parent/form-student">
                 <Button variant="primary">Lengkapi Formulir</Button>
               </Link>

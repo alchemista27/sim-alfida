@@ -10,7 +10,7 @@ export default async function ParentFormStudentPage() {
   await requireRole([UserRole.orang_tua]);
   const reg = await getActiveRegistration();
 
-  if (!reg || reg.status !== "form_filling") {
+  if (!reg || (reg.status !== "form_filling" && reg.status !== "payment_verified")) {
     redirect("/parent/dashboard");
   }
 

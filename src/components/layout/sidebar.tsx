@@ -44,6 +44,7 @@ const navGroups: NavGroup[] = [
       { title: "Verifikasi Berkas", href: "/unit/ppdb-verification", icon: "folder_open" },
       { title: "Observasi", href: "/unit/ppdb-observations", icon: "event_note" },
       { title: "Penempatan Kelas", href: "/unit/ppdb-classes", icon: "class" },
+      { title: "Assign Observer", href: "/unit/observers", icon: "how_to_reg" },
     ],
   },
   {
@@ -63,7 +64,7 @@ const navGroups: NavGroup[] = [
   {
     title: "Observer",
     items: [
-      { title: "Input Observasi", href: "/observer/input", icon: "rate_review" },
+      { title: "Input Observasi", href: "/observer", icon: "rate_review" },
     ],
   },
 ];
@@ -81,7 +82,8 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const userRoles = user?.roles || [];
   const isSuperAdmin = userRoles.some((r: any) => r.role === "super_admin");
   const isAdminUnit = userRoles.some((r: any) => r.role === "admin_unit");
-  const isParent = !isSuperAdmin && !isAdminUnit && status === "authenticated";
+  const isObserver = userRoles.some((r: any) => r.role === "observer");
+  const isParent = !isSuperAdmin && !isAdminUnit && !isObserver && status === "authenticated";
 
   const filteredGroups = navGroups.map(group => {
     // Hide auth links if logged in
@@ -97,7 +99,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
     if (group.title === "Super Admin" && !isSuperAdmin) return false;
     if (group.title === "Admin Unit (PPDB)" && !isAdminUnit) return false;
     if (group.title === "Portal Orang Tua" && !isParent) return false;
-    if (group.title === "Observer") return false; // Hide observer for now
+    if (group.title === "Observer" && !isObserver) return false;
     return true;
   });
 

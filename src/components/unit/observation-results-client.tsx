@@ -6,32 +6,32 @@ import { batchAcceptStudents, batchRejectStudents } from "@/actions/acceptance";
 export function ObservationResultsClient({ results }: { results: any[] }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState("Tidak memenuhi standar kelulusan observasi");
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
   };
 
   const handleBatchAccept = async () => {
-    if (selectedIds.length === 0) return alert("Pilih minimal satu siswa");
-    if (confirm(`Terima ${selectedIds.length} siswa ini?`)) {
-      setLoading(true);
-      const res = await batchAcceptStudents(selectedIds);
-      if (!res.success) alert(res.error);
-      setLoading(false);
-      setSelectedIds([]);
-    }
+    setLoading(true);
+    const res = await batchAcceptStudents(selectedIds);
+    if (!res.success) alert(res.error);
+    setLoading(false);
+    setSelectedIds([]);
+    setShowAcceptModal(false);
   };
 
   const handleBatchReject = async () => {
-    if (selectedIds.length === 0) return alert("Pilih minimal satu siswa");
-    const reason = prompt("Alasan penolakan:", "Tidak memenuhi standar kelulusan observasi");
-    if (reason !== null) {
-      setLoading(true);
-      const res = await batchRejectStudents(selectedIds, reason);
-      if (!res.success) alert(res.error);
-      setLoading(false);
-      setSelectedIds([]);
-    }
+    if (!rejectReason.trim()) return alert("Alasan tidak boleh kosong");
+    setLoading(true);
+    const res = await batchRejectStudents(selectedIds, rejectReason);
+    if (!res.success) alert(res.error);
+    setLoading(false);
+    setSelectedIds([]);
+    setShowRejectModal(false);
+    setRejectReason("Tidak memenuhi standar kelulusan observasi");
   };
 
   return (
@@ -41,10 +41,10 @@ export function ObservationResultsClient({ results }: { results: any[] }) {
           {selectedIds.length} baris terpilih
         </div>
         <div className="flex gap-3">
-          <button onClick={handleBatchReject} disabled={loading || selectedIds.length === 0} className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50 border border-red-200">
+          <button onClick={() => { if (selectedIds.length === 0) alert("Pilih minimal satu siswa"); else setShowRejectModal(true); }} disabled={loading || selectedIds.length === 0} className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50 border border-red-200">
             Tolak Terpilih
           </button>
-          <button onClick={handleBatchAccept} disabled={loading || selectedIds.length === 0} className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50">
+          <button onClick={() => { if (selectedIds.length === 0) alert("Pilih minimal satu siswa"); else setShowAcceptModal(true); }} disabled={loading || selectedIds.length === 0} className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50">
             Terima Terpilih
           </button>
         </div>
@@ -102,6 +102,75 @@ export function ObservationResultsClient({ results }: { results: any[] }) {
           </tbody>
         </table>
       </div>
+
+      {/* Accept Modal */}
+      {showAcceptModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 text-center">
+            <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-rounded text-3xl">done_all</span>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Terima Calon Siswa?</h3>
+            <p className="text-gray-500 text-sm mb-6">
+              Anda akan menerima <strong>{selectedIds.length}</strong> calon siswa. Langkah ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button 
+                onClick={() => setShowAcceptModal(false)}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={handleBatchAccept}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 transition-colors flex items-center"
+              >
+                {loading ? "Memproses..." : "Ya, Terima Siswa"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 text-left">
+            <div className="flex items-center gap-3 mb-4 text-red-600">
+              <span className="material-symbols-rounded text-3xl">cancel</span>
+              <h3 className="text-lg font-bold">Tolak Calon Siswa</h3>
+            </div>
+            <p className="text-gray-500 text-sm mb-4">
+              Anda akan menolak <strong>{selectedIds.length}</strong> calon siswa. Tuliskan alasan penolakan di bawah ini:
+            </p>
+            <textarea
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none mb-6 resize-none"
+              rows={3}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Masukkan alasan penolakan..."
+            ></textarea>
+            <div className="flex gap-3 justify-end">
+              <button 
+                onClick={() => setShowRejectModal(false)}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={handleBatchReject}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center"
+              >
+                {loading ? "Memproses..." : "Tolak Siswa"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -25,6 +25,7 @@ export async function getActiveRegistration() {
       studentData: true,
       parentData: true,
       payment: true,
+      observationBooking: { include: { schedule: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -150,7 +151,7 @@ export async function submitStudentFormAction(registrationId: string, data: unkn
     include: { studentData: true, parentData: true },
   });
 
-  if (!reg || reg.status !== RegistrationStatus.form_filling) {
+  if (!reg || (reg.status !== RegistrationStatus.form_filling && reg.status !== RegistrationStatus.payment_verified)) {
     throw new Error("Tidak dapat mengisi form saat ini.");
   }
 
@@ -161,6 +162,13 @@ export async function submitStudentFormAction(registrationId: string, data: unkn
     update: { ...parsed, birthDate: new Date(parsed.birthDate) },
     create: { ...parsed, birthDate: new Date(parsed.birthDate), registrationId },
   });
+
+  if (reg.status === RegistrationStatus.payment_verified) {
+    await prisma.registration.update({
+      where: { id: registrationId },
+      data: { status: RegistrationStatus.form_filling },
+    });
+  }
 
   revalidatePath("/parent/form-student");
 }

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getCurrentUser } from "@/actions/user";
 
 interface AuthContextType {
   user: any | null;
@@ -14,27 +15,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [status, setStatus] = useState<"loading" | "authenticated" | "unauthenticated">("loading");
 
-  useEffect(() => {
-    const supabase = createClient();
-    
-    // Initial fetch
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      // In a real app we'd fetch Prisma user roles here via a separate API endpoint, 
-      // but for this UI test we'll mock roles based on user existence
-      if (user) {
-        setUser({ ...user, name: user.user_metadata?.full_name || user.email?.split("@")[0], roles: [{ role: "orang_tua" }] });
+  const fetchUser = async () => {
+    try {
+      const userData = await getCurrentUser();
+      if (userData) {
+        setUser(userData);
         setStatus("authenticated");
       } else {
         setUser(null);
         setStatus("unauthenticated");
       }
-    });
+    } catch (error) {
+      console.error("Failed to fetch user roles:", error);
+      setUser(null);
+      setStatus("unauthenticated");
+    }
+  };
+
+  useEffect(() => {
+    const supabase = createClient();
+    
+    // Initial fetch
+    fetchUser();
 
     // Listen to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        setUser({ ...session.user, name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0], roles: [{ role: "orang_tua" }] });
-        setStatus("authenticated");
+        // Refetch user to get proper roles from DB
+        fetchUser();
       } else {
         setUser(null);
         setStatus("unauthenticated");

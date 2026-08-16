@@ -1,8 +1,11 @@
+import { requireRole } from "@/lib/auth-guard";
+import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ObserverInputClient } from "@/components/observer/observer-input-client";
 
 export default async function ObserverDashboard() {
-  const observerId = "dummy-observer-id"; // Placeholder auth
+  const user = await requireRole([UserRole.observer]);
+  const observerId = user.id;
 
   // Get all bookings that need to be observed today or past but status is still scheduled
   const pendingBookings = await prisma.observationBooking.findMany({
@@ -16,7 +19,7 @@ export default async function ObserverDashboard() {
       registration: {
         include: {
           studentData: true,
-          unit: true
+          academicYear: { include: { unit: true } }
         }
       },
       schedule: true
@@ -32,7 +35,7 @@ export default async function ObserverDashboard() {
     id: b.id, // Booking ID
     registrationNumber: b.registration.registrationNumber,
     studentName: b.registration.studentData?.fullName || "-",
-    unitName: b.registration.unit?.name || "-",
+    unitName: b.registration.academicYear?.unit?.name || "-",
     date: b.schedule.date,
     time: `${b.schedule.startTime} - ${b.schedule.endTime}`,
   }));
