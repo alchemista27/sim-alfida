@@ -3,33 +3,40 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
-// Catatan: Jika ini dipakai bersama Supabase Auth, maka idealnya kita memanggil Supabase Admin API 
-// untuk mendaftarkan akun auth (auth.users) sekaligus menyimpan ke tabel lokal.
-// Namun karena struktur SSO, kita asumsikan integrasi via Prisma terlebih dahulu.
+import { UserRole } from "@prisma/client";
 
-export async function batchImportUsers(csvText: string) {
+function mapRole(roleStr: string): UserRole {
+  const r = roleStr.toLowerCase();
+  if (r.includes('super')) return UserRole.super_admin;
+  if (r.includes('admin') || r.includes('tu') || r.includes('staf')) return UserRole.admin_unit;
+  if (r.includes('guru') || r.includes('pengajar')) return UserRole.guru;
+  if (r.includes('karyawan')) return UserRole.karyawan;
+  if (r.includes('ppdb')) return UserRole.tim_ppdb;
+  if (r.includes('observer')) return UserRole.observer;
+  return UserRole.orang_tua; // default fallback
+}
+
+export async function batchImportUsers(usersData: any[]) {
   try {
-    const lines = csvText.split('\n').filter(l => l.trim() !== '');
-    if (lines.length < 2) return { success: false, error: "File CSV kosong atau tidak memiliki data." };
+    if (!usersData || usersData.length === 0) {
+      return { success: false, error: "Data kosong." };
+    }
 
-    const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
-    
     let imported = 0;
 
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim());
-      const row: any = {};
-      headers.forEach((h, idx) => {
-        row[h] = values[idx] || null;
-      });
-
+    for (const row of usersData) {
       // Abaikan jika tidak ada email
       if (!row.email) continue;
 
       const hashedPassword = await bcrypt.hash(row.password || 'password123', 10);
-      const groups = row.groups ? row.groups.split(';').map((g: string) => g.trim()) : [];
+      const groups = row.groups ? String(row.groups).split(';').map((g: string) => g.trim()) : [];
       
-      const fullName = row.first_name || row.last_name ? `${row.first_name || ''} ${row.last_name || ''}`.trim() : row.username || 'User';
+      const fullName = row.first_name || row.last_name 
+        ? `${row.first_name || ''} ${row.last_name || ''}`.trim() 
+        : row.username || 'Pegawai';
+
+      const roleStrings = row.roles ? String(row.roles).split(';') : ['karyawan'];
+      const rolesToAssign = [...new Set(roleStrings.map(r => mapRole(r.trim())))];
 
       await prisma.user.upsert({
         where: { email: row.email },
@@ -41,6 +48,7 @@ export async function batchImportUsers(csvText: string) {
           groups: groups,
         },
         create: {
+          id: row.id || undefined, // Gunakan UUID dari file jika ada
           email: row.email,
           username: row.username,
           firstName: row.first_name,
@@ -48,6 +56,9 @@ export async function batchImportUsers(csvText: string) {
           fullName: fullName,
           groups: groups,
           passwordHash: hashedPassword,
+          roles: {
+            create: rolesToAssign.map(r => ({ role: r }))
+          }
         }
       });
       imported++;

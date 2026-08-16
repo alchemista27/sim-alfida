@@ -183,8 +183,199 @@
 
 ## Phase 2 — Modul Akademik (Sprint 9 - 21)
 
-Detail Backlog untuk Sprint 9 hingga 21 akan diperinci lebih lanjut pada saat Perencanaan Sprint (Sprint Planning) Phase 2. 
 Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, ATS, AAS), ekstrakurikuler, absensi, pembayaran SPP bulanan, dan rapor LHBS.
+
+---
+
+## Sprint 9 — Skema Database & Daftar Ulang Siswa
+**Durasi:** 2 minggu
+**Goal:** Transisi siswa dari PPDB ke Modul Akademik dan persiapan fondasi data.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S9-01 | Skema Database Akademik | Pembuatan model Prisma (Subject, Grade, Attendance, dll) | 8 jam |
+| S9-02 | Formulir Daftar Ulang | Halaman portal ortu untuk daftar ulang tahun ajaran baru | 6 jam |
+| S9-03 | Server Action Daftar Ulang | Pemrosesan `StudentEnrollment` ke tahun ajaran baru | 4 jam |
+| S9-04 | Batch Upload CSV | Fitur upload data SSO Pegawai via Admin | 6 jam |
+
+### Definition of Done
+- [x] Skema database berhasil di-push ke Supabase
+- [x] Orang tua dapat melakukan konfirmasi daftar ulang siswa
+- [x] Admin dapat mengunggah CSV data pegawai (SSO) secara batch
+- [x] Tervalidasi TypeScript & bebas error
+
+---
+
+## Sprint 10 — Manajemen Mapel & Penugasan Guru
+**Durasi:** 2 minggu
+**Goal:** Kesiapan struktur mata pelajaran dan siapa pengajarnya per kelas.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S10-01 | CRUD Mata Pelajaran | Form untuk kode, nama, level mata pelajaran di Unit Dashboard | 6 jam |
+| S10-02 | Penugasan Wali Kelas | UI & logika penugasan (assign) guru sebagai wali kelas | 4 jam |
+| S10-03 | Penugasan Guru Mapel | UI & logika menugaskan guru mapel ke kelas tertentu | 6 jam |
+| S10-04 | Validasi & RBAC Akademik| Zod validator & otorisasi khusus UserRole.admin_unit | 4 jam |
+
+### Definition of Done
+- [x] Admin unit dapat melihat, menambah, mengubah mapel
+- [x] Admin unit dapat menugaskan guru ke suatu kelas & mapel
+- [x] Admin unit dapat mengatur wali kelas per kelas
+- [x] Type-checking Typescript sukses
+
+---
+
+## Sprint 11 — Input Nilai & Absensi
+**Durasi:** 2 minggu
+**Goal:** Guru mapel dapat mengelola data presensi dan capaian nilai siswa.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S11-01 | Input Absensi Harian | UI dan fungsi guru mencatat kehadiran siswa per pertemuan | 6 jam |
+| S11-02 | Input Nilai Harian & Ujian | UI dan fungsi batch guru menyimpan nilai (UH, Kuis) | 6 jam |
+| S11-03 | Input Nilai ATS & AAS | UI input Asesmen Tengah & Akhir Semester | 4 jam |
+| S11-04 | Validasi Transaksional | Proteksi upsert batch nilai dengan Prisma Transaction | 4 jam |
+
+### Definition of Done
+- [x] Guru mapel dapat mencatat absensi siswa (Hadir, Sakit, Izin, Alpa) per kelas
+- [x] Guru mapel dapat menyimpan nilai akademik siswa per komponen secara batch
+- [x] Data konsisten tersimpan ke tabel `grades` dan `attendances`
+- [x] Validasi Zod dan Type-checking Typescript sukses
+
+---
+
+---
+
+## Sprint 12 — Jurnal Pembelajaran & Perencanaan (Prota/Promes/RPP)
+**Durasi:** 2 minggu
+**Goal:** Guru mapel dapat menyusun rencana ajar dan mengisi jurnal mengajar harian, serta mendownloadnya dalam bentuk PDF.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S12-01 | Jurnal Harian (AKD-14) | Guru mencatat materi diajarkan, metode, dan refleksi per pertemuan | 6 jam |
+| S12-02 | Input Perencanaan (AKD-15,16,17) | Form untuk guru menyusun Prota, Promes, dan RPP | 8 jam |
+| S12-03 | PDF Perencanaan (AKD-18) | Generate dokumen ber-kop surat untuk Prota, Promes, dan RPP | 6 jam |
+
+---
+
+## Sprint 13 — Jadwal Pelajaran
+**Durasi:** 2 minggu
+**Goal:** Wali Kelas atau Admin Unit menyusun jadwal kelas harian.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S13-01 | Input Jadwal (AKD-19) | UI interaktif penyusunan jadwal mapel per hari per jam | 8 jam |
+| S13-02 | Tampilan Jadwal Ortu (AKD-20) | Menampilkan jadwal kelas di dashboard orang tua | 4 jam |
+| S13-03 | Cetak Jadwal PDF (AKD-21) | Download jadwal pelajaran ber-kop surat resmi unit | 4 jam |
+
+---
+
+## Sprint 14 — Manajemen Ekstrakurikuler (Setup)
+**Durasi:** 2 minggu
+**Goal:** Admin Unit membuat program ekstrakurikuler dan orang tua dapat mendaftarkan siswanya.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S14-01 | CRUD Ekskul & Pembina (AKD-22,23) | Admin menambah ekskul dan menugaskan pembina | 6 jam |
+| S14-02 | Pendaftaran Siswa (AKD-27) | Orang tua mendaftarkan anak ke ekskul (jika belum wajib) | 4 jam |
+| S14-03 | Input Jadwal & Jurnal (AKD-24,25) | Pembina ekskul mengatur jadwal kegiatan dan jurnal pertemuan | 6 jam |
+
+---
+
+## Sprint 15 — Ekstrakurikuler (Nilai & Output)
+**Durasi:** 2 minggu
+**Goal:** Penyelesaian modul ekskul termasuk input nilai dan akses jadwal oleh ortu.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S15-01 | Input Nilai Ekskul (AKD-26) | Pembina menginput nilai/predikat (A/B/C/dll) | 6 jam |
+| S15-02 | Tampilan Jadwal Ekskul Ortu (AKD-28) | Orang tua melihat jadwal ekskul anak | 4 jam |
+| S15-03 | Cetak Jadwal PDF (AKD-29) | Download jadwal ekstrakurikuler dalam bentuk PDF ber-kop surat | 4 jam |
+
+---
+
+## Sprint 16 — Pembayaran SPP
+**Durasi:** 2 minggu
+**Goal:** Manajemen tagihan bulanan SPP yang transparan bagi sekolah dan orang tua.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S16-01 | Tampilan Tagihan (AKD-34) | Orang tua melihat tagihan berjalan per bulan | 6 jam |
+| S16-02 | Upload & Verifikasi Bukti (AKD-35,36) | Ortu unggah bukti transfer, Admin Unit memverifikasi (manual) | 8 jam |
+| S16-03 | Riwayat Transaksi (AKD-37) | Orang tua dan Admin melihat seluruh riwayat SPP | 4 jam |
+
+---
+
+## Sprint 17 — LHBS Tengah Semester & Kalkulasi Akhir
+**Durasi:** 2 minggu
+**Goal:** Persiapan rapor dan agregasi kalkulasi LHBS.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S17-01 | Kalkulasi Nilai (AKD-12) | Sistem otomatis rata-rata berbobot (harian, ujian, ATS, AAS) | 6 jam |
+| S17-02 | Generate LHBS Tengah Smt (AKD-30) | Wali kelas generate rapor ATS (menggabungkan harian & ATS) | 6 jam |
+| S17-03 | Tampilan LHBS Digital (AKD-32 pt 1)| Orang tua melihat rapor tengah semester di portal | 4 jam |
+
+---
+
+## Sprint 18 — LHBS Akhir Semester
+**Durasi:** 2 minggu
+**Goal:** Wali kelas dapat mengunci dan mencetak PDF Rapor LHBS Akhir Semester lengkap.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S18-01 | Generate LHBS Akhir Smt (AKD-31) | Menggabungkan seluruh nilai mapel dan ekskul | 6 jam |
+| S18-02 | Cetak LHBS PDF (AKD-33) | Generate PDF rapor ber-kop resmi yayasan dan unit (react-pdf) | 8 jam |
+| S18-03 | Tampilan LHBS Digital (AKD-32 pt 2)| Orang tua mendownload PDF Rapor di portal | 4 jam |
+
+---
+
+## Sprint 19 — Keputusan Kenaikan Kelas
+**Durasi:** 2 minggu
+**Goal:** Pemrosesan akhir tahun ajaran (naik/tinggal kelas).
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S19-01 | Tentukan Kenaikan (AKD-39) | Wali kelas menandai siswa yang naik atau tinggal kelas | 6 jam |
+| S19-02 | Tampilan Keputusan (AKD-40) | Orang tua dapat melihat status kenaikan anak | 4 jam |
+| S19-03 | Cetak SK PDF (AKD-41) | Download Surat Keputusan kenaikan kelas ber-kop surat | 4 jam |
+
+---
+
+## Sprint 20 — Finalisasi Portal Orang Tua
+**Durasi:** 2 minggu
+**Goal:** Penggabungan semua fitur di dashboard orang tua agar intuitif dan komprehensif.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S20-01 | Dashboard Integrasi | Menyatukan navigasi nilai, absen, jadwal, ekskul, dan SPP bagi ortu | 8 jam |
+| S20-02 | UI Polish Portal Ortu | Memperbaiki UX/UI Mobile-responsive untuk diakses HP | 6 jam |
+| S20-03 | Edge Cases Dashboard | Penanganan state ketika data belum siap atau tahun ajaran belum mulai | 4 jam |
+
+---
+
+## Sprint 21 — QA, Testing, & Deployment Modul Akademik
+**Durasi:** 2 minggu
+**Goal:** Rilis produksi stabil untuk Modul Akademik.
+
+### Backlog
+| ID | Task | Detail | Estimasi |
+|----|------|--------|----------|
+| S21-01 | E2E Testing Akademik | Playwright test untuk flow Modul Akademik utama | 8 jam |
+| S21-02 | Performance & Security Audit| Menguji kebocoran akses data antar unit pendidikan (RBAC Test) | 6 jam |
+| S21-03 | Deployment | Migrasi DB, Vercel update, UAT final Modul Akademik dengan Stakeholder | 6 jam |
 
 ---
 

@@ -7,7 +7,6 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
 }
 
 // ── Enums ──
@@ -17,6 +16,7 @@ enum UnitLevel {
   smp
   sma
   pesantren
+
   @@schema("sim")
 }
 
@@ -28,6 +28,7 @@ enum UserRole {
   orang_tua
   observer
   tim_ppdb
+
   @@schema("sim")
 }
 
@@ -45,6 +46,7 @@ enum RegistrationStatus {
   accepted
   rejected
   enrolled
+
   @@schema("sim")
 }
 
@@ -53,12 +55,14 @@ enum PaymentStatus {
   uploaded
   verified
   rejected
+
   @@schema("sim")
 }
 
 enum Gender {
   male
   female
+
   @@schema("sim")
 }
 
@@ -66,6 +70,7 @@ enum ParentType {
   father
   mother
   guardian
+
   @@schema("sim")
 }
 
@@ -77,6 +82,102 @@ enum DocumentType {
   father_id
   mother_id
   medical_result
+
+  @@schema("sim")
+}
+
+// ── Tambahan Enums Akademik ──
+enum EnrollmentStatus {
+  active
+  re_enrolled
+  graduated
+  dropped
+
+  @@schema("sim")
+}
+
+enum EnrollmentType {
+  new_ppdb
+  re_enrollment
+
+  @@schema("sim")
+}
+
+enum SubjectLevel {
+  level_1  @map("1")
+  level_2  @map("2")
+  level_3  @map("3")
+  level_4  @map("4")
+  level_5  @map("5")
+  level_6  @map("6")
+  level_7  @map("7")
+  level_8  @map("8")
+  level_9  @map("9")
+  level_10 @map("10")
+  level_11 @map("11")
+  level_12 @map("12")
+  all
+
+  @@schema("sim")
+}
+
+enum GradeType {
+  daily
+  exam
+  ats
+  aas
+
+  @@schema("sim")
+}
+
+enum AttendanceStatus {
+  present
+  sick
+  permitted
+  absent
+
+  @@schema("sim")
+}
+
+enum LessonPlanType {
+  prota
+  promes
+  rpp
+
+  @@schema("sim")
+}
+
+enum DayOfWeek {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+
+  @@schema("sim")
+}
+
+enum SppStatus {
+  unpaid
+  uploaded
+  verified
+  rejected
+
+  @@schema("sim")
+}
+
+enum SemesterType {
+  mid
+  final
+
+  @@schema("sim")
+}
+
+enum PromotionStatus {
+  promoted
+  retained
+
   @@schema("sim")
 }
 
@@ -104,10 +205,12 @@ model Unit {
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
-  unitSettings        UnitSettings?
-  userRoles           UserRoleAssignment[]
-  academicYears       AcademicYear[]
-  classes             Class[]
+  unitSettings     UnitSettings?
+  userRoles        UserRoleAssignment[]
+  academicYears    AcademicYear[]
+  classes          Class[]
+  subjects         Subject[]
+  extracurriculars Extracurricular[]
 
   @@map("units")
   @@schema("sim")
@@ -138,14 +241,25 @@ model User {
   email        String    @unique @db.VarChar(255)
   phone        String?   @db.VarChar(30)
   passwordHash String    @map("password_hash") @db.VarChar(255)
-  groups       String[]  // Fitur PostgreSQL: Array of strings
+  groups       String[] // Fitur PostgreSQL: Array of strings
   isActive     Boolean   @default(true) @map("is_active")
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
-  roles         UserRoleAssignment[]
-  sessions      Session[]
-  registrations Registration[]
+  roles               UserRoleAssignment[]
+  sessions            Session[]
+  registrations       Registration[]
+  enrollmentsParent   StudentEnrollment[]      @relation("EnrollmentParent")
+  teacherAssignments  TeacherAssignment[]      @relation("TeacherAssignments")
+  homeroomAssignments HomeroomAssignment[]     @relation("HomeroomAssignments")
+  gradeTeacher        Grade[]                  @relation("GradeTeacher")
+  attendanceTeacher   Attendance[]             @relation("AttendanceTeacher")
+  teachingJournals    TeachingJournal[]        @relation("TeachingJournals")
+  lessonPlans         LessonPlan[]             @relation("LessonPlans")
+  classSchedules      ClassSchedule[]          @relation("ClassSchedules")
+  extraCoaches        ExtracurricularCoach[]   @relation("ExtraCoaches")
+  extraJournals       ExtracurricularJournal[] @relation("ExtraJournals")
+  promotionDecisions  PromotionDecision[]      @relation("PromotionDecider")
 
   @@map("users")
   @@schema("shared")
@@ -191,9 +305,17 @@ model AcademicYear {
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt  DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
-  unit                 Unit                   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit                 Unit                    @relation(fields: [unitId], references: [id], onDelete: Cascade)
   registrations        Registration[]
   observationSchedules ObservationSchedule[]
+  studentEnrollments   StudentEnrollment[]
+  teacherAssignments   TeacherAssignment[]
+  homeroomAssignments  HomeroomAssignment[]    @relation("HomeroomAssignments")
+  grades               Grade[]
+  lessonPlans          LessonPlan[]
+  extraCoaches         ExtracurricularCoach[]
+  extraMemberships     ExtracurricularMember[]
+  lhbsReports          LhbsReport[]
 
   @@unique([unitId, name])
   @@map("academic_years")
@@ -219,6 +341,7 @@ model Registration {
   medicalReferral    MedicalReferral?
   observationBooking ObservationBooking?
   classAssignment    ClassAssignment?
+  studentEnrollments StudentEnrollment[]
 
   @@map("registrations")
   @@schema("sim")
@@ -260,7 +383,8 @@ model StudentData {
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
-  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  registration       Registration        @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  studentEnrollments StudentEnrollment[]
 
   @@map("student_data")
   @@schema("sim")
@@ -337,10 +461,10 @@ model ObservationSchedule {
 }
 
 model ObservationBooking {
-  id                     String   @id @default(uuid()) @db.Uuid
+  id                    String   @id @default(uuid()) @db.Uuid
   registrationId        String   @unique @map("registration_id") @db.Uuid
   observationScheduleId String   @map("observation_schedule_id") @db.Uuid
-  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   registration Registration        @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   schedule     ObservationSchedule @relation(fields: [observationScheduleId], references: [id], onDelete: Cascade)
@@ -376,8 +500,13 @@ model Class {
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
-  unit        Unit              @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  assignments ClassAssignment[]
+  unit                Unit                 @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  assignments         ClassAssignment[]
+  homeroomAssignments HomeroomAssignment[] @relation("HomeroomAssignments")
+  studentEnrollments  StudentEnrollment[]
+  teacherAssignments  TeacherAssignment[]
+  teachingJournals    TeachingJournal[]
+  classSchedules      ClassSchedule[]
 
   @@unique([unitId, academicYearId, name])
   @@map("classes")
@@ -394,5 +523,349 @@ model ClassAssignment {
   class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@map("class_assignments")
+  @@schema("sim")
+}
+
+// ── Models Akademik ──
+
+model StudentEnrollment {
+  id             String           @id @default(uuid()) @db.Uuid
+  registrationId String?          @map("registration_id") @db.Uuid
+  classId        String           @map("class_id") @db.Uuid
+  academicYearId String           @map("academic_year_id") @db.Uuid
+  studentDataId  String           @map("student_data_id") @db.Uuid
+  parentId       String           @map("parent_id") @db.Uuid
+  status         EnrollmentStatus @default(active)
+  enrollmentType EnrollmentType   @map("enrollment_type")
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime?        @updatedAt @map("updated_at") @db.Timestamptz
+
+  registration Registration? @relation(fields: [registrationId], references: [id], onDelete: SetNull)
+  class        Class         @relation(fields: [classId], references: [id], onDelete: Restrict)
+  academicYear AcademicYear  @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  studentData  StudentData   @relation(fields: [studentDataId], references: [id], onDelete: Cascade)
+  parent       User          @relation("EnrollmentParent", fields: [parentId], references: [id], onDelete: Restrict)
+
+  grades            Grade[]
+  attendances       Attendance[]
+  extraMemberships  ExtracurricularMember[]
+  extraGrades       ExtracurricularGrade[]
+  sppInvoices       SppInvoice[]
+  lhbsReports       LhbsReport[]
+  promotionDecision PromotionDecision?
+
+  @@unique([studentDataId, academicYearId])
+  @@map("student_enrollments")
+  @@schema("sim")
+}
+
+model Subject {
+  id        String       @id @default(uuid()) @db.Uuid
+  unitId    String       @map("unit_id") @db.Uuid
+  code      String       @db.VarChar(20)
+  name      String       @db.VarChar(100)
+  level     SubjectLevel
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime?    @updatedAt @map("updated_at") @db.Timestamptz
+
+  unit               Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  teacherAssignments TeacherAssignment[]
+  grades             Grade[]
+  attendances        Attendance[]
+  teachingJournals   TeachingJournal[]
+  lessonPlans        LessonPlan[]
+  classSchedules     ClassSchedule[]
+
+  @@unique([unitId, code])
+  @@map("subjects")
+  @@schema("sim")
+}
+
+model TeacherAssignment {
+  id             String   @id @default(uuid()) @db.Uuid
+  subjectId      String   @map("subject_id") @db.Uuid
+  teacherId      String   @map("teacher_id") @db.Uuid
+  classId        String   @map("class_id") @db.Uuid
+  academicYearId String   @map("academic_year_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  subject      Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher      User         @relation("TeacherAssignments", fields: [teacherId], references: [id], onDelete: Cascade)
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@unique([subjectId, teacherId, classId, academicYearId])
+  @@map("teacher_assignments")
+  @@schema("sim")
+}
+
+model HomeroomAssignment {
+  id             String   @id @default(uuid()) @db.Uuid
+  teacherId      String   @map("teacher_id") @db.Uuid
+  classId        String   @map("class_id") @db.Uuid
+  academicYearId String   @map("academic_year_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  teacher      User         @relation("HomeroomAssignments", fields: [teacherId], references: [id], onDelete: Cascade)
+  class        Class        @relation("HomeroomAssignments", fields: [classId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation("HomeroomAssignments", fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, academicYearId])
+  @@map("homeroom_assignments")
+  @@schema("sim")
+}
+
+model Grade {
+  id             String    @id @default(uuid()) @db.Uuid
+  enrollmentId   String    @map("enrollment_id") @db.Uuid
+  subjectId      String    @map("subject_id") @db.Uuid
+  teacherId      String    @map("teacher_id") @db.Uuid
+  academicYearId String    @map("academic_year_id") @db.Uuid
+  type           GradeType
+  label          String    @db.VarChar(50)
+  score          Decimal   @db.Decimal(5, 2)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  enrollment   StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  subject      Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher      User              @relation("GradeTeacher", fields: [teacherId], references: [id], onDelete: Restrict)
+  academicYear AcademicYear      @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+
+  @@map("grades")
+  @@schema("sim")
+}
+
+model Attendance {
+  id           String           @id @default(uuid()) @db.Uuid
+  enrollmentId String           @map("enrollment_id") @db.Uuid
+  subjectId    String           @map("subject_id") @db.Uuid
+  teacherId    String           @map("teacher_id") @db.Uuid
+  date         DateTime         @db.Date
+  status       AttendanceStatus
+  notes        String?
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  enrollment StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  subject    Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher    User              @relation("AttendanceTeacher", fields: [teacherId], references: [id], onDelete: Restrict)
+
+  @@unique([enrollmentId, subjectId, date])
+  @@map("attendances")
+  @@schema("sim")
+}
+
+model TeachingJournal {
+  id         String   @id @default(uuid()) @db.Uuid
+  subjectId  String   @map("subject_id") @db.Uuid
+  teacherId  String   @map("teacher_id") @db.Uuid
+  classId    String   @map("class_id") @db.Uuid
+  date       DateTime @db.Date
+  material   String
+  method     String
+  reflection String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher User    @relation("TeachingJournals", fields: [teacherId], references: [id], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@map("teaching_journals")
+  @@schema("sim")
+}
+
+model LessonPlan {
+  id             String         @id @default(uuid()) @db.Uuid
+  subjectId      String         @map("subject_id") @db.Uuid
+  teacherId      String         @map("teacher_id") @db.Uuid
+  academicYearId String         @map("academic_year_id") @db.Uuid
+  type           LessonPlanType
+  title          String         @db.VarChar(255)
+  content        String
+  pdfUrl         String?        @map("pdf_url")
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime?      @updatedAt @map("updated_at") @db.Timestamptz
+
+  subject      Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher      User         @relation("LessonPlans", fields: [teacherId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_plans")
+  @@schema("sim")
+}
+
+model ClassSchedule {
+  id        String    @id @default(uuid()) @db.Uuid
+  classId   String    @map("class_id") @db.Uuid
+  subjectId String    @map("subject_id") @db.Uuid
+  teacherId String    @map("teacher_id") @db.Uuid
+  day       DayOfWeek
+  startTime String    @map("start_time") @db.VarChar(10) // HH:mm
+  endTime   String    @map("end_time") @db.VarChar(10) // HH:mm
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher User    @relation("ClassSchedules", fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("class_schedules")
+  @@schema("sim")
+}
+
+model Extracurricular {
+  id          String   @id @default(uuid()) @db.Uuid
+  unitId      String   @map("unit_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  unit      Unit                      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  coaches   ExtracurricularCoach[]
+  schedules ExtracurricularSchedule[]
+  members   ExtracurricularMember[]
+  journals  ExtracurricularJournal[]
+
+  @@unique([unitId, name])
+  @@map("extracurriculars")
+  @@schema("sim")
+}
+
+model ExtracurricularCoach {
+  id             String   @id @default(uuid()) @db.Uuid
+  extraId        String   @map("extra_id") @db.Uuid
+  coachId        String   @map("coach_id") @db.Uuid
+  academicYearId String   @map("academic_year_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  extracurricular Extracurricular @relation(fields: [extraId], references: [id], onDelete: Cascade)
+  coach           User            @relation("ExtraCoaches", fields: [coachId], references: [id], onDelete: Cascade)
+  academicYear    AcademicYear    @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@unique([extraId, coachId, academicYearId])
+  @@map("extracurricular_coaches")
+  @@schema("sim")
+}
+
+model ExtracurricularSchedule {
+  id        String    @id @default(uuid()) @db.Uuid
+  extraId   String    @map("extra_id") @db.Uuid
+  day       DayOfWeek
+  startTime String    @map("start_time") @db.VarChar(10)
+  endTime   String    @map("end_time") @db.VarChar(10)
+  location  String?   @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  extracurricular Extracurricular @relation(fields: [extraId], references: [id], onDelete: Cascade)
+
+  @@map("extracurricular_schedules")
+  @@schema("sim")
+}
+
+model ExtracurricularMember {
+  id             String   @id @default(uuid()) @db.Uuid
+  extraId        String   @map("extra_id") @db.Uuid
+  enrollmentId   String   @map("enrollment_id") @db.Uuid
+  academicYearId String   @map("academic_year_id") @db.Uuid
+  joinedAt       DateTime @default(now()) @map("joined_at") @db.Timestamptz
+
+  extracurricular Extracurricular        @relation(fields: [extraId], references: [id], onDelete: Cascade)
+  enrollment      StudentEnrollment      @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  academicYear    AcademicYear           @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  grades          ExtracurricularGrade[]
+
+  @@unique([extraId, enrollmentId, academicYearId])
+  @@map("extracurricular_members")
+  @@schema("sim")
+}
+
+model ExtracurricularJournal {
+  id         String   @id @default(uuid()) @db.Uuid
+  extraId    String   @map("extra_id") @db.Uuid
+  coachId    String   @map("coach_id") @db.Uuid
+  date       DateTime @db.Date
+  activity   String
+  attendance Int      @default(0)
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  extracurricular Extracurricular @relation(fields: [extraId], references: [id], onDelete: Cascade)
+  coach           User            @relation("ExtraJournals", fields: [coachId], references: [id], onDelete: Restrict)
+
+  @@map("extracurricular_journals")
+  @@schema("sim")
+}
+
+model ExtracurricularGrade {
+  id           String       @id @default(uuid()) @db.Uuid
+  memberId     String       @map("member_id") @db.Uuid
+  enrollmentId String       @map("enrollment_id") @db.Uuid
+  semester     SemesterType
+  score        String       @db.VarChar(2) // A, B, C, D
+  notes        String?
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  member     ExtracurricularMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  enrollment StudentEnrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, semester])
+  @@map("extracurricular_grades")
+  @@schema("sim")
+}
+
+model SppInvoice {
+  id            String    @id @default(uuid()) @db.Uuid
+  enrollmentId  String    @map("enrollment_id") @db.Uuid
+  month         Int       @db.SmallInt // 1-12
+  year          Int       @db.SmallInt
+  amount        Decimal   @db.Decimal(12, 2)
+  status        SppStatus @default(unpaid)
+  proofUrl      String?   @map("proof_url")
+  uploadedAt    DateTime? @map("uploaded_at") @db.Timestamptz
+  verifiedAt    DateTime? @map("verified_at") @db.Timestamptz
+  verifiedBy    String?   @map("verified_by") @db.Uuid
+  rejectionNote String?   @map("rejection_note")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  enrollment StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, month, year])
+  @@map("spp_invoices")
+  @@schema("sim")
+}
+
+model LhbsReport {
+  id             String       @id @default(uuid()) @db.Uuid
+  enrollmentId   String       @map("enrollment_id") @db.Uuid
+  semester       SemesterType
+  academicYearId String       @map("academic_year_id") @db.Uuid
+  pdfUrl         String?      @map("pdf_url")
+  gradesSnapshot Json         @map("grades_snapshot") // Snapshot of all subject grades
+  extraSnapshot  Json?        @map("extra_snapshot") // Snapshot of extracurricular grades
+  attendanceSum  Json         @map("attendance_sum") // Summary of sick, absent, permitted
+  notes          String?
+  issuedAt       DateTime     @default(now()) @map("issued_at") @db.Timestamptz
+
+  enrollment   StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear      @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+
+  @@unique([enrollmentId, semester, academicYearId])
+  @@map("lhbs_reports")
+  @@schema("sim")
+}
+
+model PromotionDecision {
+  id           String          @id @default(uuid()) @db.Uuid
+  enrollmentId String          @unique @map("enrollment_id") @db.Uuid
+  decision     PromotionStatus @map("decision")
+  notes        String?
+  pdfUrl       String?         @map("pdf_url")
+  decidedAt    DateTime        @default(now()) @map("decided_at") @db.Timestamptz
+  decidedBy    String          @map("decided_by") @db.Uuid
+
+  enrollment StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  teacher    User              @relation("PromotionDecider", fields: [decidedBy], references: [id], onDelete: Restrict)
+
+  @@map("promotion_decisions")
   @@schema("sim")
 }

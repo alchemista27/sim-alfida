@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { batchImportUsers } from "@/actions/users";
+import * as XLSX from "xlsx";
 
 export function UserUploadClient() {
   const [loading, setLoading] = useState(false);
@@ -11,8 +12,8 @@ export function UserUploadClient() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-      alert("Harap unggah file berformat CSV.");
+    if (!file.name.endsWith(".csv") && !file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
+      alert("Harap unggah file berformat CSV atau XLSX.");
       return;
     }
 
@@ -25,8 +26,13 @@ export function UserUploadClient() {
     setLoading(true);
     
     try {
-      const text = await file.text();
-      const res = await batchImportUsers(text);
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+      
+      const res = await batchImportUsers(jsonData);
       
       if (res.success) {
         alert(`Berhasil! ${res.count} pengguna telah diimpor/diperbarui.`);
@@ -34,7 +40,8 @@ export function UserUploadClient() {
         alert(`Gagal: ${res.error}`);
       }
     } catch (error) {
-      alert("Terjadi kesalahan saat membaca file CSV.");
+      console.error(error);
+      alert("Terjadi kesalahan saat membaca file.");
     } finally {
       setLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -45,7 +52,7 @@ export function UserUploadClient() {
     <div>
       <input
         type="file"
-        accept=".csv"
+        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
@@ -53,10 +60,10 @@ export function UserUploadClient() {
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={loading}
-        className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50 flex items-center"
+        className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50 flex items-center shadow-sm"
       >
         <span className="material-symbols-rounded mr-2">upload_file</span>
-        {loading ? "Memproses..." : "Upload CSV Pegawai"}
+        {loading ? "Memproses..." : "Upload Pegawai"}
       </button>
     </div>
   );
