@@ -250,8 +250,152 @@ flowchart TD
 
 ### 6.2 Modul Akademik
 
-**Prioritas:** 🟡 Sedang
-**Status:** TBA — Detail akan didefinisikan pada iterasi berikutnya.
+**Prioritas:** 🟡 Sedang (dikembangkan setelah Modul PPDB)
+
+#### 6.2.1 Deskripsi
+
+Modul pengelolaan kegiatan akademik untuk seluruh unit pendidikan di bawah Yayasan Alfida. Modul ini mencakup daftar ulang siswa, manajemen mata pelajaran & ekstrakurikuler, input nilai, absensi, jurnal pembelajaran, pembuatan dokumen perencanaan guru (Prota/Promes/RPP), pembayaran SPP, pencetakan LHBS, serta penentuan kenaikan kelas.
+
+#### 6.2.2 Peran Pengguna Modul Akademik
+
+| Peran                         | Akses di Modul Akademik                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Admin Unit**                | Kelola mata pelajaran, assign guru mapel, assign wali kelas, tambah guru baru, kelola ekskul, kelola kelas.   |
+| **Guru Mata Pelajaran**       | Input nilai (harian, ujian, ATS, AAS), absensi siswa, jurnal pembelajaran harian, Prota/Promes/RPP.          |
+| **Wali Kelas**                | Input jadwal pelajaran, generate LHBS, menentukan kenaikan kelas.                                             |
+| **Pembina Ekstrakurikuler**   | Jurnal kegiatan ekskul, input nilai ekskul, input jadwal ekskul.                                              |
+| **Orang Tua / Wali**          | Daftar ulang, bayar SPP, pilih ekskul, lihat/cetak jadwal & LHBS, lihat keputusan kenaikan kelas.            |
+
+#### 6.2.3 Alur Kerja Utama (User Flow)
+
+```mermaid
+flowchart TD
+    A1["Siswa lulus PPDB / siswa lama"] --> B1["Orang tua melakukan daftar ulang"]
+    B1 --> C1["Admin unit menambah mata pelajaran"]
+    C1 --> D1["Admin unit assign guru mata pelajaran"]
+    D1 --> E1["Admin unit assign wali kelas"]
+    E1 --> F1["Wali kelas / admin unit input jadwal pelajaran"]
+    F1 --> G1["Admin unit menambah ekskul & assign pembina"]
+    G1 --> H1["Pembina input jadwal ekskul"]
+    H1 --> I1["Orang tua pilih ekskul untuk siswa"]
+    I1 --> J1["Orang tua bayar SPP & biaya lain"]
+    J1 --> K1["Guru mapel input nilai & absensi harian"]
+    K1 --> L1["Guru mapel mengisi jurnal pembelajaran"]
+    L1 --> M1["Guru mapel menyusun Prota / Promes / RPP"]
+    M1 --> N1["Pembina ekskul input nilai & jurnal ekskul"]
+    N1 --> O1["Wali kelas generate LHBS tengah/akhir semester"]
+    O1 --> P1["Orang tua melihat & cetak LHBS"]
+    P1 --> Q1["Wali kelas menentukan kenaikan kelas"]
+    Q1 --> R1["Orang tua melihat keputusan kenaikan kelas"]
+```
+
+#### 6.2.4 Fitur Detail
+
+##### A. Daftar Ulang (Orang Tua)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-01  | Daftar ulang siswa baru (dari PPDB)           | Konfirmasi data siswa, verifikasi kelengkapan, aktivasi status siswa.    |
+| AKD-02  | Daftar ulang siswa lama (naik kelas)          | Konfirmasi data siswa lama untuk tahun ajaran berikutnya.                |
+| AKD-03  | Pembayaran biaya daftar ulang                 | Transfer manual (v1), integrasi payment gateway (future).                |
+
+##### B. Manajemen Mata Pelajaran (Admin Unit)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-04  | Menambahkan mata pelajaran                    | Nama mapel, kode mapel, jenjang/tingkat kelas yang berlaku.              |
+| AKD-05  | Assign guru ke mata pelajaran                 | Menugaskan guru tertentu sebagai pengajar mapel per kelas.               |
+| AKD-06  | Assign wali kelas                             | Menugaskan guru sebagai wali kelas untuk satu kelas tertentu.            |
+| AKD-07  | Menambahkan guru baru                         | Input data guru baru ke sistem unit (nama, NIP, email, dll).             |
+
+##### C. Nilai & Asesmen (Guru Mata Pelajaran)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-08  | Input nilai harian                            | Nilai tugas, kuis, atau aktivitas harian per siswa per mapel.            |
+| AKD-09  | Input nilai ujian                             | Nilai ujian formatif (UH) per siswa per mapel.                           |
+| AKD-10  | Input nilai ATS (Asesmen Tengah Semester)      | Nilai ujian tengah semester per siswa per mapel.                          |
+| AKD-11  | Input nilai AAS (Asesmen Akhir Semester)       | Nilai ujian akhir semester per siswa per mapel.                           |
+| AKD-12  | Kalkulasi otomatis nilai LHBS                 | Sistem menghitung rata-rata berbobot dari komponen nilai (harian, ujian, ATS, AAS) menjadi nilai akhir mapel di LHBS. |
+
+##### D. Absensi & Jurnal Pembelajaran (Guru Mata Pelajaran)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-13  | Absensi siswa                                 | Input kehadiran harian per siswa: Hadir (H), Izin (I), Sakit (S), Alpa (A). |
+| AKD-14  | Jurnal pembelajaran harian                    | Guru mencatat materi yang diajarkan, metode, dan refleksi per pertemuan. |
+
+##### E. Perencanaan Pembelajaran (Guru Mata Pelajaran)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-15  | Input Program Tahunan (Prota)                 | Perencanaan pemetaan KD/CP per semester dalam satu tahun ajaran.         |
+| AKD-16  | Input Program Semester (Promes)               | Penjabaran Prota menjadi alokasi waktu mingguan per semester.            |
+| AKD-17  | Input RPP (Rencana Pelaksanaan Pembelajaran)  | Detail rencana per pertemuan: tujuan, kegiatan, asesmen, media.          |
+| AKD-18  | Download Prota/Promes/RPP (PDF)               | Dokumen ber-kop surat (logo unit + logo yayasan), siap cetak.           |
+
+##### F. Jadwal Pelajaran (Wali Kelas / Admin Unit)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-19  | Input jadwal pelajaran                        | Wali kelas atau admin unit menyusun jadwal mapel per hari per jam.       |
+| AKD-20  | Lihat jadwal pelajaran (orang tua)            | Orang tua dapat melihat jadwal kelas anaknya.                            |
+| AKD-21  | Cetak jadwal pelajaran (PDF)                  | Download jadwal ber-kop surat (logo unit + logo yayasan).                |
+
+##### G. Ekstrakurikuler (Admin Unit / Pembina)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-22  | Menambahkan ekstrakurikuler                   | Admin unit membuat ekskul baru (nama, deskripsi, kuota, hari/jam).       |
+| AKD-23  | Assign pembina ekstrakurikuler                | Admin unit menugaskan guru/pembina untuk ekskul tertentu.                |
+| AKD-24  | Input jadwal ekstrakurikuler (pembina)        | Pembina mengatur jadwal kegiatan ekskul.                                 |
+| AKD-25  | Jurnal kegiatan ekstrakurikuler (pembina)     | Pembina mencatat materi, partisipasi, dan catatan per pertemuan.         |
+| AKD-26  | Input nilai ekstrakurikuler (pembina)         | Pembina menginput nilai/predikat ekskul per siswa.                       |
+| AKD-27  | Pilih ekskul untuk siswa (orang tua)          | Orang tua mendaftarkan anaknya ke ekskul yang tersedia.                  |
+| AKD-28  | Lihat jadwal ekstrakurikuler (orang tua)      | Orang tua melihat jadwal ekskul yang diikuti anaknya.                    |
+| AKD-29  | Cetak jadwal ekstrakurikuler (PDF)            | Download jadwal ekskul ber-kop surat.                                    |
+
+##### H. LHBS (Laporan Hasil Belajar Siswa) — Wali Kelas
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-30  | Generate LHBS Tengah Semester                 | Wali kelas men-generate rapor tengah semester berdasarkan nilai ATS dan harian dari seluruh guru mapel. |
+| AKD-31  | Generate LHBS Akhir Semester                  | Wali kelas men-generate rapor akhir semester berdasarkan seluruh komponen nilai (harian, ujian, ATS, AAS) + nilai ekskul. |
+| AKD-32  | Lihat LHBS (orang tua)                        | Orang tua melihat rapor anaknya secara digital di portal.                |
+| AKD-33  | Cetak LHBS (PDF)                              | Download LHBS ber-kop surat (logo unit + logo yayasan), siap cetak.      |
+
+##### I. Pembayaran SPP & Biaya Lain (Orang Tua)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-34  | Lihat tagihan SPP bulanan                     | Menampilkan daftar tagihan dan status pembayaran per bulan.              |
+| AKD-35  | Upload bukti pembayaran SPP                   | Orang tua mengunggah bukti transfer untuk SPP bulanan.                   |
+| AKD-36  | Verifikasi pembayaran SPP (admin unit)        | Admin memverifikasi dan update status bayar (v1: manual).                |
+| AKD-37  | Riwayat pembayaran                            | Orang tua melihat seluruh riwayat pembayaran SPP dan biaya lain.        |
+| AKD-38  | *(Future)* Integrasi Payment Gateway          | Pembayaran otomatis via DOKU / Midtrans / Duitku / Xendit.              |
+
+##### J. Kenaikan Kelas (Wali Kelas / Orang Tua)
+
+| ID      | Fitur                                         | Detail                                                                   |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| AKD-39  | Menentukan kenaikan kelas                     | Wali kelas menandai siswa yang naik kelas / tinggal kelas.               |
+| AKD-40  | Melihat keputusan kenaikan kelas (orang tua)  | Orang tua melihat status kenaikan kelas anaknya di portal.               |
+| AKD-41  | Cetak keputusan kenaikan kelas (PDF)          | Download surat keputusan kenaikan kelas ber-kop surat.                   |
+
+#### 6.2.5 Dokumen PDF yang Dihasilkan
+
+Seluruh dokumen PDF menggunakan kop surat resmi yang terdiri dari logo unit (diupload admin unit) dan logo yayasan (diupload super admin):
+
+| Dokumen                          | Aktor Generator  | Aktor Download          |
+| -------------------------------- | ---------------- | ----------------------- |
+| Program Tahunan (Prota)          | Guru Mapel       | Guru Mapel              |
+| Program Semester (Promes)        | Guru Mapel       | Guru Mapel              |
+| RPP                              | Guru Mapel       | Guru Mapel              |
+| Jadwal Pelajaran                 | Wali Kelas       | Orang Tua, Wali Kelas   |
+| Jadwal Ekstrakurikuler           | Pembina Ekskul   | Orang Tua, Pembina      |
+| LHBS Tengah Semester             | Wali Kelas       | Orang Tua, Wali Kelas   |
+| LHBS Akhir Semester              | Wali Kelas       | Orang Tua, Wali Kelas   |
+| Keputusan Kenaikan Kelas         | Wali Kelas       | Orang Tua               |
 
 ---
 
@@ -346,18 +490,29 @@ flowchart TD
 
 | Milestone                              | Target       |
 | -------------------------------------- | ------------ |
-| Setup project, auth, dan multi-tenant  | Sprint 1–2   |
+| Setup project, auth, dan multi-tenant  | Sprint 0–1   |
 | Manajemen unit & admin                 | Sprint 2–3   |
 | Portal PPDB (registrasi → pembayaran)  | Sprint 3–5   |
-| Formulir & upload berkas               | Sprint 5–6   |
-| Generate surat pengantar (PDF)         | Sprint 6–7   |
-| Seleksi & observasi                    | Sprint 7–8   |
-| Penempatan kelas & surat kelulusan     | Sprint 8–9   |
-| QA, testing, dan bugfix                | Sprint 9–10  |
+| Formulir & upload berkas               | Sprint 4–5   |
+| Generate surat pengantar (PDF)         | Sprint 6     |
+| Seleksi & observasi                    | Sprint 6     |
+| Penempatan kelas & surat kelulusan     | Sprint 7     |
+| QA, testing, dan bugfix (Deployment)   | Sprint 8     |
 
-### Fase 2 — Modul Akademik & Surat Menyurat
+### Fase 2 — Modul Akademik
 
-> Detail akan didefinisikan setelah Fase 1 selesai.
+| Milestone                                          | Target        |
+| -------------------------------------------------- | ------------- |
+| Skema database akademik & daftar ulang siswa       | Sprint 9–10   |
+| Manajemen mapel, assign guru & wali kelas          | Sprint 10–11  |
+| Input nilai (harian, ujian, ATS, AAS) & absensi    | Sprint 11–13  |
+| Jurnal pembelajaran & perencanaan (Prota/Promes/RPP)| Sprint 13–14  |
+| Manajemen ekskul & pembina                         | Sprint 14–15  |
+| Jadwal pelajaran & jadwal ekskul                   | Sprint 15–16  |
+| Pembayaran SPP & biaya lain                        | Sprint 16–17  |
+| Generate LHBS (PDF) & kenaikan kelas               | Sprint 17–19  |
+| Portal orang tua akademik (lihat jadwal, LHBS, dll)| Sprint 19–20  |
+| QA, testing, dan bugfix modul akademik             | Sprint 20–21  |
 
 ### Fase 3 — Modul Karyawan, Payroll & Rekrutmen
 
@@ -415,3 +570,11 @@ Sebuah fitur dianggap selesai jika:
 | **NISN**   | Nomor Induk Siswa Nasional                                   |
 | **LMS**    | Learning Management System                                   |
 | **RBAC**   | Role-Based Access Control                                    |
+| **LHBS**   | Laporan Hasil Belajar Siswa (rapor)                          |
+| **ATS**    | Asesmen Tengah Semester                                      |
+| **AAS**    | Asesmen Akhir Semester                                       |
+| **Prota**  | Program Tahunan — rencana pemetaan KD/CP per tahun ajaran    |
+| **Promes** | Program Semester — penjabaran Prota per minggu per semester   |
+| **RPP**    | Rencana Pelaksanaan Pembelajaran                             |
+| **SPP**    | Sumbangan Pembinaan Pendidikan (biaya bulanan sekolah)       |
+| **Ekskul** | Ekstrakurikuler — kegiatan di luar jam pelajaran             |

@@ -50,7 +50,29 @@ Modul ini adalah modul penerimaan peserta didik baru di lingkungan unit di bawah
 - Orang tua yang anaknya dinyatakan lulus kemudian diarahkan untuk login ke modul akademik untuk proses daftar ulang dan tahapan selanjutnya.
 
 ### Modul akademik
-TBA
+Modul ini adalah modul khusus pengelolaan akademik yayasan dan seluruh unit pendidikan di bawah yayasan alfida. Dalam modul ini akan ada beberapa fitur:
+- Fitur daftar ulang untuk siswa lama dan siswa yang baru diterima melalui PPDB oleh orang tua siswa
+- Fitur input mata pelajaran untuk admin unit
+- Fitur input nilai harian, nilai ujian, nilai asesmen tengah semester, nilai asesmen akhir semester, yang otomatis menjadi nilai di LHBS untuk guru mata pelajaran
+- Fitur absensi siswa untuk guru mata pelajaran
+- Fitur isi jurnal pembelajaran harian untuk guru mata pelajaran
+- Fitur input program tahunan, program semester, dan rencana pelaksanaan pembelajaran untuk guru mata pelajaran
+- Fitur bayar spp dan biaya lain untuk orang tua siswa
+- Fitur generate LHBS untu wali kelas
+- Fitur menambahkan mata pelajaran untuk admin unit
+- Fitur assign guru mata pelajaran oleh admin unit
+- FItur assign wali kelas oleh admin unit
+- Fitur menambahkan guru baru oleh admin unit
+- Fitur input jadwal mata pelajaran oleh wali kelas dan admin unit
+- Fitur menambahkan ekstrakurikuler dan assign pembina ekstrakurikuler oleh admin unit
+- Fitur mengisi jurnal kegiatan ekstrakurikuler dan input nilai ekstrakurikuler oleh pembina ekstrakurikuler
+- Fitur input jadwal ekstrakurikuler oleh pembina ekstrakurikuler
+- Fitur pilih ekskul untuk siswa oleh orang tua
+- Fitur melihat dan cetak (pdf) jadwal pelajaran dan lihat dan cetak (pdf) jadwal ekstrakurikuler siswa oleh orang tua siswa
+- Fitur melihat LHBS tengah semester dan LHBS akhir semester oleh orang tua siswa
+- Fitur menentukan kenaikan kelas untuk wali kelas
+- Fitur melihat keputusan kenaikan kelas siswa oleh orang tua
+- LHBS, jadwal pelajaran, jadwal ekstrakurikuler, Program tahunan, program semester, rpp, dan keputusan kenaikan kelas bisa didownload dalam bentuk pdf dengan kop dan logo yang diupload admin unit (logo unit) dan super admin (logo yayasan)
 
 ### Modul Surat Menyurat
 TBA

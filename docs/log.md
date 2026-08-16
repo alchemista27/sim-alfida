@@ -2,6 +2,15 @@
 
 ---
 
+**tanggal:** 16 Agustus 2026 (Sesi 3)
+**progress:** 
+- Merancang dan menambahkan kelengkapan dokumentasi untuk **Modul Akademik** ke dalam `docs/PRD.md` dan struktur teknis di `docs/TDD.md`.
+- Memperbarui `docs/DB-SCHEMA.md` dengan menambahkan 18 tabel baru dan berbagai Tipe ENUM untuk menopang kebutuhan data operasional akademik (Mapel, Nilai, Jurnal, Ekskul, SPP, Rapor).
+- Mengubah target arsitektur aplikasi dari VPS (Docker & Nginx) menjadi **Serverless** (Vercel, Supabase, Cloudinary). Imbasnya, direktori `nginx` beserta file-file Docker dihapus.
+- Menyelaraskan seluruh lini masa _Sprint Plan_ sehingga Fase 1 (PPDB) resmi selesai di Sprint 8, lalu dilanjutkan Fase 2 (Modul Akademik) pada rentang Sprint 9 hingga Sprint 21 di dalam `docs/SPRINT-PLAN.md` dan `docs/PRD.md`.
+**commit message:** docs: update academic module architecture, schema, sprint plan, and shift to serverless deployment
+
+---
 **tanggal:** 16 Agustus 2026 (Sesi 2)
 **progress:** 
 - Menyelesaikan inisiatif **Sprint 8** (QA, Polish & Deployment Produksi).

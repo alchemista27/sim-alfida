@@ -40,6 +40,8 @@
 
 ## 2. Entity Relationship Diagram
 
+### 2.1 ERD — Modul Foundation & PPDB
+
 ```mermaid
 erDiagram
     foundation_settings ||--|| foundation_settings : singleton
@@ -67,6 +69,39 @@ erDiagram
     observation_schedules ||--o{ observation_bookings : "has many"
     observation_bookings ||--o| observation_results : "has zero or one"
     classes ||--o{ class_assignments : "has many"
+```
+
+### 2.2 ERD — Modul Akademik
+
+```mermaid
+erDiagram
+    units ||--o{ subjects : offers
+    units ||--o{ extracurriculars : offers
+    classes ||--o{ class_schedules : has
+    classes ||--|| homeroom_assignments : has_homeroom
+    subjects ||--o{ teacher_assignments : taught_by
+    subjects ||--o{ class_schedules : scheduled_in
+    subjects ||--o{ grades : graded_in
+    subjects ||--o{ attendances : tracked_in
+    subjects ||--o{ teaching_journals : logged_in
+    subjects ||--o{ lesson_plans : planned_in
+    users ||--o{ teacher_assignments : teaches
+    users ||--o{ homeroom_assignments : is_homeroom
+    users ||--o{ extracurricular_coaches : coaches
+    student_enrollments ||--o{ grades : receives
+    student_enrollments ||--o{ attendances : recorded
+    student_enrollments ||--o{ extracurricular_members : joins
+    student_enrollments ||--o{ extracurricular_grades : graded
+    student_enrollments ||--o| promotion_decisions : decides
+    student_enrollments ||--o{ spp_invoices : billed
+    student_enrollments ||--o{ lhbs_reports : reported
+    registrations ||--o| student_enrollments : enrolls_as
+    classes ||--o{ student_enrollments : contains
+    extracurriculars ||--o{ extracurricular_coaches : coached_by
+    extracurriculars ||--o{ extracurricular_members : joined_by
+    extracurriculars ||--o{ extracurricular_schedules : scheduled
+    extracurriculars ||--o{ extracurricular_journals : logged
+    extracurriculars ||--o{ extracurricular_grades : graded_in
 ```
 
 ---
@@ -141,6 +176,78 @@ CREATE TYPE document_type AS ENUM (
     'father_id',
     'mother_id',
     'medical_result'
+);
+
+-- ── Enum: Status Enrollment Siswa ──
+CREATE TYPE enrollment_status AS ENUM (
+    'active',
+    're_enrolled',
+    'graduated',
+    'dropped'
+);
+
+-- ── Enum: Tipe Enrollment ──
+CREATE TYPE enrollment_type AS ENUM (
+    'new_ppdb',
+    're_enrollment'
+);
+
+-- ── Enum: Level Mata Pelajaran ──
+CREATE TYPE subject_level AS ENUM (
+    '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'all'
+);
+
+-- ── Enum: Tipe Nilai ──
+CREATE TYPE grade_type AS ENUM (
+    'daily',
+    'exam',
+    'ats',
+    'aas'
+);
+
+-- ── Enum: Status Absensi ──
+CREATE TYPE attendance_status AS ENUM (
+    'present',
+    'sick',
+    'permitted',
+    'absent'
+);
+
+-- ── Enum: Tipe Rencana Pembelajaran ──
+CREATE TYPE lesson_plan_type AS ENUM (
+    'prota',
+    'promes',
+    'rpp'
+);
+
+-- ── Enum: Hari ──
+CREATE TYPE day_of_week AS ENUM (
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday'
+);
+
+-- ── Enum: Status SPP ──
+CREATE TYPE spp_status AS ENUM (
+    'unpaid',
+    'uploaded',
+    'verified',
+    'rejected'
+);
+
+-- ── Enum: Semester ──
+CREATE TYPE semester_type AS ENUM (
+    'mid',
+    'final'
+);
+
+-- ── Enum: Keputusan Kenaikan Kelas ──
+CREATE TYPE promotion_decision AS ENUM (
+    'promoted',
+    'retained'
 );
 ```
 
@@ -856,8 +963,6 @@ CREATE TABLE class_assignments (
 CREATE INDEX idx_class_assignments_class ON class_assignments (class_id);
 ```
 
-| Kolom             | Tipe        | Nullable | Keterangan                                 |
-| ----------------- | ----------- | :------: | ------------------------------------------ |
 | `id`              | UUID        | ❌       | PK                                         |
 | `registration_id` | UUID        | ❌       | FK → registrations.id, UNIQUE              |
 | `class_id`        | UUID        | ❌       | FK → classes.id                            |
@@ -866,7 +971,452 @@ CREATE INDEX idx_class_assignments_class ON class_assignments (class_id);
 
 ---
 
-## 9. Ringkasan Tabel
+## 9. Tabel — Akademik (Enrollment & Mapel)
+
+### 9.1 `student_enrollments`
+
+Data enrollment siswa aktif.
+
+```sql
+CREATE TABLE student_enrollments (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    registration_id  UUID,                     -- NULL jika bukan dari PPDB
+    class_id         UUID                NOT NULL,
+    academic_year_id UUID                NOT NULL,
+    student_data_id  UUID                NOT NULL,
+    parent_id        UUID                NOT NULL, -- users.id orang tua
+    status           enrollment_status   NOT NULL DEFAULT 'active',
+    enrollment_type  enrollment_type     NOT NULL,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ,
+
+    CONSTRAINT fk_enrollments_registration FOREIGN KEY (registration_id)
+        REFERENCES registrations (id) ON DELETE SET NULL,
+    CONSTRAINT fk_enrollments_class FOREIGN KEY (class_id)
+        REFERENCES classes (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_enrollments_academic_year FOREIGN KEY (academic_year_id)
+        REFERENCES academic_years (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_enrollments_student_data FOREIGN KEY (student_data_id)
+        REFERENCES student_data (id) ON DELETE CASCADE,
+    CONSTRAINT fk_enrollments_parent FOREIGN KEY (parent_id)
+        REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT uq_enrollments_student_year UNIQUE (student_data_id, academic_year_id)
+);
+
+CREATE INDEX idx_enrollments_class ON student_enrollments (class_id);
+CREATE INDEX idx_enrollments_parent ON student_enrollments (parent_id);
+```
+
+### 9.2 `subjects`
+
+Mata pelajaran per unit.
+
+```sql
+CREATE TABLE subjects (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    unit_id          UUID                NOT NULL,
+    code             VARCHAR(20)         NOT NULL,
+    name             VARCHAR(100)        NOT NULL,
+    level            subject_level       NOT NULL,
+    is_active        BOOLEAN             NOT NULL DEFAULT true,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ,
+
+    CONSTRAINT fk_subjects_unit FOREIGN KEY (unit_id)
+        REFERENCES units (id) ON DELETE CASCADE,
+    CONSTRAINT uq_subjects_unit_code UNIQUE (unit_id, code)
+);
+```
+
+### 9.3 `teacher_assignments`
+
+Penugasan guru ke mata pelajaran dan kelas.
+
+```sql
+CREATE TABLE teacher_assignments (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_id       UUID                NOT NULL,
+    teacher_id       UUID                NOT NULL, -- users.id
+    class_id         UUID                NOT NULL,
+    academic_year_id UUID                NOT NULL,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_teacher_assignments_subject FOREIGN KEY (subject_id)
+        REFERENCES subjects (id) ON DELETE CASCADE,
+    CONSTRAINT fk_teacher_assignments_teacher FOREIGN KEY (teacher_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_teacher_assignments_class FOREIGN KEY (class_id)
+        REFERENCES classes (id) ON DELETE CASCADE,
+    CONSTRAINT fk_teacher_assignments_year FOREIGN KEY (academic_year_id)
+        REFERENCES academic_years (id) ON DELETE CASCADE,
+    CONSTRAINT uq_teacher_assignments_unique UNIQUE (subject_id, teacher_id, class_id, academic_year_id)
+);
+```
+
+### 9.4 `homeroom_assignments`
+
+Penugasan wali kelas.
+
+```sql
+CREATE TABLE homeroom_assignments (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    teacher_id       UUID                NOT NULL, -- users.id
+    class_id         UUID                NOT NULL,
+    academic_year_id UUID                NOT NULL,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_homeroom_assignments_teacher FOREIGN KEY (teacher_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_homeroom_assignments_class FOREIGN KEY (class_id)
+        REFERENCES classes (id) ON DELETE CASCADE,
+    CONSTRAINT fk_homeroom_assignments_year FOREIGN KEY (academic_year_id)
+        REFERENCES academic_years (id) ON DELETE CASCADE,
+    CONSTRAINT uq_homeroom_assignments_class_year UNIQUE (class_id, academic_year_id)
+);
+```
+
+---
+
+## 10. Tabel — Akademik (Penilaian & Jurnal)
+
+### 10.1 `grades`
+
+Nilai per mata pelajaran.
+
+```sql
+CREATE TABLE grades (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    enrollment_id    UUID                NOT NULL,
+    subject_id       UUID                NOT NULL,
+    teacher_id       UUID                NOT NULL,
+    academic_year_id UUID                NOT NULL,
+    type             grade_type          NOT NULL,
+    label            VARCHAR(50)         NOT NULL,
+    score            DECIMAL(5, 2)       NOT NULL,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_grades_enrollment FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_grades_subject FOREIGN KEY (subject_id)
+        REFERENCES subjects (id) ON DELETE CASCADE,
+    CONSTRAINT fk_grades_teacher FOREIGN KEY (teacher_id)
+        REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_grades_year FOREIGN KEY (academic_year_id)
+        REFERENCES academic_years (id) ON DELETE RESTRICT,
+    CONSTRAINT ck_grades_score CHECK (score >= 0 AND score <= 100)
+);
+```
+
+### 10.2 `attendances`
+
+Presensi siswa.
+
+```sql
+CREATE TABLE attendances (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    enrollment_id    UUID                NOT NULL,
+    subject_id       UUID                NOT NULL,
+    teacher_id       UUID                NOT NULL,
+    date             DATE                NOT NULL,
+    status           attendance_status   NOT NULL,
+    notes            TEXT,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_attendances_enrollment FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_attendances_subject FOREIGN KEY (subject_id)
+        REFERENCES subjects (id) ON DELETE CASCADE,
+    CONSTRAINT uq_attendances_enrollment_subject_date UNIQUE (enrollment_id, subject_id, date)
+);
+```
+
+### 10.3 `teaching_journals`
+
+Jurnal mengajar guru.
+
+```sql
+CREATE TABLE teaching_journals (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_id       UUID                NOT NULL,
+    teacher_id       UUID                NOT NULL,
+    class_id         UUID                NOT NULL,
+    date             DATE                NOT NULL,
+    material         TEXT                NOT NULL,
+    method           TEXT                NOT NULL,
+    reflection       TEXT,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_journals_subject FOREIGN KEY (subject_id)
+        REFERENCES subjects (id) ON DELETE CASCADE,
+    CONSTRAINT fk_journals_teacher FOREIGN KEY (teacher_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_journals_class FOREIGN KEY (class_id)
+        REFERENCES classes (id) ON DELETE CASCADE
+);
+```
+
+### 10.4 `lesson_plans`
+
+Prota, Promes, RPP.
+
+```sql
+CREATE TABLE lesson_plans (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_id       UUID                NOT NULL,
+    teacher_id       UUID                NOT NULL,
+    academic_year_id UUID                NOT NULL,
+    type             lesson_plan_type    NOT NULL,
+    title            VARCHAR(255)        NOT NULL,
+    content          TEXT                NOT NULL, -- JSON or rich text
+    pdf_url          TEXT,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ,
+
+    CONSTRAINT fk_lesson_plans_subject FOREIGN KEY (subject_id)
+        REFERENCES subjects (id) ON DELETE CASCADE,
+    CONSTRAINT fk_lesson_plans_teacher FOREIGN KEY (teacher_id)
+        REFERENCES users (id) ON DELETE CASCADE
+);
+```
+
+### 10.5 `class_schedules`
+
+Jadwal pelajaran kelas.
+
+```sql
+CREATE TABLE class_schedules (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    class_id         UUID                NOT NULL,
+    subject_id       UUID                NOT NULL,
+    teacher_id       UUID                NOT NULL,
+    day              day_of_week         NOT NULL,
+    start_time       TIME                NOT NULL,
+    end_time         TIME                NOT NULL,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_class_schedules_class FOREIGN KEY (class_id)
+        REFERENCES classes (id) ON DELETE CASCADE,
+    CONSTRAINT fk_class_schedules_subject FOREIGN KEY (subject_id)
+        REFERENCES subjects (id) ON DELETE CASCADE,
+    CONSTRAINT fk_class_schedules_teacher FOREIGN KEY (teacher_id)
+        REFERENCES users (id) ON DELETE CASCADE
+);
+```
+
+---
+
+## 11. Tabel — Akademik (Ekstrakurikuler)
+
+### 11.1 `extracurriculars`
+
+Data kegiatan ekstrakurikuler.
+
+```sql
+CREATE TABLE extracurriculars (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    unit_id          UUID                NOT NULL,
+    academic_year_id UUID                NOT NULL,
+    name             VARCHAR(100)        NOT NULL,
+    description      TEXT,
+    quota            INTEGER             NOT NULL,
+    is_active        BOOLEAN             NOT NULL DEFAULT true,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_extracurriculars_unit FOREIGN KEY (unit_id)
+        REFERENCES units (id) ON DELETE CASCADE,
+    CONSTRAINT fk_extracurriculars_year FOREIGN KEY (academic_year_id)
+        REFERENCES academic_years (id) ON DELETE CASCADE
+);
+```
+
+### 11.2 `extracurricular_coaches`
+
+Pembina ekstrakurikuler.
+
+```sql
+CREATE TABLE extracurricular_coaches (
+    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    extracurricular_id UUID                NOT NULL,
+    coach_id           UUID                NOT NULL, -- users.id
+    created_at         TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_extra_coaches_extra FOREIGN KEY (extracurricular_id)
+        REFERENCES extracurriculars (id) ON DELETE CASCADE,
+    CONSTRAINT fk_extra_coaches_coach FOREIGN KEY (coach_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT uq_extra_coaches UNIQUE (extracurricular_id, coach_id)
+);
+```
+
+### 11.3 `extracurricular_schedules`
+
+Jadwal ekstrakurikuler.
+
+```sql
+CREATE TABLE extracurricular_schedules (
+    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    extracurricular_id UUID                NOT NULL,
+    day                day_of_week         NOT NULL,
+    start_time         TIME                NOT NULL,
+    end_time           TIME                NOT NULL,
+    location           VARCHAR(200),
+    created_at         TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_extra_schedules_extra FOREIGN KEY (extracurricular_id)
+        REFERENCES extracurriculars (id) ON DELETE CASCADE
+);
+```
+
+### 11.4 `extracurricular_members`
+
+Siswa yang mengikuti ekstrakurikuler.
+
+```sql
+CREATE TABLE extracurricular_members (
+    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    extracurricular_id UUID                NOT NULL,
+    enrollment_id      UUID                NOT NULL,
+    joined_at          TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_extra_members_extra FOREIGN KEY (extracurricular_id)
+        REFERENCES extracurriculars (id) ON DELETE CASCADE,
+    CONSTRAINT fk_extra_members_enrollment FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments (id) ON DELETE CASCADE,
+    CONSTRAINT uq_extra_members UNIQUE (extracurricular_id, enrollment_id)
+);
+```
+
+### 11.5 `extracurricular_journals`
+
+Jurnal kegiatan ekstrakurikuler.
+
+```sql
+CREATE TABLE extracurricular_journals (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    extracurricular_id  UUID                NOT NULL,
+    coach_id            UUID                NOT NULL,
+    date                DATE                NOT NULL,
+    material            TEXT                NOT NULL,
+    participation_notes TEXT,
+    created_at          TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_extra_journals_extra FOREIGN KEY (extracurricular_id)
+        REFERENCES extracurriculars (id) ON DELETE CASCADE,
+    CONSTRAINT fk_extra_journals_coach FOREIGN KEY (coach_id)
+        REFERENCES users (id) ON DELETE CASCADE
+);
+```
+
+### 11.6 `extracurricular_grades`
+
+Nilai/predikat ekstrakurikuler per siswa.
+
+```sql
+CREATE TABLE extracurricular_grades (
+    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    extracurricular_id UUID                NOT NULL,
+    enrollment_id      UUID                NOT NULL,
+    coach_id           UUID                NOT NULL,
+    predicate          VARCHAR(10)         NOT NULL, -- e.g. A, B, C
+    notes              TEXT,
+    created_at         TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_extra_grades_extra FOREIGN KEY (extracurricular_id)
+        REFERENCES extracurriculars (id) ON DELETE CASCADE,
+    CONSTRAINT fk_extra_grades_enrollment FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_extra_grades_coach FOREIGN KEY (coach_id)
+        REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT uq_extra_grades UNIQUE (extracurricular_id, enrollment_id)
+);
+```
+
+---
+
+## 12. Tabel — Akademik (SPP & Kenaikan Kelas)
+
+### 12.1 `spp_invoices`
+
+Tagihan SPP bulanan.
+
+```sql
+CREATE TABLE spp_invoices (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    enrollment_id    UUID                NOT NULL,
+    academic_year_id UUID                NOT NULL,
+    month            INTEGER             NOT NULL,
+    year             INTEGER             NOT NULL,
+    amount           DECIMAL(12, 2)      NOT NULL,
+    proof_url        TEXT,
+    status           spp_status          NOT NULL DEFAULT 'unpaid',
+    verified_by      UUID,               -- users.id
+    verified_at      TIMESTAMPTZ,
+    created_at       TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_spp_invoices_enrollment FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_spp_invoices_year FOREIGN KEY (academic_year_id)
+        REFERENCES academic_years (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_spp_invoices_verified_by FOREIGN KEY (verified_by)
+        REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT uq_spp_invoices_month UNIQUE (enrollment_id, month, year),
+    CONSTRAINT ck_spp_invoices_month CHECK (month >= 1 AND month <= 12)
+);
+```
+
+### 12.2 `lhbs_reports`
+
+Laporan Hasil Belajar Siswa (Rapor).
+
+```sql
+CREATE TABLE lhbs_reports (
+    id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    enrollment_id            UUID                NOT NULL,
+    homeroom_teacher_id      UUID                NOT NULL,
+    academic_year_id         UUID                NOT NULL,
+    semester                 semester_type       NOT NULL,
+    grades_snapshot          JSONB               NOT NULL,
+    extracurricular_snapshot JSONB               NOT NULL,
+    attendance_summary       JSONB               NOT NULL,
+    homeroom_notes           TEXT,
+    pdf_url                  TEXT,
+    generated_at             TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_lhbs_reports_enrollment FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_lhbs_reports_teacher FOREIGN KEY (homeroom_teacher_id)
+        REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_lhbs_reports_year FOREIGN KEY (academic_year_id)
+        REFERENCES academic_years (id) ON DELETE RESTRICT,
+    CONSTRAINT uq_lhbs_reports_semester UNIQUE (enrollment_id, semester)
+);
+```
+
+### 12.3 `promotion_decisions`
+
+Keputusan Kenaikan Kelas.
+
+```sql
+CREATE TABLE promotion_decisions (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    enrollment_id       UUID                NOT NULL,
+    homeroom_teacher_id UUID                NOT NULL,
+    decision            promotion_decision  NOT NULL,
+    notes               TEXT,
+    pdf_url             TEXT,
+    decided_at          TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_promotion_decisions_enrollment FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_promotion_decisions_teacher FOREIGN KEY (homeroom_teacher_id)
+        REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT uq_promotion_decisions_enrollment UNIQUE (enrollment_id)
+);
+```
+
+---
+
+## 13. Ringkasan Tabel
 
 | #  | Tabel                    | Deskripsi                                       | Relasi Utama                  |
 | -- | ------------------------ | ----------------------------------------------- | ----------------------------- |
@@ -888,18 +1438,36 @@ CREATE INDEX idx_class_assignments_class ON class_assignments (class_id);
 | 16 | `observation_results`   | Hasil observasi                                 | → observation_bookings, → users |
 | 17 | `classes`               | Kelas paralel                                   | → units, → academic_years    |
 | 18 | `class_assignments`     | Penempatan siswa ke kelas                       | → registrations, → classes, → users |
+| 19 | `student_enrollments`   | Data enrollment siswa aktif                     | → registrations, → classes, → academic_years, → student_data, → users |
+| 20 | `subjects`              | Mata pelajaran per unit                         | → units                      |
+| 21 | `teacher_assignments`   | Penugasan guru mapel                            | → subjects, → users, → classes, → academic_years |
+| 22 | `homeroom_assignments`  | Penugasan wali kelas                            | → users, → classes, → academic_years |
+| 23 | `grades`                | Nilai per mata pelajaran                        | → student_enrollments, → subjects, → users, → academic_years |
+| 24 | `attendances`           | Presensi siswa per mapel                        | → student_enrollments, → subjects |
+| 25 | `teaching_journals`     | Jurnal mengajar guru                            | → subjects, → users, → classes |
+| 26 | `lesson_plans`          | Prota, Promes, RPP                              | → subjects, → users          |
+| 27 | `class_schedules`       | Jadwal pelajaran kelas                          | → classes, → subjects, → users |
+| 28 | `extracurriculars`      | Data ekstrakurikuler                            | → units, → academic_years    |
+| 29 | `extracurricular_coaches` | Pembina ekstrakurikuler                       | → extracurriculars, → users  |
+| 30 | `extracurricular_schedules` | Jadwal ekstrakurikuler                        | → extracurriculars           |
+| 31 | `extracurricular_members` | Siswa peserta ekstrakurikuler                 | → extracurriculars, → student_enrollments |
+| 32 | `extracurricular_journals` | Jurnal kegiatan ekskul                       | → extracurriculars, → users  |
+| 33 | `extracurricular_grades` | Nilai/predikat ekskul per siswa                | → extracurriculars, → student_enrollments, → users |
+| 34 | `spp_invoices`          | Tagihan SPP bulanan                             | → student_enrollments, → academic_years, → users |
+| 35 | `lhbs_reports`          | Laporan Hasil Belajar (Rapor)                   | → student_enrollments, → users, → academic_years |
+| 36 | `promotion_decisions`   | Keputusan kenaikan kelas                        | → student_enrollments, → users |
 
-**Total: 18 tabel**
+**Total: 36 tabel**
 
 ---
 
-## 10. Prisma Schema
+## 14. Prisma Schema
 
 Implementasi schema database menggunakan Prisma ORM akan disimpan di `prisma/schema.prisma`. Semua model akan didefinisikan dalam satu file tersebut sesuai standar Prisma, dan migrasi akan di-generate otomatis melalui Prisma CLI.
 
 ---
 
-## 11. Migration Strategy
+## 15. Migration Strategy
 
 | Langkah | Perintah                              | Keterangan                              |
 | ------- | ------------------------------------- | --------------------------------------- |
@@ -913,7 +1481,7 @@ Implementasi schema database menggunakan Prisma ORM akan disimpan di `prisma/sch
 
 ---
 
-## 12. Seed Data
+## 16. Seed Data
 
 ```sql
 -- ── Foundation Settings ──
@@ -946,7 +1514,7 @@ FROM users u WHERE u.email = 'admin@alfida.sch.id';
 
 ---
 
-## 13. Referensi
+## 17. Referensi
 
 | Dokumen                                                                | Konten                                 |
 | ---------------------------------------------------------------------- | -------------------------------------- |

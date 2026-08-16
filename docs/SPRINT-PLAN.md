@@ -1,4 +1,4 @@
-# Sprint Plan — SIM-Alfida (Phase 1: Modul PPDB)
+# Sprint Plan — SIM-Alfida (Phase 1 & 2: Modul PPDB & Akademik)
 
 > **Dokumen ini disusun berdasarkan:**
 > [PRD.md](./PRD.md) · [TDD.md](./TDD.md) · [DB-SCHEMA.md](./DB-SCHEMA.md) · [DESIGN.md](../DESIGN.md) · [PROJECTS.md](../PROJECTS.md)
@@ -10,22 +10,38 @@
 | Item | Detail |
 |------|--------|
 | **Nama** | SIM-Alfida — Sistem Informasi Manajemen Yayasan Alfida |
-| **Fokus Phase 1** | Modul PPDB (Penerimaan Peserta Didik Baru) |
-| **Target User** | 8 unit pendidikan (2 TK, 3 SD, 1 SMP, 1 SMA, 1 Pesantren) |
+| **Fokus Phase 1 & 2** | Modul PPDB (Penerimaan Peserta Didik Baru) & Modul Akademik |
+| **Target User** | 8 unit pendidikan (Admin Unit, Guru, Wali Kelas, Pembina Ekskul, Orang Tua) |
 | **Stack** | Next.js 15 (App Router) · Prisma · PostgreSQL 16 · Tailwind CSS · NextAuth v5 |
-| **Deployment** | Docker Compose on Ubuntu VPS (Nginx + Let's Encrypt) |
-| **Estimasi Total** | **9 Sprint (~16 minggu kerja)** |
-| **Metode** | Scrum · Sprint 2 minggu · Sprint 0 & 7 = 1 minggu |
+| **Deployment** | Vercel (Next.js) + Supabase (DB & Auth) + Cloudinary (Storage) |
+| **Estimasi Total** | **21 Sprint (~40 minggu kerja)** |
+| **Metode** | Scrum · Sprint 2 minggu |
 
 ---
 
 ## Timeline Overview
 
-```
-Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16
-       ├──┤ ├─────┤ ├─────┤ ├─────┤ ├─────┤ ├─────┤ ├─────┤ ├──┤ ├─────────────────┤
-        S0     S1     S2     S3     S4     S5     S6   S7          S8
-```
+| Fase | Sprint | Fokus |
+|------|--------|-------|
+| **Fase 1** | **Sprint 0** | Project Bootstrap & Infrastructure |
+| | **Sprint 1** | Autentikasi, RBAC & Layout Utama |
+| | **Sprint 2** | Modul Super Admin |
+| | **Sprint 3** | Admin Unit & Setup PPDB |
+| | **Sprint 4** | Portal Orang Tua — Alur Pendaftaran Bagian 1 |
+| | **Sprint 5** | Portal Orang Tua — Alur Pendaftaran Bagian 2 |
+| | **Sprint 6** | Observasi & Seleksi |
+| | **Sprint 7** | Penempatan Kelas & Finalisasi Fitur |
+| | **Sprint 8** | QA, Polish & Deployment Produksi (Fase 1) |
+| **Fase 2** | **Sprint 9-10**  | Skema database akademik & daftar ulang siswa |
+| | **Sprint 10-11** | Manajemen mapel, assign guru & wali kelas |
+| | **Sprint 11-13** | Input nilai (harian, ujian, ATS, AAS) & absensi |
+| | **Sprint 13-14** | Jurnal pembelajaran & perencanaan (Prota/Promes/RPP) |
+| | **Sprint 14-15** | Manajemen ekskul & pembina |
+| | **Sprint 15-16** | Jadwal pelajaran & jadwal ekskul |
+| | **Sprint 16-17** | Pembayaran SPP & biaya lain |
+| | **Sprint 17-19** | Generate LHBS (PDF) & kenaikan kelas |
+| | **Sprint 19-20** | Portal orang tua akademik (jadwal, LHBS, promosi) |
+| | **Sprint 20-21** | QA, testing, & deployment Modul Akademik |
 
 | Sprint | Durasi | Fokus |
 |--------|--------|-------|
@@ -130,9 +146,9 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 
 ---
 
-## Sprint 8 — QA, Polish & Deployment Produksi
+## Sprint 8 — QA, Polish & Deployment Produksi (Phase 1)
 **Durasi:** 2 minggu
-**Goal:** Aplikasi production-ready, deployed, dan siap digunakan.
+**Goal:** Aplikasi production-ready, deployed ke Vercel/Supabase, dan siap digunakan.
 
 ### Backlog
 
@@ -147,22 +163,28 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 | S8-06 | Security Hardening | Validasi ulang semua input (Zod), CSRF protection, header keamanan (CSP, HSTS), sanitize uploads | 4 jam |
 | S8-07 | UI Polish | Micro-animations, hover states, transition smoothing, konsistensi spacing & typography | 4 jam |
 | **Minggu 2: Deployment** ||||
-| S8-08 | Dockerize Production | Multi-stage Dockerfile (build → production). `docker-compose.prod.yml` | 4 jam |
-| S8-09 | Nginx Configuration | Reverse proxy config, SSL termination (Let's Encrypt / Certbot), gzip, static caching | 4 jam |
-| S8-10 | VPS Provisioning | Ubuntu setup, Docker install, firewall (UFW), SSH hardening, monitoring dasar | 4 jam |
-| S8-11 | Database Migration Prod | `prisma migrate deploy` di production. Backup strategy. Seed data unit pendidikan real | 3 jam |
-| S8-12 | CI/CD Pipeline Final | GitHub Actions: lint → tsc → test → build → deploy SSH ke VPS. Branch `main` → staging, `release/*` → prod | 4 jam |
-| S8-13 | Monitoring & Logging | Setup logging (structured JSON), health check endpoint, basic uptime monitoring | 3 jam |
+| S8-08 | Vercel Deployment Setup | Setup Vercel project, koneksi repositori GitHub, environment variables production | 4 jam |
+| S8-09 | Supabase Production Setup | Setup project Supabase prod, auth settings, email templates, connection pooling | 4 jam |
+| S8-10 | Cloudinary Integration | Konfigurasi Cloudinary production bucket & signed upload settings | 2 jam |
+| S8-11 | Database Migration Prod | `npx prisma migrate deploy` di production. Seed data unit pendidikan real | 3 jam |
+| S8-12 | CI/CD Pipeline Final | Vercel auto-deployment. Branch `main` → Preview, `release/*` → Production | 4 jam |
+| S8-13 | Monitoring & Logging | Setup Vercel Analytics & Supabase logs monitoring | 3 jam |
 | S8-14 | User Acceptance Testing | Demo ke stakeholder yayasan. Collect feedback. Quick-fix critical issues | 6 jam |
 | S8-15 | Dokumentasi Deployment | README update, runbook operasional, panduan admin | 3 jam |
 
 ### Definition of Done
 - [x] Semua E2E test pass (5 user journey)
 - [x] Lighthouse score: Performance ≥ 80, Accessibility ≥ 90
-- [x] Aplikasi live di VPS dengan HTTPS
-- [x] CI/CD pipeline: push → auto-deploy ke staging
+- [x] Aplikasi live di Vercel dengan HTTPS
 - [x] Zero critical/high severity bug
 - [x] UAT sign-off dari stakeholder
+
+---
+
+## Phase 2 — Modul Akademik (Sprint 9 - 21)
+
+Detail Backlog untuk Sprint 9 hingga 21 akan diperinci lebih lanjut pada saat Perencanaan Sprint (Sprint Planning) Phase 2. 
+Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, ATS, AAS), ekstrakurikuler, absensi, pembayaran SPP bulanan, dan rapor LHBS.
 
 ---
 
@@ -170,30 +192,30 @@ Minggu   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 
 | Risiko | Dampak | Probabilitas | Mitigasi |
 |--------|--------|--------------|----------|
-| VPS belum ready saat Sprint 8 | Deployment tertunda | Sedang | Gunakan Railway/Vercel sebagai staging sementara |
-| Perubahan requirement form PPDB | Rework Sprint 4-5 | Sedang | Lock requirement di akhir Sprint 3, tampung perubahan di backlog Phase 2 |
-| Integrasi Cloudinary kompleks | Upload gagal | Rendah | Fallback ke local filesystem storage di dev, Cloudinary di staging/prod |
-| Performance query aggregasi lambat | Dashboard lemot | Rendah | Gunakan materialized view / caching Redis (add di Sprint 8 jika perlu) |
-| PDF generation memory-intensive | Server crash | Rendah | Limit concurrent PDF gen, gunakan queue (bull) jika diperlukan |
+| Limitasi Vercel Hobby/Pro | Deployment macet | Rendah | Monitor usage Vercel, upgrade plan jika traffic PPDB/Akademik sangat tinggi |
+| Perubahan requirement form PPDB/Rapor | Rework Sprint | Sedang | Lock requirement di awal Sprint, tampung perubahan di backlog iterasi berikutnya |
+| Integrasi Cloudinary kompleks | Upload gagal | Rendah | Fallback ke local filesystem storage di dev, optimalkan presigned URL di staging/prod |
+| Performance query nilai/rapor lambat | Dashboard lemot | Rendah | Gunakan agregasi dan snapshot JSONB (contoh pada `lhbs_reports`) untuk laporan |
+| PDF generation memory-intensive | Server crash | Sedang | Limit concurrent PDF gen di serverless function, delegasikan ke service khusus jika timeout (Vercel max 10s) |
 
 ---
 
-## Metrik Keberhasilan Phase 1
+## Metrik Keberhasilan Phase 1 & 2
 
 | Metrik | Target |
 |--------|--------|
-| Cakupan fitur PPDB | 100% (seluruh 13 state machine terealisasi) |
-| Unit Test Coverage | ≥ 80% pada module auth, state machine, dan form validation |
-| E2E Test Pass Rate | 100% pada 5 critical user journey |
-| Build Time | ≤ 3 menit (CI pipeline) |
+| Cakupan fitur PPDB & Akademik | 100% dari requirements PRD |
+| Unit Test Coverage | ≥ 80% pada module auth, state machine, kalkulasi nilai, form validation |
+| E2E Test Pass Rate | 100% pada critical user journey PPDB & Akademik |
+| Build Time | ≤ 3 menit (Vercel pipeline) |
 | Page Load (LCP) | ≤ 2.5 detik |
-| Downtime Target | ≤ 0.1% (post-deployment) |
-| Bug Severity | Zero P0/P1 at launch |
+| Uptime Target | ≥ 99.9% (Serverless) |
+| Bug Severity | Zero P0/P1 at launch tiap modul |
 
 ---
 
 ## Catatan
 
-- **Modul Phase 2 & 3** (Akademik, Surat Menyurat, Manajemen Karyawan, Payroll, Rekrutmen) akan direncanakan dalam sprint plan terpisah setelah Phase 1 go-live.
-- **SSO Integration** dengan WordPress & Moodle disiapkan di arsitektur tapi implementasinya masuk Phase 2.
+- **Modul Phase 3** (Surat Menyurat, Manajemen Karyawan, Payroll, Rekrutmen) akan direncanakan setelah Phase 2 go-live.
+- **SSO Integration** dengan WordPress & Moodle disiapkan di arsitektur tapi implementasinya masuk iterasi berikutnya.
 - Sprint plan ini bersifat *living document* — akan di-update setiap Sprint Review berdasarkan velocity aktual tim.

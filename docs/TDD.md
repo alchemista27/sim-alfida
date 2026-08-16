@@ -35,6 +35,7 @@ graph TB
     subgraph Services["Service Layer"]
         AuthSvc["Auth Service"]
         PPDBSvc["PPDB Service"]
+        AcadSvc["Academic Service"]
         UnitSvc["Unit Service"]
         FileSvc["File Service"]
         PDFSvc["PDF Service"]
@@ -115,11 +116,24 @@ sim-alfida/
 │   │   │   │   ├── documents/
 │   │   │   │   ├── observation/
 │   │   │   │   └── result/
+│   │   │   ├── academic/          # Modul Akademik
+│   │   │   │   ├── re-enrollment/ # Daftar ulang
+│   │   │   │   ├── subjects/      # Mata pelajaran (admin unit)
+│   │   │   │   ├── grades/        # Input nilai (guru mapel)
+│   │   │   │   ├── attendance/    # Absensi (guru mapel)
+│   │   │   │   ├── journal/       # Jurnal pembelajaran (guru)
+│   │   │   │   ├── planning/      # Prota / Promes / RPP (guru)
+│   │   │   │   ├── schedule/      # Jadwal pelajaran (wali kelas)
+│   │   │   │   ├── extracurricular/ # Ekskul (admin / pembina)
+│   │   │   │   ├── spp/           # Pembayaran SPP (orang tua)
+│   │   │   │   ├── lhbs/          # Rapor (wali kelas / orang tua)
+│   │   │   │   └── promotion/     # Kenaikan kelas
 │   │   │   └── layout.tsx
 │   │   ├── api/                  # API Route Handlers
 │   │   │   ├── auth/
 │   │   │   ├── units/
 │   │   │   ├── ppdb/
+│   │   │   ├── academic/
 │   │   │   └── upload/
 │   │   ├── layout.tsx            # Root layout
 │   │   └── page.tsx              # Landing page
@@ -127,7 +141,8 @@ sim-alfida/
 │   │   ├── ui/                   # Primitif (Button, Input, Card, etc.)
 │   │   ├── layout/               # Shell, Sidebar, Header, etc.
 │   │   └── features/             # Komponen domain-specific
-│   │       └── ppdb/
+│   │       ├── ppdb/
+│   │       └── academic/
 │   ├── lib/                      # Utility & konfigurasi
 │   │   ├── auth.ts               # Konfigurasi NextAuth
 │   │   ├── prisma.ts             # Instansiasi Prisma Client
@@ -372,7 +387,231 @@ erDiagram
     }
 ```
 
-### 3.2 Catatan Desain Database
+### 3.2 ERD — Modul Akademik
+
+```mermaid
+erDiagram
+    UNITS ||--o{ SUBJECTS : offers
+    UNITS ||--o{ EXTRACURRICULARS : offers
+    CLASSES ||--o{ CLASS_SCHEDULES : has
+    CLASSES ||--|| HOMEROOM_ASSIGNMENTS : has_homeroom
+    SUBJECTS ||--o{ TEACHER_ASSIGNMENTS : taught_by
+    SUBJECTS ||--o{ CLASS_SCHEDULES : scheduled_in
+    SUBJECTS ||--o{ GRADES : graded_in
+    SUBJECTS ||--o{ ATTENDANCES : tracked_in
+    SUBJECTS ||--o{ TEACHING_JOURNALS : logged_in
+    SUBJECTS ||--o{ LESSON_PLANS : planned_in
+    USERS ||--o{ TEACHER_ASSIGNMENTS : teaches
+    USERS ||--o{ HOMEROOM_ASSIGNMENTS : is_homeroom
+    USERS ||--o{ EXTRACURRICULAR_COACHES : coaches
+    STUDENT_ENROLLMENTS ||--o{ GRADES : receives
+    STUDENT_ENROLLMENTS ||--o{ ATTENDANCES : recorded
+    STUDENT_ENROLLMENTS ||--o{ EXTRACURRICULAR_MEMBERS : joins
+    STUDENT_ENROLLMENTS ||--o{ EXTRACURRICULAR_GRADES : graded
+    STUDENT_ENROLLMENTS ||--o| PROMOTION_DECISIONS : decides
+    STUDENT_ENROLLMENTS ||--o{ SPP_INVOICES : billed
+    STUDENT_ENROLLMENTS ||--o{ LHBS_REPORTS : reported
+    REGISTRATIONS ||--o| STUDENT_ENROLLMENTS : enrolls_as
+    CLASSES ||--o{ STUDENT_ENROLLMENTS : contains
+    EXTRACURRICULARS ||--o{ EXTRACURRICULAR_COACHES : coached_by
+    EXTRACURRICULARS ||--o{ EXTRACURRICULAR_MEMBERS : joined_by
+    EXTRACURRICULARS ||--o{ EXTRACURRICULAR_SCHEDULES : scheduled
+    EXTRACURRICULARS ||--o{ EXTRACURRICULAR_JOURNALS : logged
+    EXTRACURRICULARS ||--o{ EXTRACURRICULAR_GRADES : graded_in
+
+    STUDENT_ENROLLMENTS {
+        uuid id PK
+        uuid registration_id FK "nullable — siswa baru dari PPDB"
+        uuid class_id FK
+        uuid academic_year_id FK
+        uuid student_data_id FK
+        uuid parent_id FK "users.id orang tua"
+        enum status "active | re_enrolled | graduated | dropped"
+        enum enrollment_type "new_ppdb | re_enrollment"
+        timestamp created_at
+    }
+
+    SUBJECTS {
+        uuid id PK
+        uuid unit_id FK
+        string code "e.g. MTK, IPA, BIG"
+        string name "e.g. Matematika"
+        enum level "1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | all"
+        boolean is_active
+        timestamp created_at
+    }
+
+    TEACHER_ASSIGNMENTS {
+        uuid id PK
+        uuid subject_id FK
+        uuid teacher_id FK "users.id"
+        uuid class_id FK
+        uuid academic_year_id FK
+        timestamp created_at
+    }
+
+    HOMEROOM_ASSIGNMENTS {
+        uuid id PK
+        uuid teacher_id FK "users.id"
+        uuid class_id FK
+        uuid academic_year_id FK
+        timestamp created_at
+    }
+
+    GRADES {
+        uuid id PK
+        uuid enrollment_id FK
+        uuid subject_id FK
+        uuid teacher_id FK "users.id"
+        uuid academic_year_id FK
+        enum type "daily | exam | ats | aas"
+        string label "e.g. UH-1, Tugas-3"
+        decimal score "0–100"
+        timestamp created_at
+    }
+
+    ATTENDANCES {
+        uuid id PK
+        uuid enrollment_id FK
+        uuid subject_id FK
+        uuid teacher_id FK
+        date date
+        enum status "present | sick | permitted | absent"
+        text notes "nullable"
+        timestamp created_at
+    }
+
+    TEACHING_JOURNALS {
+        uuid id PK
+        uuid subject_id FK
+        uuid teacher_id FK
+        uuid class_id FK
+        date date
+        text material
+        text method
+        text reflection "nullable"
+        timestamp created_at
+    }
+
+    LESSON_PLANS {
+        uuid id PK
+        uuid subject_id FK
+        uuid teacher_id FK
+        uuid academic_year_id FK
+        enum type "prota | promes | rpp"
+        string title
+        text content "JSON or rich text"
+        string pdf_url "nullable — generated PDF"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CLASS_SCHEDULES {
+        uuid id PK
+        uuid class_id FK
+        uuid subject_id FK
+        uuid teacher_id FK
+        enum day "monday | tuesday | wednesday | thursday | friday | saturday"
+        time start_time
+        time end_time
+        timestamp created_at
+    }
+
+    EXTRACURRICULARS {
+        uuid id PK
+        uuid unit_id FK
+        uuid academic_year_id FK
+        string name
+        text description "nullable"
+        integer quota
+        boolean is_active
+        timestamp created_at
+    }
+
+    EXTRACURRICULAR_COACHES {
+        uuid id PK
+        uuid extracurricular_id FK
+        uuid coach_id FK "users.id"
+        timestamp created_at
+    }
+
+    EXTRACURRICULAR_SCHEDULES {
+        uuid id PK
+        uuid extracurricular_id FK
+        enum day "monday | tuesday | wednesday | thursday | friday | saturday"
+        time start_time
+        time end_time
+        string location "nullable"
+        timestamp created_at
+    }
+
+    EXTRACURRICULAR_MEMBERS {
+        uuid id PK
+        uuid extracurricular_id FK
+        uuid enrollment_id FK
+        timestamp joined_at
+    }
+
+    EXTRACURRICULAR_JOURNALS {
+        uuid id PK
+        uuid extracurricular_id FK
+        uuid coach_id FK
+        date date
+        text material
+        text participation_notes "nullable"
+        timestamp created_at
+    }
+
+    EXTRACURRICULAR_GRADES {
+        uuid id PK
+        uuid extracurricular_id FK
+        uuid enrollment_id FK
+        uuid coach_id FK
+        string predicate "e.g. A, B, C"
+        text notes "nullable"
+        timestamp created_at
+    }
+
+    SPP_INVOICES {
+        uuid id PK
+        uuid enrollment_id FK
+        uuid academic_year_id FK
+        integer month "1–12"
+        integer year
+        decimal amount
+        string proof_url "nullable"
+        enum status "unpaid | uploaded | verified | rejected"
+        uuid verified_by FK "nullable → users.id"
+        timestamp verified_at "nullable"
+        timestamp created_at
+    }
+
+    LHBS_REPORTS {
+        uuid id PK
+        uuid enrollment_id FK
+        uuid homeroom_teacher_id FK
+        uuid academic_year_id FK
+        enum semester "mid | final"
+        jsonb grades_snapshot "snapshot of all subject grades"
+        jsonb extracurricular_snapshot "snapshot of ekskul grades"
+        jsonb attendance_summary "H/I/S/A counts"
+        text homeroom_notes "nullable"
+        string pdf_url "nullable"
+        timestamp generated_at
+    }
+
+    PROMOTION_DECISIONS {
+        uuid id PK
+        uuid enrollment_id FK
+        uuid homeroom_teacher_id FK
+        enum decision "promoted | retained"
+        text notes "nullable"
+        string pdf_url "nullable"
+        timestamp decided_at
+    }
+```
+
+### 3.3 Catatan Desain Database
 
 - **UUID** sebagai primary key untuk semua tabel — menghindari enumerable ID dan aman untuk distributed systems
 - **Multi-tenant via `unit_id`** — setiap row yang bersifat per-unit memiliki kolom `unit_id` sebagai foreign key
@@ -455,6 +694,33 @@ const ROUTE_RULES: RouteRule[] = [
 | Download surat pengantar & kelulusan| ❌          | ❌         | ❌       | ❌       | ✅        |
 | Pilih jadwal observasi              | ❌          | ❌         | ❌       | ❌       | ✅        |
 
+### 4.5 RBAC Matrix — Modul Akademik
+
+| Endpoint / Aksi                          | Admin Unit | Guru Mapel | Wali Kelas | Pembina Ekskul | Orang Tua |
+| ---------------------------------------- | :--------: | :--------: | :--------: | :------------: | :-------: |
+| Tambah / kelola mata pelajaran           | ✅         | ❌         | ❌         | ❌             | ❌        |
+| Assign guru ke mata pelajaran            | ✅         | ❌         | ❌         | ❌             | ❌        |
+| Assign wali kelas                        | ✅         | ❌         | ❌         | ❌             | ❌        |
+| Tambah guru baru                         | ✅         | ❌         | ❌         | ❌             | ❌        |
+| Tambah / kelola ekstrakurikuler          | ✅         | ❌         | ❌         | ❌             | ❌        |
+| Assign pembina ekskul                    | ✅         | ❌         | ❌         | ❌             | ❌        |
+| Verifikasi pembayaran SPP               | ✅         | ❌         | ❌         | ❌             | ❌        |
+| Input nilai (harian, ujian, ATS, AAS)    | ❌         | ✅         | ❌         | ❌             | ❌        |
+| Input absensi siswa                      | ❌         | ✅         | ❌         | ❌             | ❌        |
+| Isi jurnal pembelajaran                  | ❌         | ✅         | ❌         | ❌             | ❌        |
+| Input Prota / Promes / RPP              | ❌         | ✅         | ❌         | ❌             | ❌        |
+| Input jadwal pelajaran                   | ✅         | ❌         | ✅         | ❌             | ❌        |
+| Generate LHBS                            | ❌         | ❌         | ✅         | ❌             | ❌        |
+| Tentukan kenaikan kelas                  | ❌         | ❌         | ✅         | ❌             | ❌        |
+| Input jadwal ekskul                      | ❌         | ❌         | ❌         | ✅             | ❌        |
+| Isi jurnal ekskul                        | ❌         | ❌         | ❌         | ✅             | ❌        |
+| Input nilai ekskul                       | ❌         | ❌         | ❌         | ✅             | ❌        |
+| Daftar ulang                             | ❌         | ❌         | ❌         | ❌             | ✅        |
+| Bayar SPP & upload bukti                 | ❌         | ❌         | ❌         | ❌             | ✅        |
+| Pilih ekskul untuk anak                  | ❌         | ❌         | ❌         | ❌             | ✅        |
+| Lihat jadwal, LHBS, kenaikan kelas      | ❌         | ❌         | ❌         | ❌             | ✅        |
+| Download PDF (jadwal, LHBS, keputusan)   | ❌         | ❌         | ✅         | ❌             | ✅        |
+
 ---
 
 ## 5. API Design
@@ -506,7 +772,31 @@ type ErrorResponse = {
 | `submitObservationResult`        | `actions/ppdb.ts`              | `ObservationResultSchema`  | Observer input skor                         |
 | `assignToClass`                  | `actions/ppdb.ts`              | `ClassAssignmentSchema`    | Admin assign siswa ke kelas                 |
 
-### 5.3 Contoh Zod Schema
+### 5.3 Server Actions — Modul Akademik
+
+| Action                              | File                             | Input Schema                    | Keterangan                                    |
+| ----------------------------------- | -------------------------------- | ------------------------------- | --------------------------------------------- |
+| `processReEnrollment`               | `actions/academic.ts`            | `ReEnrollmentSchema`            | Orang tua daftar ulang siswa                  |
+| `createSubject`                     | `actions/academic.ts`            | `SubjectSchema`                 | Admin unit tambah mata pelajaran              |
+| `assignTeacherToSubject`            | `actions/academic.ts`            | `TeacherAssignmentSchema`       | Admin assign guru ke mapel per kelas          |
+| `assignHomeroom`                    | `actions/academic.ts`            | `HomeroomAssignmentSchema`      | Admin assign wali kelas                       |
+| `submitGrade`                       | `actions/academic.ts`            | `GradeSchema`                   | Guru input nilai (daily/exam/ats/aas)         |
+| `submitAttendance`                  | `actions/academic.ts`            | `AttendanceSchema`              | Guru input absensi per mapel per hari         |
+| `submitTeachingJournal`             | `actions/academic.ts`            | `TeachingJournalSchema`         | Guru isi jurnal pembelajaran                  |
+| `submitLessonPlan`                  | `actions/academic.ts`            | `LessonPlanSchema`              | Guru input Prota/Promes/RPP                   |
+| `upsertClassSchedule`              | `actions/academic.ts`            | `ClassScheduleSchema`           | Wali kelas / admin input jadwal               |
+| `createExtracurricular`             | `actions/academic.ts`            | `ExtracurricularSchema`         | Admin unit tambah ekskul                      |
+| `assignCoach`                       | `actions/academic.ts`            | `CoachAssignmentSchema`         | Admin assign pembina ekskul                   |
+| `upsertExtracurricularSchedule`     | `actions/academic.ts`            | `ExtraScheduleSchema`           | Pembina input jadwal ekskul                   |
+| `joinExtracurricular`               | `actions/academic.ts`            | `JoinExtraSchema`               | Orang tua daftarkan anak ke ekskul            |
+| `submitExtracurricularJournal`      | `actions/academic.ts`            | `ExtraJournalSchema`            | Pembina isi jurnal ekskul                     |
+| `submitExtracurricularGrade`        | `actions/academic.ts`            | `ExtraGradeSchema`              | Pembina input nilai/predikat ekskul           |
+| `uploadSppProof`                    | `actions/academic.ts`            | `SppProofSchema`                | Orang tua upload bukti bayar SPP              |
+| `verifySppPayment`                  | `actions/academic.ts`            | `VerifySppSchema`               | Admin verifikasi SPP                          |
+| `generateLhbs`                      | `actions/academic.ts`            | `GenerateLhbsSchema`            | Wali kelas generate rapor (mid/final)         |
+| `decidePromotion`                   | `actions/academic.ts`            | `PromotionDecisionSchema`       | Wali kelas tentukan naik/tinggal kelas        |
+
+### 5.4 Contoh Zod Schema
 
 ```typescript
 // src/lib/validators/ppdb.ts
@@ -621,7 +911,20 @@ sequenceDiagram
 | Kelas penempatan        | `classes.name` via `class_assignments`       |
 | Tanda tangan kepsek     | `unit_settings.principal_signature_url`      |
 
-### 7.3 Implementasi
+### 7.3 Dokumen PDF — Modul Akademik
+
+| Dokumen                  | Sumber Data Utama                                          | Kop Surat        |
+| ------------------------ | ---------------------------------------------------------- | ---------------- |
+| Program Tahunan (Prota)  | `lesson_plans` (type=prota)                                | Logo unit + yayasan |
+| Program Semester (Promes)| `lesson_plans` (type=promes)                               | Logo unit + yayasan |
+| RPP                      | `lesson_plans` (type=rpp)                                  | Logo unit + yayasan |
+| Jadwal Pelajaran         | `class_schedules` + `subjects` + `teacher_assignments`     | Logo unit + yayasan |
+| Jadwal Ekstrakurikuler   | `extracurricular_schedules` + `extracurriculars`           | Logo unit + yayasan |
+| LHBS Tengah Semester     | `lhbs_reports` (semester=mid) — snapshot data              | Logo unit + yayasan |
+| LHBS Akhir Semester      | `lhbs_reports` (semester=final) — snapshot data            | Logo unit + yayasan |
+| Keputusan Kenaikan Kelas | `promotion_decisions` + `student_data`                     | Logo unit + yayasan |
+
+### 7.4 Implementasi
 
 ```typescript
 // Pseudocode — src/server/services/pdf-service.ts
@@ -750,6 +1053,57 @@ stateDiagram-v2
 | `/ppdb/[regId]/observation`    | Pilih jadwal & status observasi        |
 | `/ppdb/[regId]/result`         | Hasil seleksi & surat kelulusan        |
 
+### 9.5 Protected Routes — Modul Akademik (Admin Unit)
+
+| Path                                          | Halaman                                |
+| --------------------------------------------- | -------------------------------------- |
+| `/unit/[unitId]/academic`                      | Dashboard akademik unit                |
+| `/unit/[unitId]/academic/subjects`             | Kelola mata pelajaran                  |
+| `/unit/[unitId]/academic/teachers`             | Assign guru mapel & wali kelas         |
+| `/unit/[unitId]/academic/extracurriculars`     | Kelola ekskul & assign pembina         |
+| `/unit/[unitId]/academic/spp`                  | Verifikasi SPP                         |
+
+### 9.6 Protected Routes — Guru Mata Pelajaran
+
+| Path                                          | Halaman                                |
+| --------------------------------------------- | -------------------------------------- |
+| `/teacher`                                     | Dashboard guru                         |
+| `/teacher/grades`                              | Input nilai (per kelas & mapel)        |
+| `/teacher/attendance`                          | Input absensi siswa                    |
+| `/teacher/journal`                             | Jurnal pembelajaran harian             |
+| `/teacher/planning`                            | Prota / Promes / RPP                   |
+
+### 9.7 Protected Routes — Wali Kelas
+
+| Path                                          | Halaman                                |
+| --------------------------------------------- | -------------------------------------- |
+| `/homeroom`                                    | Dashboard wali kelas                   |
+| `/homeroom/schedule`                           | Input jadwal pelajaran                 |
+| `/homeroom/lhbs`                               | Generate & kelola LHBS                 |
+| `/homeroom/promotion`                          | Kenaikan kelas                         |
+
+### 9.8 Protected Routes — Pembina Ekstrakurikuler
+
+| Path                                          | Halaman                                |
+| --------------------------------------------- | -------------------------------------- |
+| `/coach`                                       | Dashboard pembina ekskul               |
+| `/coach/schedule`                              | Input jadwal ekskul                    |
+| `/coach/journal`                               | Jurnal kegiatan ekskul                 |
+| `/coach/grades`                                | Input nilai/predikat ekskul            |
+
+### 9.9 Protected Routes — Orang Tua (Portal Akademik)
+
+| Path                                          | Halaman                                |
+| --------------------------------------------- | -------------------------------------- |
+| `/academic`                                    | Dashboard akademik orang tua           |
+| `/academic/re-enrollment`                      | Daftar ulang siswa                     |
+| `/academic/spp`                                | Pembayaran SPP & riwayat               |
+| `/academic/extracurricular`                    | Pilih ekskul untuk anak                |
+| `/academic/schedule`                           | Lihat & cetak jadwal pelajaran         |
+| `/academic/extracurricular-schedule`           | Lihat & cetak jadwal ekskul            |
+| `/academic/lhbs`                               | Lihat & cetak LHBS                     |
+| `/academic/promotion`                          | Lihat keputusan kenaikan kelas         |
+
 ---
 
 ## 10. Environment Variables
@@ -805,70 +1159,85 @@ CLOUDINARY_API_SECRET=QSQ-HbPN10B20hHzIz-sZ9LgJvo1
 | PPDB registration             | Pilih unit → Bayar → Form → Upload → Submit           |
 | Admin payment verification    | Login admin → Lihat payment → Verifikasi              |
 | Observation flow              | Jadwal → Booking → Input skor → Peringkat             |
+| Academic re-enrollment        | Login ortu → Daftar ulang → Konfirmasi                |
+| Grade input                   | Login guru → Pilih kelas → Input nilai → Simpan       |
+| LHBS generation               | Login wali kelas → Generate LHBS → Download PDF      |
+| SPP payment                   | Login ortu → Lihat tagihan → Upload bukti → Verifikasi|
+| Extracurricular flow          | Admin buat ekskul → Ortu daftar → Pembina input nilai |
 
 ### 11.3 Lokasi File Test
 
 ```
 src/lib/validators/ppdb.test.ts          # co-located unit test
+src/lib/validators/academic.test.ts      # co-located unit test
 src/server/services/ppdb-service.test.ts  # co-located unit test
+src/server/services/academic-service.test.ts # co-located unit test
 tests/e2e/ppdb-registration.spec.ts       # E2E test
 tests/e2e/admin-payment.spec.ts           # E2E test
+tests/e2e/academic-grades.spec.ts         # E2E test
+tests/e2e/academic-lhbs.spec.ts           # E2E test
+tests/e2e/academic-spp.spec.ts            # E2E test
 ```
 
 ---
 
 ## 12. Deployment & Infrastructure
 
-### 12.1 Environments
+Proyek ini menggunakan arsitektur *Serverless/Managed Services* tanpa VPS konvensional maupun Docker Compose. 
 
-| Environment | Tujuan                    | Database           | Storage        | Host      |
-| ----------- | ------------------------- | ------------------ | -------------- | --------- |
-| **Local**   | Development               | PostgreSQL (Docker)| Cloudinary (Docker) | Localhost |
-| **Staging** | QA & UAT                  | PostgreSQL (Docker)| Cloudinary (Docker) | VPS       |
-| **Prod**    | Production                | PostgreSQL (Docker)| Cloudinary (Docker) | VPS       |
+### 12.1 Environments & Layanan
 
-### 12.2 VPS Stack (Docker Compose)
+| Komponen            | Layanan / Provider               | Deskripsi                                             |
+| ------------------- | -------------------------------- | ----------------------------------------------------- |
+| **Aplikasi Web**    | Vercel                           | Hosting Next.js App Router (Serverless Functions)     |
+| **Database**        | Supabase PostgreSQL (Managed)    | Skema Prisma di-migrate via koneksi langsung (`5432`) |
+| **Koneksi DB**      | Supabase Transaction Pooler      | Koneksi operasional aplikasi (`6543`)                 |
+| **Authentication**  | Supabase Auth (SSR)              | Terintegrasi dengan Next.js Middleware                |
+| **Object Storage**  | Cloudinary                       | Penyimpanan media (logo, PDF, bukti bayar)            |
+
+### 12.2 Arsitektur Infrastruktur
 
 ```mermaid
 graph TB
-    subgraph VPS["VPS (Ubuntu/Debian)"]
-        NG["Nginx Reverse Proxy\n+ SSL (Let's Encrypt)"]
-        subgraph Docker["Docker Compose"]
-            APP["Next.js App\n(Node.js container)"]
-            DB[("PostgreSQL 16")]
-            MINIO["Cloudinary\n(Object Storage)"]
-        end
+    subgraph "Client Side"
+        Browser["Web Browser (User)"]
     end
 
-    Internet --> NG
-    NG --> APP
-    APP --> DB
-    APP --> MINIO
+    subgraph "Vercel Cloud"
+        NextApp["Next.js Application\n(Edge/Serverless)"]
+        Middleware["Next.js Middleware\n(Auth Check)"]
+    end
+
+    subgraph "Supabase Cloud"
+        Auth["Supabase Auth"]
+        Pooler["Transaction Pooler\n(Port 6543)"]
+        DB[("PostgreSQL 15+")]
+    end
+
+    subgraph "Cloudinary Cloud"
+        Storage["Object Storage"]
+    end
+
+    Browser -->|HTTPS| NextApp
+    Browser -->|Auth Token| Middleware
+    NextApp -->|Query via Prisma| Pooler
+    Pooler --> DB
+    NextApp -->|Upload/Get Media| Storage
+    Middleware -.->|Verify| Auth
 ```
 
-### 12.3 CI/CD Pipeline
+### 12.3 CI/CD Pipeline (Vercel Integration)
 
 ```mermaid
 flowchart LR
-    A["Push to branch"] --> B["Lint (ESLint)"]
-    B --> C["Type Check (tsc)"]
-    C --> D["Unit Tests (Vitest)"]
-    D --> E["Build (next build)"]
-    E --> F["E2E Tests (Playwright)"]
-    F --> G{"Branch?"}
-    G -- main --> H["SSH Deploy to VPS (Staging)"]
-    G -- release/* --> I["SSH Deploy to VPS (Production)"]
+    A["Push to GitHub branch"] --> B["Vercel Build Process"]
+    B --> C["Lint (ESLint) & Type Check (tsc)"]
+    C --> D["Prisma Generate"]
+    D --> E["Next Build"]
+    E --> F{"Branch?"}
+    F -- main --> G["Deploy to Preview Environment"]
+    F -- release/* --> H["Deploy to Production Environment"]
 ```
-
-### 12.4 Rekomendasi Spesifikasi VPS
-
-| Komponen     | Minimum            | Rekomendasi         |
-| ------------ | ------------------ | ------------------- |
-| **CPU**      | 2 vCPU             | 4 vCPU              |
-| **RAM**      | 4 GB               | 8 GB                |
-| **Storage**  | 40 GB SSD          | 80 GB NVMe SSD      |
-| **OS**       | Ubuntu 22.04 LTS   | Ubuntu 24.04 LTS    |
-| **Bandwidth**| 1 TB/bulan         | Unmetered            |
 
 ---
 

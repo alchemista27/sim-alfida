@@ -58,16 +58,27 @@ export default async function ParentResultPage() {
             </p>
           </div>
           
-          <div className="bg-white/60 backdrop-blur-sm rounded-lg p-5 mt-6 border border-green-100 relative z-10 flex gap-4 items-start">
-            <Icon name="info" className="text-green-600 shrink-0" />
-            <div>
-              <h4 className="font-bold text-green-800 mb-1">Langkah Selanjutnya</h4>
-              <p className="text-sm text-green-700">
-                {reg.status === "enrolled" 
-                  ? "Ananda telah berhasil ditempatkan di dalam kelas. Silakan menunggu informasi lebih lanjut mengenai jadwal hari pertama sekolah dari wali kelas terkait."
-                  : "Silakan hubungi pihak sekolah untuk prosedur daftar ulang dan pengambilan seragam. Proses pembagian kelas akan segera diinformasikan."}
-              </p>
+          <div className="bg-white/60 backdrop-blur-sm rounded-lg p-5 mt-6 border border-green-100 relative z-10 flex flex-col sm:flex-row gap-4 items-start justify-between">
+            <div className="flex gap-4 items-start">
+              <Icon name="info" className="text-green-600 shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-green-800 mb-1">Langkah Selanjutnya</h4>
+                <p className="text-sm text-green-700">
+                  {reg.status === "enrolled" 
+                    ? "Ananda telah berhasil ditempatkan di dalam kelas. Silakan menunggu informasi lebih lanjut mengenai jadwal hari pertama sekolah dari wali kelas terkait."
+                    : "Silakan hubungi pihak sekolah untuk prosedur daftar ulang dan pengambilan seragam. Proses pembagian kelas akan segera diinformasikan."}
+                </p>
+              </div>
             </div>
+            
+            <a 
+              href={`/api/pdf/acceptance?id=${reg.id}`} 
+              target="_blank"
+              className="whitespace-nowrap shrink-0 flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+            >
+              <Icon name="download" className="text-base" />
+              Surat Kelulusan
+            </a>
           </div>
         </div>
       ) : (
