@@ -35,6 +35,11 @@ export async function requireAuth() {
 export async function requireRole(allowedRoles: UserRole[]) {
   const user = await requireAuth();
   const roles = user.roles || [];
+  
+  // Super admin bypasses role checks
+  const isSuperAdmin = roles.some((r) => r.role === UserRole.super_admin);
+  if (isSuperAdmin) return user;
+
   const hasRole = roles.some((r) => allowedRoles.includes(r.role));
 
   if (!hasRole) {

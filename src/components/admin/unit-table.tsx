@@ -17,6 +17,8 @@ export interface UnitTableRow {
   registered: number;
   adminName: string | null;
   ppdbActive: boolean;
+  activeStudents: number;
+  attendanceRate: number;
 }
 
 interface UnitTableProps {
@@ -48,10 +50,9 @@ export function UnitTable({ data }: UnitTableProps) {
           <tr>
             <th className="px-6 py-4 font-semibold">Nama Unit</th>
             <th className="px-6 py-4 font-semibold">Jenjang</th>
-            <th className="px-6 py-4 font-semibold">Status PPDB</th>
-            <th className="px-6 py-4 font-semibold">Kuota</th>
-            <th className="px-6 py-4 font-semibold">Terdaftar</th>
-            <th className="px-6 py-4 font-semibold">Admin</th>
+            <th className="px-6 py-4 font-semibold">Pendaftar PPDB</th>
+            <th className="px-6 py-4 font-semibold">Siswa Aktif</th>
+            <th className="px-6 py-4 font-semibold">Kehadiran</th>
             <th className="px-6 py-4 font-semibold text-right">Aksi</th>
           </tr>
         </thead>
@@ -63,16 +64,15 @@ export function UnitTable({ data }: UnitTableProps) {
               </td>
               <td className="px-6 py-4">{getLevelBadge(unit.level)}</td>
               <td className="px-6 py-4">
-                {unit.ppdbActive ? (
-                  <Badge className="bg-green-100 text-green-700">Aktif</Badge>
-                ) : (
-                  <Badge variant="gray">Nonaktif</Badge>
-                )}
+                <span className="font-bold">{unit.registered}</span>
+                <span className="text-gray-400 text-xs ml-1">/ {unit.quota}</span>
+                {unit.ppdbActive && <span className="ml-2 inline-block w-2 h-2 bg-green-500 rounded-full" title="PPDB Aktif"></span>}
               </td>
-              <td className="px-6 py-4">{unit.quota}</td>
-              <td className="px-6 py-4">{unit.registered}</td>
-              <td className="px-6 py-4 text-gray-500">
-                {unit.adminName || "-"}
+              <td className="px-6 py-4 font-bold text-teal-700">{unit.activeStudents}</td>
+              <td className="px-6 py-4">
+                <Badge variant={unit.attendanceRate >= 90 ? "teal" : unit.attendanceRate >= 75 ? "amber" : "red"}>
+                  {unit.attendanceRate}%
+                </Badge>
               </td>
               <td className="px-6 py-4 text-right">
                 <Link href={`/admin/units/${unit.id}`} passHref>
@@ -86,7 +86,7 @@ export function UnitTable({ data }: UnitTableProps) {
           ))}
           {data.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+              <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                 Belum ada data unit pendidikan.
               </td>
             </tr>

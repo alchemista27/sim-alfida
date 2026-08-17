@@ -83,6 +83,29 @@ export default async function UnitDashboardPage() {
   const registered = activeAY?.registered ?? totalRegistrations;
   const progressPct = quota > 0 ? Math.round((registered / quota) * 100) : 0;
 
+  // Akademik Stats
+  const activeStudents = await prisma.studentEnrollment.count({
+    where: { status: 'active', class: { unitId } }
+  });
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const todaysAttendances = await prisma.attendance.findMany({
+    where: {
+      date: { gte: today, lt: tomorrow },
+      enrollment: { class: { unitId } }
+    },
+    select: { status: true }
+  });
+
+  const presentCount = todaysAttendances.filter(a => a.status === 'present').length;
+  const attendanceRate = todaysAttendances.length > 0
+    ? Math.round((presentCount / todaysAttendances.length) * 100)
+    : 100;
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -100,16 +123,22 @@ export default async function UnitDashboardPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard title="Pendaftar" value={totalRegistrations} icon="how_to_reg" />
+        <StatCard title="Pendaftar PPDB" value={totalRegistrations} icon="how_to_reg" />
+        <StatCard title="Siswa Aktif" value={activeStudents} icon="face" />
+        <StatCard 
+          title="Kehadiran Hari Ini" 
+          value={`${attendanceRate}%`} 
+          icon="event_available" 
+          trend={attendanceRate < 90 ? "Perlu pemantauan" : "Bagus"} 
+          trendUp={attendanceRate >= 90} 
+        />
         <StatCard
           title="Pending Bayar"
           value={pendingPayment}
           icon="schedule"
-          trend={pendingPayment > 0 ? "Perlu tindakan" : undefined}
+          trend={pendingPayment > 0 ? "Menunggu aksi" : undefined}
           trendUp={false}
         />
-        <StatCard title="Berkas Diverifikasi" value={filesVerified} icon="verified" />
-        <StatCard title="Diterima" value={accepted} icon="check_circle" />
       </div>
 
       {/* PPDB Quota Progress */}
@@ -136,7 +165,7 @@ export default async function UnitDashboardPage() {
 
       {/* Shortcut Cards */}
       <div>
-        <h2 className="font-heading font-semibold text-xl text-primary mb-4">Akses Cepat</h2>
+        <h2 className="font-heading font-semibold text-xl text-primary mb-4">Akses Cepat PPDB</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <ShortcutCard
             title="Verifikasi Pembayaran"

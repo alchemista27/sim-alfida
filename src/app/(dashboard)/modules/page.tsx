@@ -75,12 +75,14 @@ export default async function ModulesPage() {
   const user = await getCurrentUser();
   const roles = user?.roles || [];
   
-  let ppdbHref = "/parent/dashboard"; // Default to parent
+  let dashboardHref = "/parent/dashboard"; // Default to parent
   
   if (roles.some((r: any) => r.role === "super_admin")) {
-    ppdbHref = "/admin/dashboard";
+    dashboardHref = "/admin/dashboard";
   } else if (roles.some((r: any) => r.role === "admin_unit")) {
-    ppdbHref = "/unit/dashboard";
+    dashboardHref = "/unit/dashboard";
+  } else if (roles.some((r: any) => r.role === "guru")) {
+    dashboardHref = "/teacher/dashboard";
   }
 
   return (
@@ -100,13 +102,15 @@ export default async function ModulesPage() {
           subtitle="Modul pendaftaran calon siswa baru, verifikasi berkas, observasi, dan seleksi."
           icon="school"
           active={true}
-          href={ppdbHref}
+          href={dashboardHref}
         />
 
         <ModuleCard
           title="Modul Akademik"
-          subtitle="Pengelolaan data siswa, kelas, jadwal pelajaran, dan penyesuaian kurikulum."
+          subtitle="Pengelolaan data siswa, kelas, jadwal pelajaran, nilai, rapor dan penyesuaian kurikulum."
           icon="menu_book"
+          active={true}
+          href={dashboardHref}
         />
 
         <ModuleCard

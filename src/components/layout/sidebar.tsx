@@ -29,6 +29,7 @@ const navGroups: NavGroup[] = [
     title: "Super Admin",
     items: [
       { title: "Dashboard Admin", href: "/admin/dashboard", icon: "dashboard" },
+      { title: "Pantauan Akademik", href: "/admin/academic", icon: "analytics" },
       { title: "Unit Pendidikan", href: "/admin/units", icon: "domain" },
       { title: "Manajemen Pengguna", href: "/admin/users", icon: "manage_accounts" },
     ],
@@ -51,20 +52,43 @@ const navGroups: NavGroup[] = [
     title: "Portal Orang Tua",
     items: [
       { title: "Dashboard Ortu", href: "/parent/dashboard", icon: "home" },
-      { title: "Pilih Unit", href: "/parent/select-unit", icon: "school" },
-      { title: "Pembayaran", href: "/parent/payment", icon: "payments" },
-      { title: "Form Siswa", href: "/parent/form-student", icon: "assignment" },
-      { title: "Form Ortu", href: "/parent/form-parents", icon: "family_restroom" },
-      { title: "Upload Berkas", href: "/parent/documents", icon: "upload_file" },
-      { title: "Surat IMC", href: "/parent/medical", icon: "local_hospital" },
-      { title: "Jadwal Observasi", href: "/parent/observation", icon: "event_available" },
-      { title: "Hasil Seleksi", href: "/parent/result", icon: "emoji_events" },
+      { title: "Pilih Unit (Daftar Baru)", href: "/parent/select-unit", icon: "school" },
     ],
   },
   {
     title: "Observer",
     items: [
       { title: "Input Observasi", href: "/observer", icon: "rate_review" },
+    ],
+  },
+  {
+    title: "Admin Unit (Akademik)",
+    items: [
+      { title: "Tahun Ajaran", href: "/unit/academic-years", icon: "event" },
+      { title: "Mata Pelajaran", href: "/unit/subjects", icon: "menu_book" },
+      { title: "Kelas & Siswa", href: "/unit/classes", icon: "class" },
+      { title: "Jadwal Pelajaran", href: "/unit/schedules", icon: "calendar_month" },
+      { title: "Ekstrakurikuler", href: "/unit/extracurricular", icon: "sports_soccer" },
+      { title: "Tagihan SPP", href: "/unit/spp", icon: "payments" },
+      { title: "Kenaikan Kelas", href: "/unit/promotions", icon: "school" },
+    ],
+  },
+  {
+    title: "Guru (Akademik)",
+    items: [
+      { title: "Dashboard Guru", href: "/teacher/dashboard", icon: "home" },
+      { title: "Jurnal Mengajar", href: "/teacher/journals", icon: "history_edu" },
+      { title: "RPP", href: "/teacher/lesson-plans", icon: "assignment" },
+      { title: "Input Nilai Harian", href: "/teacher/grades", icon: "grading" },
+      { title: "Penilaian Ekskul", href: "/teacher/extracurricular", icon: "sports_score" },
+      { title: "Rapor (LHBS)", href: "/teacher/lhbs", icon: "contact_page" },
+    ],
+  },
+  {
+    title: "Portal Orang Tua (Akademik)",
+    items: [
+      { title: "Bayar SPP", href: "/parent/spp", icon: "receipt_long" },
+      { title: "Rapor (LHBS)", href: "/parent/lhbs", icon: "auto_stories" },
     ],
   },
 ];
@@ -83,7 +107,8 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const isSuperAdmin = userRoles.some((r: any) => r.role === "super_admin");
   const isAdminUnit = userRoles.some((r: any) => r.role === "admin_unit");
   const isObserver = userRoles.some((r: any) => r.role === "observer");
-  const isParent = !isSuperAdmin && !isAdminUnit && !isObserver && status === "authenticated";
+  const isTeacher = userRoles.some((r: any) => r.role === "guru");
+  const isParent = !isSuperAdmin && !isAdminUnit && !isObserver && !isTeacher && status === "authenticated";
 
   const filteredGroups = navGroups.map(group => {
     // Hide auth links if logged in
@@ -95,10 +120,16 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
     }
     return group;
   }).filter(group => {
-    // Filter groups based on role
+    // Filter groups based on role strictly
     if (group.title === "Super Admin" && !isSuperAdmin) return false;
+    
     if (group.title === "Admin Unit (PPDB)" && !isAdminUnit) return false;
+    if (group.title === "Admin Unit (Akademik)" && !isAdminUnit) return false;
+    
     if (group.title === "Portal Orang Tua" && !isParent) return false;
+    if (group.title === "Portal Orang Tua (Akademik)" && !isParent) return false;
+    
+    if (group.title === "Guru (Akademik)" && !isTeacher) return false;
     if (group.title === "Observer" && !isObserver) return false;
     return true;
   });

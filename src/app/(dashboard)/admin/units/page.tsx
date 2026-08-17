@@ -38,6 +38,8 @@ export default async function AdminUnitsPage() {
       registered: activeAY?.registered || 0,
       ppdbActive: !!activeAY,
       adminName: u.userRoles[0]?.user.fullName || null,
+      activeStudents: 0,
+      attendanceRate: 100,
     };
   });
 
