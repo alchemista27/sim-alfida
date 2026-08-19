@@ -29,6 +29,7 @@ async function main() {
     { name: "SMP Islam Terpadu Iqra", slug: "smp-iqra", level: UnitLevel.smp },
     { name: "SMA Islam Terpadu Iqra", slug: "sma-iqra", level: UnitLevel.sma },
     { name: "Pesantren Quran Alfida", slug: "pesantren-alfida", level: UnitLevel.pesantren },
+    { name: "Kantor Pusat Yayasan", slug: "kantor-yayasan", level: UnitLevel.kantor_yayasan },
   ];
 
   const createdUnits = [];
@@ -138,21 +139,142 @@ async function main() {
         startDate: new Date("2026-01-01"),
         endDate: new Date("2026-06-30"),
         ppdbActive: true,
-        quota: 30,
-        registered: 18,
+        quota: 100,
+        registered: 0,
       },
     });
-    console.log("✓ Demo Academic Year 2026/2027 created for TK IT Auladuna 1.");
+    console.log("✓ Demo Academic Year created for TK Auladuna 1.");
   }
 
-  console.log("Seeding completed successfully!");
+  // 5. Create Other Admin Roles
+  const adminAccounts = [
+    { email: "hr@alfida.com", name: "Admin Kepegawaian", role: UserRole.admin_kepegawaian },
+    { email: "bpi@alfida.com", name: "Admin BPI", role: UserRole.admin_bpi },
+    { email: "unit@alfida.com", name: "Admin Unit", role: UserRole.admin_unit },
+    { email: "ppdb@alfida.com", name: "Tim PPDB", role: UserRole.tim_ppdb },
+    { email: "pendidikan@alfida.com", name: "Admin Bidang Pendidikan", role: UserRole.admin_bidang, deptName: "Bidang Pendidikan" },
+    { email: "keuangan@alfida.com", name: "Admin Bidang Keuangan", role: UserRole.admin_bidang, deptName: "Bidang Keuangan" },
+    { email: "sarpras@alfida.com", name: "Admin Bidang Sarpras", role: UserRole.admin_bidang, deptName: "Bidang Sarana & Prasarana" },
+    { email: "guru@alfida.com", name: "Guru Pengajar (Sekaligus Murobbi)", role: UserRole.guru },
+    { email: "karyawan@alfida.com", name: "Staf Karyawan", role: UserRole.karyawan }
+  ];
+
+  for (const acc of adminAccounts) {
+    let accId = `uuid-placeholder-${acc.role}`;
+    
+    // Auth with Supabase
+    let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: acc.email,
+      password: "Password123!",
+    });
+
+    if (authError || !authData?.user) {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: acc.email,
+        password: "Password123!",
+      });
+      if (!signUpError && signUpData?.user) {
+        accId = signUpData.user.id;
+      }
+    } else {
+      accId = authData.user.id;
+    }
+
+    if (!accId.startsWith("uuid-placeholder")) {
+      const userRecord = await prisma.user.upsert({
+        where: { email: acc.email },
+        update: { id: accId },
+        create: {
+          id: accId,
+          fullName: acc.name,
+          email: acc.email,
+          phone: "08120000" + Math.floor(Math.random() * 9999),
+          passwordHash: "managed_by_supabase",
+          isActive: true,
+        },
+      });
+
+      const existingAccRole = await prisma.userRoleAssignment.findFirst({
+        where: { userId: userRecord.id, role: acc.role },
+      });
+
+      if (!existingAccRole) {
+        let unitToAssign = acc.role === UserRole.admin_unit || acc.role === UserRole.tim_ppdb ? tk1?.id : null;
+        
+        const kantorYayasan = createdUnits.find(u => u.level === UnitLevel.kantor_yayasan);
+        if (acc.role === UserRole.admin_bidang && kantorYayasan) {
+          unitToAssign = kantorYayasan.id;
+        }
+
+        await prisma.userRoleAssignment.create({
+          data: {
+            userId: userRecord.id,
+            role: acc.role,
+            unitId: unitToAssign,
+          },
+        });
+      }
+
+      // If it's an admin bidang, create the department and link
+      if (acc.role === UserRole.admin_bidang && acc.deptName) {
+        const kantorYayasan = createdUnits.find(u => u.level === UnitLevel.kantor_yayasan);
+        if (kantorYayasan) {
+          let dept = await prisma.department.findFirst({
+            where: { name: acc.deptName, unitId: kantorYayasan.id }
+          });
+
+          if (!dept) {
+            dept = await prisma.department.create({
+              data: {
+                unitId: kantorYayasan.id,
+                name: acc.deptName,
+                description: `Departemen ${acc.deptName} Yayasan Alfida`,
+              }
+            });
+          }
+
+          const existingDeptAdmin = await prisma.departmentAdmin.findFirst({
+            where: { departmentId: dept.id, userId: userRecord.id }
+          });
+
+          if (!existingDeptAdmin) {
+            await prisma.departmentAdmin.create({
+              data: {
+                departmentId: dept.id,
+                userId: userRecord.id
+              }
+            });
+          }
+        }
+      }
+      
+      console.log(`✓ ${acc.name} initialized:`, userRecord.email);
+    }
+  }
+
+  // Assign Murobbi role to Guru and create Liqo Group
+  const guruUser = await prisma.user.findUnique({ where: { email: "guru@alfida.com" } });
+  if (guruUser) {
+    const existingMurobbiRole = await prisma.userRoleAssignment.findFirst({
+      where: { userId: guruUser.id, role: UserRole.murobbi },
+    });
+
+    if (!existingMurobbiRole) {
+      await prisma.userRoleAssignment.create({
+        data: {
+          userId: guruUser.id,
+          role: UserRole.murobbi,
+          unitId: null, // Global or unit-based depending on need
+        },
+      });
+      console.log(`✓ Role Murobbi ditambahkan ke ${guruUser.email}`);
+    }
+  }
+
+  console.log("Seeding complete!");
 }
 
 main()
-  .catch((e) => {
-    console.error("Error during seeding:", e);
-    process.exit(1);
-  })
   .finally(async () => {
     await prisma.$disconnect();
   });

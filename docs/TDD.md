@@ -7,7 +7,7 @@
 | **Versi**       | 0.1.0-alpha                                     |
 | **Tanggal**     | 6 Agustus 2026                                  |
 | **Penulis**     | Tim Pengembangan SIM-Alfida                     |
-| **Status**      | Draft                                           |
+| **Status**      | Fase 3 (Manajemen Karyawan) - Fase 1 & 2 Selesai|
 | **Referensi**   | [PRD.md](file:///home/alchemista/projects/sim-alfida/docs/PRD.md) · [AGENTS.md](file:///home/alchemista/projects/sim-alfida/AGENTS.md) · [DESIGN.md](file:///home/alchemista/projects/sim-alfida/DESIGN.md) |
 
 ---
@@ -243,7 +243,7 @@ erDiagram
         uuid id PK
         uuid user_id FK
         uuid unit_id FK "nullable - null for super_admin"
-        enum role "super_admin | admin_unit | guru | karyawan | orang_tua | observer | tim_ppdb"
+        enum role "super_admin | admin_unit | guru | karyawan | orang_tua | observer | tim_ppdb | admin_kepegawaian | admin_bpi | admin_bidang | murobbi"
         timestamp created_at
     }
 
@@ -611,7 +611,80 @@ erDiagram
     }
 ```
 
-### 3.3 Catatan Desain Database
+### 3.3 ERD — Modul Manajemen Karyawan
+
+```mermaid
+erDiagram
+    USERS ||--o{ ATTENDANCE_GPS : logs
+    USERS ||--o{ LEAVE_REQUESTS : submits
+    USERS ||--o{ WORK_PROGRAMS : manages
+    USERS ||--o{ WAJIBAT_REPORTS : reports
+    DEPARTMENTS ||--o{ USERS : belongs_to
+    LIQO_GROUPS ||--o{ USERS : members
+    USERS ||--o{ LIQO_GROUPS : mentors
+
+    DEPARTMENTS {
+        uuid id PK
+        string name
+        string description
+        timestamp created_at
+    }
+
+    LIQO_GROUPS {
+        uuid id PK
+        string name
+        uuid murobbi_id FK "users.id"
+        timestamp created_at
+    }
+
+    ATTENDANCE_GPS {
+        uuid id PK
+        uuid user_id FK
+        date date
+        time check_in
+        time check_out
+        decimal latitude
+        decimal longitude
+        boolean is_valid
+        timestamp created_at
+    }
+
+    LEAVE_REQUESTS {
+        uuid id PK
+        uuid user_id FK
+        enum type "cuti | sakit | izin"
+        date start_date
+        date end_date
+        string reason
+        enum status "pending | approved | rejected"
+        timestamp created_at
+    }
+
+    WORK_PROGRAMS {
+        uuid id PK
+        uuid department_id FK
+        uuid user_id FK
+        string title
+        text description
+        enum type "weekly | monthly"
+        enum status "planned | ongoing | completed"
+        timestamp created_at
+    }
+
+    WAJIBAT_REPORTS {
+        uuid id PK
+        uuid user_id FK
+        date date
+        boolean sholat_wajib
+        boolean puasa_kamis
+        boolean infaq
+        boolean baca_alquran
+        boolean sholat_sunnah
+        timestamp created_at
+    }
+```
+
+### 3.4 Catatan Desain Database
 
 - **UUID** sebagai primary key untuk semua tabel — menghindari enumerable ID dan aman untuk distributed systems
 - **Multi-tenant via `unit_id`** — setiap row yang bersifat per-unit memiliki kolom `unit_id` sebagai foreign key
@@ -721,6 +794,21 @@ const ROUTE_RULES: RouteRule[] = [
 | Lihat jadwal, LHBS, kenaikan kelas      | ❌         | ❌         | ❌         | ❌             | ✅        |
 | Download PDF (jadwal, LHBS, keputusan)   | ❌         | ❌         | ✅         | ❌             | ✅        |
 
+### 4.6 RBAC Matrix — Modul Manajemen Karyawan
+
+| Endpoint / Aksi                          | Admin Kepegawaian | Admin BPI | Admin Bidang | Murobbi | Karyawan / Guru |
+| ---------------------------------------- | :---------------: | :-------: | :----------: | :-----: | :-------------: |
+| Tambah guru/karyawan baru                | ✅                | ❌        | ❌           | ❌      | ❌              |
+| Kelola departemen & unit kerja           | ✅                | ❌        | ❌           | ❌      | ❌              |
+| Assign Karyawan ke departemen / unit     | ✅                | ❌        | ✅           | ❌      | ❌              |
+| Kelola grup UPA/Liqo                     | ❌                | ✅        | ❌           | ❌      | ❌              |
+| Approval cuti/izin/sakit                 | ✅                | ❌        | ✅           | ❌      | ❌              |
+| Review laporan wajibat                   | ❌                | ✅        | ❌           | ✅      | ❌              |
+| Input absensi GPS                        | ❌                | ❌        | ❌           | ❌      | ✅              |
+| Ajukan cuti/izin/sakit                   | ❌                | ❌        | ❌           | ❌      | ✅              |
+| Input laporan program kerja mingguan     | ❌                | ❌        | ❌           | ❌      | ✅              |
+| Input mutaba'ah wajibat                  | ❌                | ❌        | ❌           | ❌      | ✅              |
+
 ---
 
 ## 5. API Design
@@ -796,7 +884,20 @@ type ErrorResponse = {
 | `generateLhbs`                      | `actions/academic.ts`            | `GenerateLhbsSchema`            | Wali kelas generate rapor (mid/final)         |
 | `decidePromotion`                   | `actions/academic.ts`            | `PromotionDecisionSchema`       | Wali kelas tentukan naik/tinggal kelas        |
 
-### 5.4 Contoh Zod Schema
+### 5.4 API Route Handlers — Modul Manajemen Karyawan
+
+Berbeda dengan modul lainnya yang mayoritas menggunakan Server Actions, modul Manajemen Karyawan menyediakan REST API routes terdedikasi untuk integrasi tertentu:
+
+| Endpoint                  | Method | Keterangan                                  |
+| ------------------------- | ------ | ------------------------------------------- |
+| `/api/attendance/gps`     | POST   | Check-in/out absensi dengan koordinat GPS dan radius validation |
+| `/api/departments`        | GET, POST, PUT, DELETE | CRUD Departemen (Bidang) |
+| `/api/liqo`               | GET, POST, PUT, DELETE | Manajemen grup UPA/Liqo mentoring agama |
+| `/api/leave-requests`     | GET, POST, PUT, DELETE | Pengajuan dan approval cuti, sakit, izin |
+| `/api/work-programs`      | GET, POST, PUT, DELETE | Pelaporan program kerja mingguan/bulanan |
+| `/api/wajibat`            | GET, POST, PUT | Pelaporan mutaba'ah amal yaumi (wajibat) |
+
+### 5.5 Contoh Zod Schema
 
 ```typescript
 // src/lib/validators/ppdb.ts

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { upsertExtraSchedule, deleteExtraSchedule, upsertExtraJournal, deleteExtraJournal, upsertExtraGrade } from "@/actions/extracurricular";
 import { DayOfWeek } from "@prisma/client";

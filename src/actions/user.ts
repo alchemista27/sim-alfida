@@ -9,13 +9,24 @@ export async function getCurrentUser() {
 
   if (!user) return null;
 
-  // Coba ambil dari database
-  const dbUser = await prisma.user.findUnique({
+  // Coba ambil dari database berdasarkan ID
+  let dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     include: {
       roles: true
     }
   });
+
+  // Fallback: Jika ID Supabase berbeda dengan ID Prisma (akibat re-seed database),
+  // cari berdasarkan email.
+  if (!dbUser && user.email) {
+    dbUser = await prisma.user.findUnique({
+      where: { email: user.email },
+      include: {
+        roles: true
+      }
+    });
+  }
 
   return {
     ...user,

@@ -4,8 +4,8 @@
 
 | Atribut         | Detail                                          |
 | --------------- | ----------------------------------------------- |
-| **Versi**       | 0.1.0-alpha                                     |
-| **Tanggal**     | 6 Agustus 2026                                  |
+| **Versi**       | 0.3.0-alpha                                     |
+| **Tanggal**     | 18 Agustus 2026                                 |
 | **Database**    | Supabase PostgreSQL 15+                         |
 | **ORM**         | Prisma (via Connection Pooler)                  |
 | **Referensi**   | [PRD.md](file:///home/alchemista/projects/sim-alfida/docs/PRD.md) · [TDD.md](file:///home/alchemista/projects/sim-alfida/docs/TDD.md) |
@@ -115,7 +115,8 @@ CREATE TYPE unit_level AS ENUM (
     'sd',
     'smp',
     'sma',
-    'pesantren'
+    'pesantren',
+    'kantor_yayasan'
 );
 
 -- ── Enum: Peran pengguna ──
@@ -126,7 +127,11 @@ CREATE TYPE user_role AS ENUM (
     'karyawan',
     'orang_tua',
     'observer',
-    'tim_ppdb'
+    'tim_ppdb',
+    'admin_kepegawaian',
+    'admin_bpi',
+    'admin_bidang',
+    'murobbi'
 );
 
 -- ── Enum: Status pendaftaran PPDB ──
@@ -248,6 +253,26 @@ CREATE TYPE semester_type AS ENUM (
 CREATE TYPE promotion_decision AS ENUM (
     'promoted',
     'retained'
+);
+
+-- ── Enum: Tipe Pengajuan Izin (Fase 3) ──
+CREATE TYPE leave_type AS ENUM (
+    'cuti',
+    'sakit',
+    'izin'
+);
+
+-- ── Enum: Status Pengajuan Izin (Fase 3) ──
+CREATE TYPE leave_status AS ENUM (
+    'pending',
+    'approved',
+    'rejected'
+);
+
+-- ── Enum: Tipe Laporan Aktivitas (Fase 3) ──
+CREATE TYPE report_type AS ENUM (
+    'weekly',
+    'monthly'
 );
 ```
 
@@ -1416,7 +1441,143 @@ CREATE TABLE promotion_decisions (
 
 ---
 
-## 13. Ringkasan Tabel
+## 13. Tabel — Manajemen Karyawan (Fase 3 - PLANNED)
+
+### 13.1 `departments` (Bidang)
+Tabel untuk menyimpan data bidang/departemen.
+- `id`: UUID (PK)
+- `unit_id`: UUID (FK to units, nullable untuk bidang yayasan)
+- `name`: VARCHAR
+- `description`: TEXT
+- `is_active`: BOOLEAN
+- `created_at`: TIMESTAMPTZ
+
+### 13.2 `department_admins`
+Tabel penugasan admin untuk bidang.
+- `id`: UUID (PK)
+- `department_id`: UUID (FK to departments)
+- `user_id`: UUID (FK to users)
+- `created_at`: TIMESTAMPTZ
+
+### 13.3 `gps_attendance_config`
+Konfigurasi lokasi absensi GPS per unit.
+- `id`: UUID (PK)
+- `unit_id`: UUID (FK to units)
+- `latitude`: FLOAT
+- `longitude`: FLOAT
+- `radius_meters`: INTEGER
+- `created_at`: TIMESTAMPTZ
+
+### 13.4 `gps_attendances`
+Data absensi karyawan berbasis GPS.
+- `id`: UUID (PK)
+- `user_id`: UUID (FK to users)
+- `unit_id`: UUID (FK to units)
+- `date`: DATE
+- `check_in_time`: TIMESTAMPTZ
+- `check_out_time`: TIMESTAMPTZ
+- `latitude`: FLOAT
+- `longitude`: FLOAT
+- `status`: ENUM (present, late, dsb)
+- `notes`: TEXT
+- `created_at`: TIMESTAMPTZ
+
+### 13.5 `holidays`
+Jadwal hari libur (non-efektif).
+- `id`: UUID (PK)
+- `unit_id`: UUID (FK to units)
+- `date`: DATE
+- `name`: VARCHAR
+- `description`: TEXT
+- `created_at`: TIMESTAMPTZ
+
+### 13.6 `leave_requests`
+Pengajuan cuti/sakit/izin.
+- `id`: UUID (PK)
+- `user_id`: UUID (FK to users)
+- `type`: ENUM `leave_type`
+- `start_date`: DATE
+- `end_date`: DATE
+- `reason`: TEXT
+- `status`: ENUM `leave_status`
+- `approved_by`: UUID (FK to users)
+- `created_at`: TIMESTAMPTZ
+
+### 13.7 `liqo_groups` (UPA/Liqo)
+Kelompok mentoring BPI.
+- `id`: UUID (PK)
+- `unit_id`: UUID (FK to units)
+- `name`: VARCHAR
+- `murobbi_id`: UUID (FK to users)
+- `academic_year_id`: UUID (FK to academic_years)
+- `created_at`: TIMESTAMPTZ
+
+### 13.8 `liqo_members`
+Anggota kelompok Liqo.
+- `id`: UUID (PK)
+- `group_id`: UUID (FK to liqo_groups)
+- `user_id`: UUID (FK to users)
+- `joined_at`: TIMESTAMPTZ
+
+### 13.9 `liqo_schedules`
+Jadwal kelompok Liqo.
+- `id`: UUID (PK)
+- `group_id`: UUID (FK to liqo_groups)
+- `day`: ENUM `day_of_week`
+- `start_time`: TIME
+- `end_time`: TIME
+- `location`: VARCHAR
+- `created_at`: TIMESTAMPTZ
+
+### 13.10 `liqo_attendances`
+Kehadiran anggota Liqo.
+- `id`: UUID (PK)
+- `group_id`: UUID (FK to liqo_groups)
+- `member_id`: UUID (FK to liqo_members)
+- `date`: DATE
+- `status`: ENUM `attendance_status`
+- `notes`: TEXT
+- `created_at`: TIMESTAMPTZ
+
+### 13.11 `wajibat_reports`
+Laporan wajibat (ibadah harian) anggota BPI.
+- `id`: UUID (PK)
+- `member_id`: UUID (FK to liqo_members)
+- `group_id`: UUID (FK to liqo_groups)
+- `week_start`: DATE
+- `sholat_wajib`: INTEGER
+- `puasa_kamis`: BOOLEAN
+- `infaq`: BOOLEAN
+- `baca_alquran`: BOOLEAN
+- `sholat_sunnah`: BOOLEAN
+- `notes`: TEXT
+- `created_at`: TIMESTAMPTZ
+
+### 13.12 `work_programs`
+Program kerja bidang.
+- `id`: UUID (PK)
+- `department_id`: UUID (FK to departments)
+- `academic_year_id`: UUID (FK to academic_years)
+- `title`: VARCHAR
+- `description`: TEXT
+- `target_date`: DATE
+- `status`: VARCHAR
+- `created_at`: TIMESTAMPTZ
+
+### 13.13 `activity_reports`
+Laporan aktivitas bidang (pekanan/bulanan).
+- `id`: UUID (PK)
+- `department_id`: UUID (FK to departments)
+- `type`: ENUM `report_type`
+- `period_start`: DATE
+- `period_end`: DATE
+- `content`: TEXT
+- `submitted_by`: UUID (FK to users)
+- `created_at`: TIMESTAMPTZ
+
+---
+
+## 14. Ringkasan Tabel
 
 | #  | Tabel                    | Deskripsi                                       | Relasi Utama                  |
 | -- | ------------------------ | ----------------------------------------------- | ----------------------------- |
@@ -1455,19 +1616,32 @@ CREATE TABLE promotion_decisions (
 | 33 | `extracurricular_grades` | Nilai/predikat ekskul per siswa                | → extracurriculars, → student_enrollments, → users |
 | 34 | `spp_invoices`          | Tagihan SPP bulanan                             | → student_enrollments, → academic_years, → users |
 | 35 | `lhbs_reports`          | Laporan Hasil Belajar (Rapor)                   | → student_enrollments, → users, → academic_years |
-| 36 | `promotion_decisions`   | Keputusan kenaikan kelas                        | → student_enrollments, → users |
+| 36 | `promotion_decisions`      | Keputusan kenaikan kelas                        | → student_enrollments, → users |
+| 37 | `departments`              | Data bidang/departemen (Fase 3 PLANNED)         | → units                       |
+| 38 | `department_admins`        | Admin bidang (Fase 3 PLANNED)                   | → departments, → users        |
+| 39 | `gps_attendance_config`    | Konfigurasi GPS absensi (Fase 3 PLANNED)        | → units                       |
+| 40 | `gps_attendances`          | Absensi kehadiran GPS (Fase 3 PLANNED)          | → users, → units              |
+| 41 | `holidays`                 | Jadwal libur (Fase 3 PLANNED)                   | → units                       |
+| 42 | `leave_requests`           | Pengajuan izin/cuti/sakit (Fase 3 PLANNED)      | → users                       |
+| 43 | `liqo_groups`              | Kelompok UPA/Liqo (Fase 3 PLANNED)              | → units, → users, → years     |
+| 44 | `liqo_members`             | Anggota UPA/Liqo (Fase 3 PLANNED)               | → liqo_groups, → users        |
+| 45 | `liqo_schedules`           | Jadwal UPA/Liqo (Fase 3 PLANNED)                | → liqo_groups                 |
+| 46 | `liqo_attendances`         | Kehadiran UPA/Liqo (Fase 3 PLANNED)             | → liqo_groups, → liqo_members |
+| 47 | `wajibat_reports`          | Laporan ibadah harian wajibat (Fase 3 PLANNED)  | → liqo_members, → liqo_groups |
+| 48 | `work_programs`            | Program kerja bidang (Fase 3 PLANNED)           | → departments, → years        |
+| 49 | `activity_reports`         | Laporan aktivitas (Fase 3 PLANNED)              | → departments, → users        |
 
-**Total: 36 tabel**
+**Total: 49 tabel**
 
 ---
 
-## 14. Prisma Schema
+## 15. Prisma Schema
 
 Implementasi schema database menggunakan Prisma ORM akan disimpan di `prisma/schema.prisma`. Semua model akan didefinisikan dalam satu file tersebut sesuai standar Prisma, dan migrasi akan di-generate otomatis melalui Prisma CLI.
 
 ---
 
-## 15. Migration Strategy
+## 16. Migration Strategy
 
 | Langkah | Perintah                              | Keterangan                              |
 | ------- | ------------------------------------- | --------------------------------------- |
@@ -1481,7 +1655,7 @@ Implementasi schema database menggunakan Prisma ORM akan disimpan di `prisma/sch
 
 ---
 
-## 16. Seed Data
+## 17. Seed Data
 
 ```sql
 -- ── Foundation Settings ──
@@ -1514,7 +1688,7 @@ FROM users u WHERE u.email = 'admin@alfida.sch.id';
 
 ---
 
-## 17. Referensi
+## 18. Referensi
 
 | Dokumen                                                                | Konten                                 |
 | ---------------------------------------------------------------------- | -------------------------------------- |

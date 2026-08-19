@@ -5,10 +5,16 @@ import { UnitTable, UnitTableRow } from "@/components/admin/unit-table";
 import { requireRole } from "@/lib/auth-guard";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getBpiOverview, getDepartmentOverview, getAttendanceOverview } from "@/actions/super-dashboard";
+import { SuperDashboardClient } from "./super-dashboard-client";
 
 export default async function AdminDashboardPage() {
   // Protect route
   await requireRole([UserRole.super_admin]);
+
+  const bpiOverview = await getBpiOverview();
+  const deptOverview = await getDepartmentOverview();
+  const attOverview = await getAttendanceOverview();
 
   // Fetch stats
   const totalUnits = await prisma.unit.count();
@@ -115,6 +121,12 @@ export default async function AdminDashboardPage() {
           Ringkasan performa dan data Yayasan Alfida.
         </p>
       </div>
+
+      <SuperDashboardClient 
+        bpiOverview={bpiOverview} 
+        deptOverview={deptOverview} 
+        attOverview={attOverview} 
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard

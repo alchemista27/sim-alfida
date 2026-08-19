@@ -4,19 +4,19 @@
 
 | Atribut         | Detail                                      |
 | --------------- | ------------------------------------------- |
-| **Versi**       | 0.1.0-alpha                                 |
-| **Tanggal**     | 6 Agustus 2026                              |
+| **Versi**       | 0.3.0-alpha                                 |
+| **Tanggal**     | 18 Agustus 2026                             |
 | **Penulis**     | Tim Pengembangan SIM-Alfida                 |
-| **Status**      | Draft                                       |
+| **Status**      | Active Development                          |
 | **Referensi**   | AGENTS.md · DESIGN.md · PROJECTS.md         |
 
 ---
 
 ## 1. Ringkasan Eksekutif
 
-SIM-Alfida adalah platform Sistem Informasi Manajemen terpadu untuk Yayasan Alfida yang menaungi **2 TK, 3 SD, 1 SMP, 1 SMA, dan 1 Pesantren Alquran**. Sistem ini bertujuan meningkatkan efektivitas dan efisiensi pengelolaan yayasan melalui digitalisasi proses operasional mulai dari penerimaan siswa baru, akademik, surat-menyurat, manajemen karyawan, payroll, hingga rekrutmen.
+SIM-Alfida adalah platform Sistem Informasi Manajemen terpadu untuk Yayasan Alfida yang menaungi **2 TK, 3 SD, 1 SMP, 1 SMA, 1 Pesantren Alquran, dan 1 Kantor Yayasan (Bukan unit pendidikan)**. Sistem ini bertujuan meningkatkan efektivitas dan efisiensi pengelolaan yayasan melalui digitalisasi proses operasional mulai dari penerimaan siswa baru, akademik, surat-menyurat, manajemen karyawan, payroll, hingga rekrutmen.
 
-Platform dibangun dengan arsitektur **multi-tenant** yang memungkinkan setiap unit pendidikan dikelola secara independen di bawah satu sistem terpusat.
+Platform dibangun dengan arsitektur **multi-tenant** yang memungkinkan setiap unit pendidikan dan kantor yayasan dikelola secara independen di bawah satu sistem terpusat.
 
 ---
 
@@ -35,7 +35,7 @@ Platform dibangun dengan arsitektur **multi-tenant** yang memungkinkan setiap un
 | --------------------------------------------------- | ---------------- |
 | Digitalisasi proses PPDB seluruh unit                | 100%             |
 | Pengurangan waktu proses administrasi PPDB           | ≥ 50%            |
-| Adopsi sistem oleh seluruh unit pendidikan           | 8/8 unit         |
+| Adopsi sistem oleh seluruh unit pendidikan/yayasan         | 9/9 unit         |
 | Integrasi SSO dengan WordPress & Moodle              | Selesai di v1.0  |
 
 ---
@@ -106,19 +106,24 @@ Yayasan Alfida (Root)
 ├── SD Islam Terpadu Iqra 3
 ├── SMP Islam Terpadu Iqra
 ├── SMA Islam Terpadu Iqra
-└── Pesantren Quran Alfida
+├── Pesantren Quran Alfida
+└── Kantor Yayasan
 ```
 
 ### 5.2 Definisi Peran (Roles)
 
-| Peran                  | Akses                                                                                           |
-| ---------------------- | ----------------------------------------------------------------------------------------------- |
-| **Super Admin**        | Akses seluruh unit & modul. Membuat unit, assign admin unit, upload logo yayasan.               |
-| **Admin Unit**         | Akses fitur khusus unitnya. Assign guru/karyawan homebase. Upload logo unit & TTD kepala sekolah. |
-| **Guru / Karyawan**   | Akses modul manajemen karyawan dan absensi.                                                     |
-| **Orang Tua / Wali**  | Akses portal PPDB: registrasi, pembayaran, pengisian formulir, unggah berkas, pilih jadwal.     |
-| **Observer (PPDB)**    | Input hasil observasi calon siswa.                                                              |
-| **Tim PPDB Unit**      | Verifikasi berkas, menentukan peserta lolos tahap observasi.                                    |
+| Peran                         | Akses                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Super Admin**               | Akses seluruh unit & modul. Membuat unit, assign admin unit, upload logo yayasan.               |
+| **Admin Unit**                | Akses fitur khusus unitnya. Tambah guru/karyawan di unit, assign guru/karyawan homebase. Upload logo unit & TTD kepala sekolah. |
+| **Admin Kepegawaian**         | Tambah guru/karyawan, rekap absensi, dan assign staf ke unit.                                   |
+| **Admin Bina Pribadi Islam**  | Mengelola kelompok UPA/Liqo, assign guru/ustadz sebagai murobbi, pantau absensi & wajibat.      |
+| **Admin Bidang**              | Input program kerja, laporan bulanan, dan laporan mingguan per departemen/bidang.               |
+| **Murobbi**                   | Mengelola jadwal UPA/Liqo, update laporan kegiatan, input kehadiran anggota & laporan wajibat.  |
+| **Guru / Karyawan**           | Akses modul manajemen karyawan dan absensi.                                                     |
+| **Orang Tua / Wali**          | Akses portal PPDB: registrasi, pembayaran, pengisian formulir, unggah berkas, pilih jadwal.     |
+| **Observer (PPDB)**           | Input hasil observasi calon siswa.                                                              |
+| **Tim PPDB Unit**             | Verifikasi berkas, menentukan peserta lolos tahap observasi.                                    |
 
 ### 5.3 SSO (Single Sign-On)
 
@@ -412,7 +417,67 @@ Seluruh dokumen PDF menggunakan kop surat resmi yang terdiri dari logo unit (diu
 ### 6.4 Modul Manajemen Karyawan & Absensi
 
 **Prioritas:** 🟡 Sedang
-**Status:** TBA — Detail akan didefinisikan pada iterasi berikutnya.
+**Status:** Active Development
+
+#### 6.4.1 Deskripsi
+
+Modul untuk mengelola absensi (kehadiran GPS, lembur, izin/cuti), program bina pribadi Islam (UPA/Liqo), pelaporan program kerja per bidang, serta rekapitulasi data pegawai Yayasan Alfida dan seluruh unit.
+
+#### 6.4.2 Alur Kerja Utama (User Flow)
+
+```mermaid
+flowchart TD
+    A["Super Admin buat bidang & assign admin bidang"] --> B["Admin Kepegawaian assign staf ke unit"]
+    B --> C["Admin Unit set titik GPS & radius absen"]
+    C --> D["Admin BPI kelola grup UPA/Liqo & assign Murobbi"]
+    D --> E["Guru/Karyawan absen via GPS"]
+    E --> F["Guru/Karyawan akses jadwal UPA/Liqo & ajukan cuti/izin"]
+    F --> G["Murobbi kelola jadwal, input kehadiran & wajibat"]
+    G --> H["Admin Bidang input proker, laporan bulanan/mingguan"]
+    H --> I["Super Admin & Admin Kepegawaian rekapitulasi data"]
+```
+
+#### 6.4.3 Fitur Detail
+
+##### A. Manajemen Departemen & Unit (Super Admin & Admin Kepegawaian)
+
+| ID      | Fitur                                         | Aktor                     |
+| ------- | --------------------------------------------- | ------------------------- |
+| MKA-01  | Membuat bidang/departemen & assign admin      | Super Admin               |
+| MKA-02a | Tambah guru/karyawan & assign staf ke unit    | Admin Kepegawaian         |
+| MKA-02b | Tambah guru/karyawan untuk bertugas di unit   | Admin Unit                |
+| MKA-03  | Melihat rekapitulasi seluruh pegawai & unit   | Super Admin               |
+| MKA-04  | Rekap kehadiran dan aktivitas                 | Admin Kepegawaian         |
+
+##### B. Absensi GPS & Pengajuan Izin
+
+| ID      | Fitur                                         | Aktor                     |
+| ------- | --------------------------------------------- | ------------------------- |
+| MKA-05  | Set titik koordinat GPS & radius absensi      | Admin Unit                |
+| MKA-06  | Set jadwal hari libur & off day               | Admin Unit                |
+| MKA-07  | Absen harian via GPS                          | Guru & Karyawan           |
+| MKA-08  | Pengajuan cuti, sakit, dan izin               | Guru & Karyawan           |
+
+##### C. Bina Pribadi Islam (UPA/Liqo)
+
+| ID      | Fitur                                         | Aktor                     |
+| ------- | --------------------------------------------- | ------------------------- |
+| MKA-09  | Mengelola grup UPA/Liqo                       | Admin Bina Pribadi Islam  |
+| MKA-10  | Assign guru/ustadz sebagai Murobbi            | Admin Bina Pribadi Islam  |
+| MKA-11  | Pantau kehadiran anggota & laporan wajibat    | Admin Bina Pribadi Islam  |
+| MKA-12  | Mengelola jadwal UPA/Liqo & update laporan    | Murobbi                   |
+| MKA-13  | Input kehadiran anggota & wajibat             | Murobbi                   |
+| MKA-14  | Akses jadwal UPA/Liqo & submit wajibat        | Guru & Karyawan           |
+
+*Catatan: Wajibat meliputi laporan sholat wajib, puasa kamis, infaq, baca alquran, dan sholat sunnah.*
+
+##### D. Program Kerja & Laporan
+
+| ID      | Fitur                                         | Aktor                     |
+| ------- | --------------------------------------------- | ------------------------- |
+| MKA-15  | Input program kerja departemen                | Admin Bidang              |
+| MKA-16  | Input laporan aktivitas bulanan               | Admin Bidang              |
+| MKA-17  | Input laporan aktivitas mingguan              | Admin Bidang              |
 
 > [!NOTE]
 > Guru dan karyawan memiliki akses langsung ke modul ini sesuai role-based access control.
@@ -486,7 +551,7 @@ Seluruh dokumen PDF menggunakan kop surat resmi yang terdiri dari logo unit (diu
 
 ## 9. Roadmap & Fase Pengembangan
 
-### Fase 1 — Foundation & Modul PPDB
+### Fase 1 — Foundation & Modul PPDB (COMPLETE)
 
 | Milestone                              | Target       |
 | -------------------------------------- | ------------ |
@@ -499,7 +564,7 @@ Seluruh dokumen PDF menggunakan kop surat resmi yang terdiri dari logo unit (diu
 | Penempatan kelas & surat kelulusan     | Sprint 7     |
 | QA, testing, dan bugfix (Deployment)   | Sprint 8     |
 
-### Fase 2 — Modul Akademik
+### Fase 2 — Modul Akademik (COMPLETE)
 
 | Milestone                                          | Target        |
 | -------------------------------------------------- | ------------- |
@@ -514,9 +579,20 @@ Seluruh dokumen PDF menggunakan kop surat resmi yang terdiri dari logo unit (diu
 | Portal orang tua akademik (lihat jadwal, LHBS, dll)| Sprint 19–20  |
 | QA, testing, dan bugfix modul akademik             | Sprint 20–21  |
 
-### Fase 3 — Modul Karyawan, Payroll & Rekrutmen
+### Fase 3 — Modul Manajemen Karyawan
 
-> Detail akan didefinisikan setelah Fase 2 selesai.
+| Milestone                                          | Target        |
+| -------------------------------------------------- | ------------- |
+| Skema database karyawan, jabatan, unit & absensi   | Sprint 22     |
+| Manajemen departemen & assignment pegawai          | Sprint 23     |
+| Setup titik GPS, radius, hari libur (Admin Unit)   | Sprint 24     |
+| Absensi GPS harian (Mobile-friendly)               | Sprint 25     |
+| Pengajuan Cuti, Sakit, Izin & Approval             | Sprint 26     |
+| Manajemen Bina Pribadi Islam & Grup UPA/Liqo       | Sprint 27     |
+| Pelaporan Wajibat harian/mingguan                  | Sprint 28     |
+| Input Proker & Laporan Bulanan/Mingguan (Bidang)   | Sprint 29     |
+| Dashboard Rekapitulasi & Report System             | Sprint 30     |
+| QA, testing, dan bugfix modul karyawan             | Sprint 31     |
 
 ### Fase 4 — Integrasi Eksternal
 
@@ -574,7 +650,10 @@ Sebuah fitur dianggap selesai jika:
 | **ATS**    | Asesmen Tengah Semester                                      |
 | **AAS**    | Asesmen Akhir Semester                                       |
 | **Prota**  | Program Tahunan — rencana pemetaan KD/CP per tahun ajaran    |
-| **Promes** | Program Semester — penjabaran Prota per minggu per semester   |
-| **RPP**    | Rencana Pelaksanaan Pembelajaran                             |
-| **SPP**    | Sumbangan Pembinaan Pendidikan (biaya bulanan sekolah)       |
-| **Ekskul** | Ekstrakurikuler — kegiatan di luar jam pelajaran             |
+| **Promes**  | Program Semester — penjabaran Prota per minggu per semester  |
+| **RPP**     | Rencana Pelaksanaan Pembelajaran                             |
+| **SPP**     | Sumbangan Pembinaan Pendidikan (biaya bulanan sekolah)       |
+| **Ekskul**  | Ekstrakurikuler — kegiatan di luar jam pelajaran             |
+| **UPA/Liqo**| Unit Pembinaan Anggota — kelompok bina pribadi Islam         |
+| **Murobbi** | Guru/ustadz pemimpin kelompok UPA/Liqo                       |
+| **Wajibat** | Laporan ibadah rutin (sholat, puasa, infaq, tilawah, dll)    |

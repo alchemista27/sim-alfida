@@ -35,6 +35,24 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    title: "Manajemen Karyawan",
+    items: [
+      { title: "Dasbor Kepegawaian", href: "/admin/hr/dashboard", icon: "analytics" },
+      { title: "Rekap Absensi", href: "/admin/hr/attendance", icon: "summarize" },
+      { title: "Departemen / Bidang", href: "/admin/departments", icon: "domain" },
+      { title: "Distribusi Pegawai", href: "/admin/staff", icon: "badge" },
+      { title: "Kelola Cuti/Izin", href: "/admin/hr/leaves", icon: "event_available" },
+      { title: "Program Kerja", href: "/admin/work-programs", icon: "assignment" },
+      { title: "Laporan Aktivitas", href: "/admin/activity-reports", icon: "article" },
+    ],
+  },
+  {
+    title: "Bina Pribadi Islami",
+    items: [
+      { title: "Kelompok Liqo", href: "/admin/bpi/liqo", icon: "groups" },
+    ],
+  },
+  {
     title: "Admin Unit (PPDB)",
     items: [
       { title: "Dashboard Unit", href: "/unit/dashboard", icon: "speed" },
@@ -85,6 +103,22 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    title: "Layanan Pegawai",
+    items: [
+      { title: "Absensi Harian", href: "/staff/attendance", icon: "fingerprint" },
+      { title: "Riwayat Absensi", href: "/staff/attendance/history", icon: "history" },
+      { title: "Mutabaah (Amal Yaumi)", href: "/staff/mutabaah", icon: "task_alt" },
+      { title: "Jadwal Liqo (Karyawan)", href: "/staff/liqo", icon: "event_note" },
+      { title: "Pengajuan Izin/Cuti", href: "/staff/leaves", icon: "event_busy" },
+    ],
+  },
+  {
+    title: "Grup Mentoring",
+    items: [
+      { title: "Dasbor Murobbi", href: "/murobbi/liqo", icon: "co_present" },
+    ],
+  },
+  {
     title: "Portal Orang Tua (Akademik)",
     items: [
       { title: "Bayar SPP", href: "/parent/spp", icon: "receipt_long" },
@@ -108,6 +142,10 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const isAdminUnit = userRoles.some((r: any) => r.role === "admin_unit");
   const isObserver = userRoles.some((r: any) => r.role === "observer");
   const isTeacher = userRoles.some((r: any) => r.role === "guru");
+  const isKaryawan = userRoles.some((r: any) => r.role === "karyawan");
+  const isAdminKepegawaian = userRoles.some((r: any) => r.role === "admin_kepegawaian");
+  const isAdminBpi = userRoles.some((r: any) => r.role === "admin_bpi");
+  const isMurobbi = userRoles.some((r: any) => r.role === "murobbi");
   const isParent = !isSuperAdmin && !isAdminUnit && !isObserver && !isTeacher && status === "authenticated";
 
   const filteredGroups = navGroups.map(group => {
@@ -118,19 +156,38 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
         items: group.items.filter(item => item.title !== "Login" && item.title !== "Register")
       };
     }
+    // Filter department vs staff items for admin_kepegawaian
+    if (group.title === "Manajemen Karyawan") {
+      return {
+        ...group,
+        items: group.items.filter(item => {
+          if (item.href === "/admin/departments" && !isSuperAdmin) return false;
+          return true;
+        })
+      };
+    }
+    // Return group unmodified, items filter comes next
     return group;
   }).filter(group => {
-    // Filter groups based on role strictly
-    if (group.title === "Super Admin" && !isSuperAdmin) return false;
-    
+    // If user is super admin, they should ONLY see Super Admin specific menus to avoid clutter,
+    // even if they have other roles in the database.
+    if (isSuperAdmin) {
+      const allowedForSuperAdmin = ["Auth & Utama", "Super Admin", "Manajemen Karyawan", "Bina Pribadi Islami"];
+      return allowedForSuperAdmin.includes(group.title);
+    }
+
+    // Filter groups based on role strictly for non-super-admins
+    if (group.title === "Manajemen Karyawan" && !isAdminKepegawaian) return false;
+    if (group.title === "Bina Pribadi Islami" && !isAdminBpi) return false;
+    if (group.title === "Grup Mentoring" && !isMurobbi) return false;
     if (group.title === "Admin Unit (PPDB)" && !isAdminUnit) return false;
     if (group.title === "Admin Unit (Akademik)" && !isAdminUnit) return false;
-    
     if (group.title === "Portal Orang Tua" && !isParent) return false;
     if (group.title === "Portal Orang Tua (Akademik)" && !isParent) return false;
-    
     if (group.title === "Guru (Akademik)" && !isTeacher) return false;
+    if (group.title === "Layanan Pegawai" && !isTeacher && !isKaryawan) return false;
     if (group.title === "Observer" && !isObserver) return false;
+    
     return true;
   });
 

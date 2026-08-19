@@ -2,6 +2,19 @@
 
 ---
 
+**tanggal:** 19 Agustus 2026 (Sesi Akhir Phase 3)
+**progress:**
+- Menyelesaikan inisiatif **Sprint 22-36** secara menyeluruh (Modul Manajemen Karyawan & Absensi).
+- Mengimplementasikan **Presensi GPS Karyawan** dengan dukungan kalkulasi jarak (Haversine formula), batasan radius per unit, serta jadwal efektif harian (Sprint 22-26).
+- Membangun ekosistem **Bina Pribadi Islam (UPA/Liqo)** yang memfasilitasi penjadwalan mentoring, pencatatan mutaba'ah wajibat ibadah harian oleh anggota, hingga pantauan global oleh Admin BPI (Sprint 27-29).
+- Mengembangkan **Pengajuan Cuti/Izin** berjenjang dengan integrasi potong otomatis *leaveQuota* berbasis *Prisma Transaction* saat cuti disetujui oleh Admin (Sprint 30-31).
+- Menyediakan arsitektur **Program Kerja Bidang** dan rekam pelaporan (Activity Reports) berkala untuk seluruh departemen (Sprint 32-33).
+- Membangun kumpulan **Dashboard Eksekutif**, memisahkan Dasbor Kepegawaian (HR) untuk agregasi demografi & rekap CSV absensi, serta Dasbor *Super Admin* (*Bird-Eye View*) yang merangkum keseluruhan indeks Liqo, ibadah harian, kinerja departemen, dan absensi lintas-yayasan secara asinkron tanpa memblokir peramban (Sprint 34-35).
+- Mengeksekusi penutupan **Quality Assurance (Sprint 36)**, merampungkan *tech debt* (TSC `0 errors`), mematenkan pengujian *Playwright E2E*, dan menyusun pedoman rilis produksi (`PRODUCTION.md`).
+**commit message:** feat: finalize phase 3 HR modul with dashboards, E2E tests, and zero type errors
+
+---
+
 **tanggal:** 16 Agustus 2026 (Sesi 4)
 **progress:**
 - Menyelesaikan inisiatif **Sprint 9** (Skema Database Akademik & Daftar Ulang Siswa).

@@ -1,8 +1,19 @@
 # SIM-Alfida
 
-Sistem Informasi Manajemen terpadu untuk **Yayasan Alfida** yang menaungi 2 TK, 3 SD, 1 SMP, 1 SMA, dan 1 Pesantren Alquran. Platform ini bertujuan untuk mendigitalkan seluruh proses operasional mulai dari Penerimaan Peserta Didik Baru (PPDB), akademik, surat-menyurat, hingga rekrutmen.
+Sistem Informasi Manajemen terpadu untuk **Yayasan Alfida** yang menaungi 2 TK, 3 SD, 1 SMP, 1 SMA, dan 1 Pesantren Alquran. Platform ini bertujuan untuk mendigitalkan seluruh proses operasional mulai dari Penerimaan Peserta Didik Baru (PPDB), akademik, surat-menyurat, hingga rekrutmen. Saat ini Modul PPDB dan Akademik telah selesai (Complete), dan Modul Manajemen Karyawan sedang dalam tahap pengembangan (In Development).
 
 Sistem ini dirancang dengan arsitektur **multi-tenant** sehingga setiap unit pendidikan memiliki *scope* datanya masing-masing dan beroperasi di bawah payung yayasan yang sama.
+
+---
+
+## 📦 Modul Sistem (Modules)
+
+- **Modul PPDB (Complete)** - Penerimaan Peserta Didik Baru
+- **Modul Akademik (Complete)** - Pengelolaan akademik, nilai, LHBS, ekskul
+- **Modul Manajemen Karyawan & Absensi (In Development)** - GPS attendance, UPA/Liqo, leave management
+- **Modul Surat Menyurat (Planned)**
+- **Modul Payroll (Planned)**
+- **Modul Rekrutmen (Planned)**
 
 ---
 
@@ -18,10 +29,12 @@ Sistem ini dirancang dengan arsitektur **multi-tenant** sehingga setiap unit pen
 
 ## 🛠 Tech Stack
 
-- **Framework:** Next.js (React 19 · App Router)
-- **Database & Auth:** Supabase (PostgreSQL & SSR Auth)
-- **ORM:** Prisma
-- **Styling:** Tailwind CSS (dengan *Material UI Icons*)
+- **Framework:** Next.js (React · App Router)
+- **Database & Auth:** Supabase (PostgreSQL & Supabase Auth SSR)
+- **ORM:** Prisma (Connected via Supabase Transaction Pooler)
+- **Storage:** Cloudinary (Image & PDF storage)
+- **Icons:** Material UI Icons (Google)
+- **Styling:** Tailwind CSS
 - **Validasi:** Zod
 
 ---
@@ -32,6 +45,7 @@ Prasyarat sebelum menjalankan proyek:
 - Node.js (v24+)
 - PNPM (*Package Manager*)
 - Kredensial akun Supabase (Database URL, Direct URL, Anon Key)
+- Kredensial akun Cloudinary
 
 ### 1. Klon Repositori & Instal Dependensi
 
@@ -79,6 +93,24 @@ npx prisma db seed
 pnpm dev
 ```
 Aplikasi akan berjalan di `http://localhost:3000`.
+
+Perintah lain yang tersedia:
+- `pnpm build` - Build untuk production
+- `pnpm lint` - Menjalankan ESLint
+- `pnpm test` - Menjalankan Vitest untuk unit tests
+- `pnpm test:e2e` - Menjalankan Playwright untuk E2E tests
+- `pnpm tsc --noEmit` - Menjalankan Typechecking
+
+---
+
+## 📁 Struktur Proyek (Project Structure)
+
+- `src/app/` - Halaman Next.js App Router
+- `src/components/` - Komponen React yang dapat digunakan ulang
+- `src/lib/` - Utility functions, Prisma client, dll
+- `prisma/` - Skema database (`schema.prisma`)
+- `tests/` - Unit tests & E2E tests
+- `docs/` - Dokumentasi proyek (PRD, Skema DB, Sprint Plan)
 
 ---
 

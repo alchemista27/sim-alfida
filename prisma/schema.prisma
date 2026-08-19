@@ -16,6 +16,7 @@ enum UnitLevel {
   smp
   sma
   pesantren
+  kantor_yayasan
 
   @@schema("sim")
 }
@@ -28,6 +29,10 @@ enum UserRole {
   orang_tua
   observer
   tim_ppdb
+  admin_kepegawaian
+  admin_bpi
+  admin_bidang
+  murobbi
 
   @@schema("sim")
 }
@@ -181,6 +186,39 @@ enum PromotionStatus {
   @@schema("sim")
 }
 
+// ── Tambahan Enums Fase 3 ──
+enum GpsAttendanceStatus {
+  present
+  late
+  absent
+  leave
+
+  @@schema("sim")
+}
+
+enum LeaveType {
+  cuti
+  sakit
+  izin
+
+  @@schema("sim")
+}
+
+enum LeaveStatus {
+  pending
+  approved
+  rejected
+
+  @@schema("sim")
+}
+
+enum ReportType {
+  weekly
+  monthly
+
+  @@schema("sim")
+}
+
 // ── Tables ──
 model FoundationSettings {
   id                String    @id @default(uuid()) @db.Uuid
@@ -211,6 +249,12 @@ model Unit {
   classes          Class[]
   subjects         Subject[]
   extracurriculars Extracurricular[]
+
+  // Modul Karyawan (Fase 3)
+  departments         Department[]
+  holidays            Holiday[]
+  gpsAttendanceConfig GpsAttendanceConfig?
+  gpsAttendances      GpsAttendance[]
 
   @@map("units")
   @@schema("sim")
@@ -243,6 +287,7 @@ model User {
   passwordHash String    @map("password_hash") @db.VarChar(255)
   groups       String[] // Fitur PostgreSQL: Array of strings
   isActive     Boolean   @default(true) @map("is_active")
+  leaveQuota   Int       @default(12) @map("leave_quota")
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -260,6 +305,18 @@ model User {
   extraCoaches        ExtracurricularCoach[]   @relation("ExtraCoaches")
   extraJournals       ExtracurricularJournal[] @relation("ExtraJournals")
   promotionDecisions  PromotionDecision[]      @relation("PromotionDecider")
+
+  // Modul Karyawan (Fase 3)
+  departmentAdmins DepartmentAdmin[]
+  gpsAttendances   GpsAttendance[]
+  liqoGroupsAsMurobbi LiqoGroup[]
+  liqoMemberships  LiqoMember[]
+  liqoAttendances  LiqoAttendance[]
+  mutabaahRecords  MutabaahRecord[]
+  leaveRequests    LeaveRequest[] @relation("UserLeaveRequests")
+  approvedLeaves   LeaveRequest[] @relation("ApprovedLeaves")
+  workProgramsAsPIC WorkProgram[] @relation("WorkProgramsPIC")
+  activityReports  ActivityReport[] @relation("SubmittedActivityReports")
 
   @@map("users")
   @@schema("shared")
@@ -316,6 +373,7 @@ model AcademicYear {
   extraCoaches         ExtracurricularCoach[]
   extraMemberships     ExtracurricularMember[]
   lhbsReports          LhbsReport[]
+  workPrograms         WorkProgram[]
 
   @@unique([unitId, name])
   @@map("academic_years")
@@ -867,5 +925,241 @@ model PromotionDecision {
   teacher    User              @relation("PromotionDecider", fields: [decidedBy], references: [id], onDelete: Restrict)
 
   @@map("promotion_decisions")
+  @@schema("sim")
+}
+
+// ── Modul Manajemen Karyawan & Absensi (Fase 3) ──
+
+model Department {
+  id          String   @id @default(uuid()) @db.Uuid
+  unitId      String?  @map("unit_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  unit   Unit?             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  admins DepartmentAdmin[]
+  workPrograms WorkProgram[]
+  activityReports ActivityReport[]
+
+  @@map("departments")
+  @@schema("sim")
+}
+
+model DepartmentAdmin {
+  id           String   @id @default(uuid()) @db.Uuid
+  departmentId String   @map("department_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([departmentId, userId])
+  @@map("department_admins")
+  @@schema("sim")
+}
+
+model Holiday {
+  id          String   @id @default(uuid()) @db.Uuid
+  unitId      String?  @map("unit_id") @db.Uuid
+  date        DateTime @db.Date
+  name        String   @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  unit Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, date])
+  @@map("holidays")
+  @@schema("sim")
+}
+
+model GpsAttendanceConfig {
+  id           String   @id @default(uuid()) @db.Uuid
+  unitId       String   @unique @map("unit_id") @db.Uuid
+  latitude     Float
+  longitude    Float
+  radiusMeters Int      @default(50) @map("radius_meters")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@map("gps_attendance_config")
+  @@schema("sim")
+}
+
+model GpsAttendance {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @map("user_id") @db.Uuid
+  unitId       String              @map("unit_id") @db.Uuid
+  date         DateTime            @db.Date
+  checkInTime  DateTime?           @map("check_in_time") @db.Timestamptz
+  checkOutTime DateTime?           @map("check_out_time") @db.Timestamptz
+  latitude     Float?
+  longitude    Float?
+  status       GpsAttendanceStatus
+  notes        String?
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("gps_attendances")
+  @@schema("sim")
+}
+
+model LiqoGroup {
+  id               String      @id @default(uuid()) @db.Uuid
+  name             String      @db.VarChar(200)
+  murobbiId        String      @map("murobbi_id") @db.Uuid
+  description      String?
+  scheduleDay      DayOfWeek?  @map("schedule_day")
+  scheduleTime     String?     @map("schedule_time") @db.VarChar(50)
+  scheduleLocation String?     @map("schedule_location") @db.VarChar(200)
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime?   @updatedAt @map("updated_at") @db.Timestamptz
+
+  murobbi          User          @relation(fields: [murobbiId], references: [id], onDelete: Restrict)
+  members          LiqoMember[]
+  meetings         LiqoMeeting[]
+
+  @@map("liqo_groups")
+  @@schema("sim")
+}
+
+model LiqoMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  groupId   String   @map("group_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  joinedAt  DateTime @default(now()) @map("joined_at") @db.Timestamptz
+
+  group     LiqoGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("liqo_members")
+  @@schema("sim")
+}
+
+model LiqoMeeting {
+  id            String    @id @default(uuid()) @db.Uuid
+  groupId       String    @map("group_id") @db.Uuid
+  date          DateTime  @db.Date
+  materialTitle String    @map("material_title") @db.VarChar(200)
+  summary       String?   @db.Text
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+
+  group         LiqoGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  attendances   LiqoAttendance[]
+
+  @@map("liqo_meetings")
+  @@schema("sim")
+}
+
+model LiqoAttendance {
+  id        String           @id @default(uuid()) @db.Uuid
+  meetingId String           @map("meeting_id") @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  status    AttendanceStatus
+  notes     String?          @db.VarChar(255)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime?        @updatedAt @map("updated_at") @db.Timestamptz
+
+  meeting   LiqoMeeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, userId])
+  @@map("liqo_attendances")
+  @@schema("sim")
+}
+
+model MutabaahRecord {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  date          DateTime @db.Date
+  sholatJamaah  Int      @default(0) @map("sholat_jamaah")
+  sholatRawatib Int      @default(0) @map("sholat_rawatib")
+  sholatDhuha   Boolean  @default(false) @map("sholat_dhuha")
+  sholatTahajud Boolean  @default(false) @map("sholat_tahajud")
+  tilawahPages  Int      @default(0) @map("tilawah_pages")
+  puasaSunnah   Boolean  @default(false) @map("puasa_sunnah")
+  infaq         Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("mutabaah_records")
+  @@schema("sim")
+}
+
+model LeaveRequest {
+  id            String      @id @default(uuid()) @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  type          LeaveType
+  startDate     DateTime    @map("start_date") @db.Date
+  endDate       DateTime    @map("end_date") @db.Date
+  reason        String      @db.Text
+  attachmentUrl String?     @map("attachment_url") @db.Text
+  status        LeaveStatus @default(pending)
+  approvedById  String?     @map("approved_by_id") @db.Uuid
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime?   @updatedAt @map("updated_at") @db.Timestamptz
+
+  user          User        @relation("UserLeaveRequests", fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy    User?       @relation("ApprovedLeaves", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@map("leave_requests")
+  @@schema("sim")
+}
+
+enum WorkProgramStatus {
+  planned
+  ongoing
+  completed
+  @@schema("sim")
+}
+
+model WorkProgram {
+  id             String            @id @default(uuid()) @db.Uuid
+  departmentId   String            @map("department_id") @db.Uuid
+  academicYearId String?           @map("academic_year_id") @db.Uuid
+  userId         String?           @map("user_id") @db.Uuid
+  title          String            @db.VarChar(255)
+  description    String?           @db.Text
+  targetDate     DateTime?         @map("target_date") @db.Date
+  status         WorkProgramStatus @default(planned)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime?         @updatedAt @map("updated_at") @db.Timestamptz
+
+  department     Department        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear?     @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  user           User?             @relation("WorkProgramsPIC", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("work_programs")
+  @@schema("sim")
+}
+
+model ActivityReport {
+  id            String      @id @default(uuid()) @db.Uuid
+  departmentId  String      @map("department_id") @db.Uuid
+  type          ReportType
+  periodStart   DateTime    @map("period_start") @db.Date
+  periodEnd     DateTime    @map("period_end") @db.Date
+  content       String      @db.Text
+  attachmentUrl String?     @map("attachment_url") @db.Text
+  submittedById String      @map("submitted_by_id") @db.Uuid
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime?   @updatedAt @map("updated_at") @db.Timestamptz
+
+  department    Department  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  submittedBy   User        @relation("SubmittedActivityReports", fields: [submittedById], references: [id], onDelete: Cascade)
+
+  @@map("activity_reports")
   @@schema("sim")
 }

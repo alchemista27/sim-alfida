@@ -11,8 +11,9 @@ export const metadata = {
 export default async function ReEnrollmentFormPage({
   params,
 }: {
-  params: { enrollmentId: string };
+  params: Promise<{ enrollmentId: string }>;
 }) {
+  const resolvedParams = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -22,7 +23,7 @@ export default async function ReEnrollmentFormPage({
   // Ambil data enrollment yang akan didaftarkan ulang
   const currentEnrollment = await prisma.studentEnrollment.findUnique({
     where: {
-      id: params.enrollmentId,
+      id: resolvedParams.enrollmentId,
       parentId: user.id,
       status: "active",
     },

@@ -78,7 +78,19 @@ Modul ini adalah modul khusus pengelolaan akademik yayasan dan seluruh unit pend
 TBA
 
 ### Modul Manajemen Karyawan dan Absen
-TBA
+Modul ini adalah modul pengelolaan karyawan dan guru yang ada di lingkungan Yayasan Alfida Bengkulu. Modul ini memiliki fitur sebagai berikut:
+- Super admin memiliki akses ke rekap nama-nama karyawan dan guru yang ada di lingkungan yayasan alfida dan semua rekapan dari masing-masing bidang
+- Super admin bisa membuat bidang dan assign user untuk menjadi admin bidang
+- Admin kepegawaian memiliki akses untuk merekap kehadiran karyawan dan guru
+- Admin kepegawaian memiliki akses untuk assign guru dan karyawan ke unit yang ada
+- Admin kepegawaian memiliki akses untuk menambahkan guru atau karyawan dan assign unit
+- Admin Unit memiliki akses untuk menentukan titik lokasi koordinat absen by gps, radius absen dan seeding tanggal merah dan jadwal libur
+- Admin unit bisa menambahkan guru dan karyawan yang bertugas di unit
+- Admin bina pribadi islam memiliki akses untuk membuat kelompok UPA/Liqo, assign guru atau ustadz sebagai murobbi kelompok UPA/Liqo, rekap kehadiran peserta kelompok Liqo dan rekap laporan wajibat (sholat wajib, puasa kamis, infaq, baca alquran, sholat sunnah) masing-masing kelompok liqo
+- Murobbi bisa mengakses fitur atur jadwal, update laporan kegiatan liqo, input kehadiran anggota kelompok, input laporan wajibat peserta.
+- Admin masing-masing bidang bisa input program kerja, laporan kegiatan bulanan, dan laporan kegiatan mingguan.
+- Guru dan karyawan bisa melakukan absen dengan GPS, akses jadwal UPA/liqo, mengajukan izin (cuti, sakit atau izin)
+- Tambahkan satu unit khusus yaitu Kantor Yayasan (Bukan unit pendidikan)
 
 ### Modul Payroll
 TBA

@@ -1,0 +1,94 @@
+import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/actions/user";
+import { UserRole, GpsAttendanceStatus, LeaveStatus, WorkProgramStatus } from "@prisma/client";
+import { requireRole } from "@/lib/auth-guard";
+
+export async function getBpiOverview() {
+  await requireRole([UserRole.super_admin]);
+
+  // Liqo Attendance Rate (Global)
+  const liqoAttendances = await prisma.liqoAttendance.groupBy({
+    by: ['status'],
+    _count: { id: true }
+  });
+
+  let totalLiqo = 0;
+  let presentLiqo = 0;
+  liqoAttendances.forEach(a => {
+    totalLiqo += a._count.id;
+    if (a.status === 'present') presentLiqo += a._count.id;
+  });
+  
+  const liqoAttendanceRate = totalLiqo > 0 ? Math.round((presentLiqo / totalLiqo) * 100) : 0;
+
+  // Mutabaah Aggregates
+  const mutabaahAgg = await prisma.mutabaahRecord.aggregate({
+    _avg: {
+      sholatJamaah: true,
+      tilawahPages: true
+    }
+  });
+
+  return {
+    liqoAttendanceRate,
+    avgJamaah: mutabaahAgg._avg.sholatJamaah || 0,
+    avgTilawah: mutabaahAgg._avg.tilawahPages || 0
+  };
+}
+
+export async function getDepartmentOverview() {
+  await requireRole([UserRole.super_admin]);
+
+  const workPrograms = await prisma.workProgram.groupBy({
+    by: ['status'],
+    _count: { id: true }
+  });
+
+  let planned = 0, ongoing = 0, completed = 0;
+  workPrograms.forEach(wp => {
+    if (wp.status === WorkProgramStatus.planned) planned = wp._count.id;
+    if (wp.status === WorkProgramStatus.ongoing) ongoing = wp._count.id;
+    if (wp.status === WorkProgramStatus.completed) completed = wp._count.id;
+  });
+
+  const totalReports = await prisma.activityReport.count();
+
+  return { planned, ongoing, completed, totalReports };
+}
+
+export async function getAttendanceOverview() {
+  await requireRole([UserRole.super_admin]);
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const attendances = await prisma.gpsAttendance.groupBy({
+    by: ['status'],
+    where: {
+      date: {
+        gte: today,
+        lt: tomorrow
+      }
+    },
+    _count: { id: true }
+  });
+
+  let present = 0, late = 0, absent = 0;
+  attendances.forEach(a => {
+    if (a.status === GpsAttendanceStatus.present) present = a._count.id;
+    if (a.status === GpsAttendanceStatus.late) late = a._count.id;
+    if (a.status === GpsAttendanceStatus.absent) absent = a._count.id;
+  });
+
+  const activeLeaves = await prisma.leaveRequest.count({
+    where: {
+      status: LeaveStatus.approved,
+      startDate: { lte: today },
+      endDate: { gte: today }
+    }
+  });
+
+  return { present, late, absent, activeLeaves };
+}
