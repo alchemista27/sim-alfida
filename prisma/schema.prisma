@@ -225,8 +225,10 @@ enum ReportType {
 model FoundationSettings {
   id                String    @id @default(uuid()) @db.Uuid
   foundationName    String    @default("Yayasan Alfida") @map("foundation_name") @db.VarChar(200)
-  logoUrl           String?   @map("logo_url")
-  bankName          String?   @map("bank_name") @db.VarChar(100)
+  logoUrl               String?   @map("logo_url")
+  chairmanName          String?   @map("chairman_name") @db.VarChar(200)
+  chairmanSignatureUrl  String?   @map("chairman_signature_url")
+  bankName              String?   @map("bank_name") @db.VarChar(100)
   bankAccountNumber String?   @map("bank_account_number") @db.VarChar(50)
   bankAccountHolder String?   @map("bank_account_holder") @db.VarChar(200)
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz

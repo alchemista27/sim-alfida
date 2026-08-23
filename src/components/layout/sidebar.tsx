@@ -32,6 +32,7 @@ const navGroups: NavGroup[] = [
       { title: "Pantauan Akademik", href: "/admin/academic", icon: "analytics" },
       { title: "Unit Pendidikan", href: "/admin/units", icon: "domain" },
       { title: "Manajemen Pengguna", href: "/admin/users", icon: "manage_accounts" },
+      { title: "Identitas Yayasan", href: "/admin/foundation-settings", icon: "account_balance" },
     ],
   },
   {
