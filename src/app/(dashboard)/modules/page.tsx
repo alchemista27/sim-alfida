@@ -81,21 +81,25 @@ export default async function ModulesPage() {
     dashboardHref = "/admin/dashboard";
   } else if (roles.some((r: any) => r.role === "admin_kepegawaian")) {
     dashboardHref = "/admin/hr/dashboard";
-  } else if (roles.some((r: any) => r.role === "admin_unit")) {
+  } else if (roles.some((r: any) => r.role === "admin_unit" || r.role === "tim_ppdb")) {
     dashboardHref = "/unit/dashboard";
   } else if (roles.some((r: any) => r.role === "guru")) {
     dashboardHref = "/teacher/dashboard";
   } else if (roles.some((r: any) => r.role === "karyawan")) {
     dashboardHref = "/staff/attendance";
+  } else if (roles.some((r: any) => r.role === "admin_bpi")) {
+    dashboardHref = "/admin/bpi/liqo";
+  } else if (roles.some((r: any) => r.role === "admin_bidang")) {
+    dashboardHref = "/admin/work-programs";
   }
 
   let hrHref = "/staff/attendance";
   if (roles.some((r: any) => r.role === "super_admin" || r.role === "admin_kepegawaian")) {
     hrHref = "/admin/hr/dashboard";
-  } else if (roles.some((r: any) => r.role === "admin_bidang")) {
-    hrHref = "/admin/work-programs";
   } else if (roles.some((r: any) => r.role === "admin_bpi")) {
     hrHref = "/admin/bpi/liqo";
+  } else if (roles.some((r: any) => r.role === "admin_bidang")) {
+    hrHref = "/admin/work-programs";
   }
 
   return (

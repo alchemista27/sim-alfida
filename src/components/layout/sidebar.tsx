@@ -146,7 +146,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const isAdminKepegawaian = userRoles.some((r: any) => r.role === "admin_kepegawaian");
   const isAdminBpi = userRoles.some((r: any) => r.role === "admin_bpi");
   const isMurobbi = userRoles.some((r: any) => r.role === "murobbi");
-  const isParent = !isSuperAdmin && !isAdminUnit && !isObserver && !isTeacher && status === "authenticated";
+  const isParent = userRoles.some((r: any) => r.role === "orang_tua");
 
   const filteredGroups = navGroups.map(group => {
     // Hide auth links if logged in
