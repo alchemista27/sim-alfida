@@ -6,17 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { updateFoundationSettings } from "@/actions/foundation-settings";
 import { Icon } from "@/components/ui/icon";
+import { Modal } from "@/components/ui/modal";
 
 export function FoundationSettingsClient({ settings }: { settings: any }) {
   const [isPending, startTransition] = useTransition();
   const [logoPreview, setLogoPreview] = useState<string | null>(settings.logoUrl || null);
   const [sigPreview, setSigPreview] = useState<string | null>(settings.chairmanSignatureUrl || null);
+  const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
+
+  const showModal = (title: string, message: string) => {
+    setModalConfig({ isOpen: true, title, message });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: any) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert("Ukuran maksimal 2MB!");
+        showModal("Gagal Mengunggah", "Ukuran berkas maksimal 2MB!");
         e.target.value = "";
         return;
       }
@@ -34,9 +44,9 @@ export function FoundationSettingsClient({ settings }: { settings: any }) {
     startTransition(async () => {
       try {
         await updateFoundationSettings(formData);
-        alert("Pengaturan yayasan berhasil diperbarui!");
+        showModal("Sukses", "Pengaturan yayasan berhasil diperbarui!");
       } catch (err: any) {
-        alert(err.message || "Gagal menyimpan pengaturan.");
+        showModal("Gagal", err.message || "Gagal menyimpan pengaturan.");
       }
     });
   };
@@ -125,6 +135,21 @@ export function FoundationSettingsClient({ settings }: { settings: any }) {
           {isPending ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
       </div>
+
+      <Modal 
+        isOpen={modalConfig.isOpen} 
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })} 
+        title={modalConfig.title}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">{modalConfig.message}</p>
+          <div className="flex justify-end pt-2">
+            <Button type="button" onClick={() => setModalConfig({ ...modalConfig, isOpen: false })}>
+              Tutup
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </form>
   );
 }
