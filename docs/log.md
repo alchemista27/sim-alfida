@@ -2,6 +2,15 @@
 
 ---
 
+**tanggal:** 23 Agustus 2026 (Sesi 3)
+**progress:**
+- Membangun fitur **Identitas Yayasan** di dasbor *Super Admin* yang memungkinkan manajemen pengaturan global seperti nama yayasan, detail rekening bank, serta fitur unggah logo dan tanda tangan pimpinan yayasan yang terintegrasi langsung dengan CDN *Cloudinary*.
+- Menginvestigasi dan menyelesaikan *bug* hak akses _(role privilege)_ Murobbi; kini sistem secara otomatis menyuntikkan *role* `murobbi` pada *database* (Tabel `UserRoleAssignment`) sesaat setelah Super Admin menugaskan seorang pengguna sebagai pembimbing grup Liqo.
+- Menambahkan kapabilitas penyimpanan **Tautan Grup WhatsApp** (`whatsapp_link`) di modul pengelolaan *LiqoGroup*, yang memungkinkan Murobbi menempelkan *invite link* mereka sehingga para peserta binaan bisa langsung mengaksesnya melalui tombol khusus di Dasbor Info Liqo Karyawan.
+**commit message:** feat: add foundation settings module, fix murobbi assignment role, and integrate whatsapp group links
+
+---
+
 **tanggal:** 23 Agustus 2026 (Sesi 2)
 **progress:**
 - Memperbaiki tautan navigasi dasbor Guru dari `/teacher/dashboard` ke `/teacher/schedules` serta melengkapi *sidebar* dengan menu **Absensi Siswa**.
