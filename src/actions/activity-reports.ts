@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
 import { UserRole, ReportType } from "@prisma/client";

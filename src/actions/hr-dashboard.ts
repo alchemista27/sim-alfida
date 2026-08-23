@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
 import { UserRole, GpsAttendanceStatus, LeaveStatus } from "@prisma/client";
