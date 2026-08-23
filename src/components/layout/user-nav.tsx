@@ -39,6 +39,13 @@ export function UserNav() {
             <p className="text-xs font-semibold text-primary">{userName}</p>
             <p className="text-[10px] text-gray-500">{user?.email}</p>
           </div>
+          <a
+            href="/profile"
+            className="w-full text-left px-4 py-2 text-xs text-primary hover:bg-neutral flex items-center gap-2 cursor-pointer border-b border-border"
+          >
+            <Icon name="person" className="text-sm" />
+            <span>Profil Saya</span>
+          </a>
           <button
             onClick={async () => {
               const supabase = createClient();

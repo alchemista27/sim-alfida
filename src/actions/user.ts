@@ -13,7 +13,9 @@ export async function getCurrentUser() {
   let dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     include: {
-      roles: true
+      roles: {
+        include: { unit: true }
+      }
     }
   });
 
@@ -23,7 +25,9 @@ export async function getCurrentUser() {
     dbUser = await prisma.user.findUnique({
       where: { email: user.email },
       include: {
-        roles: true
+        roles: {
+        include: { unit: true }
+      }
       }
     });
   }
