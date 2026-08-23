@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "SIM-Alfida — Sistem Informasi Manajemen Yayasan Alfida",
-  description: "Sistem Informasi Manajemen Pegawai, Karyawan, dan PPDB Yayasan Alfida",
-};
+import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await prisma.foundationSettings.findFirst();
+  return {
+    title: settings?.foundationName ? `SIM-Alfida — ${settings.foundationName}` : "SIM-Alfida — Sistem Informasi Manajemen Yayasan Alfida",
+    description: "Sistem Informasi Manajemen Pegawai, Karyawan, dan PPDB Yayasan Alfida",
+    icons: {
+      icon: settings?.logoUrl || "/favicon.ico",
+    }
+  };
+}
 
 export default function RootLayout({
   children,
