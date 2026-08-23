@@ -202,8 +202,9 @@ export default function SettingsClient({
             <select
               name="unitId"
               className="w-full px-3 py-2 text-sm bg-surface border border-border rounded text-primary focus:outline-none focus:border-secondary transition-colors"
+              required={units.length === 1} // Force required if they only have 1 unit to choose from
             >
-              <option value="">Semua Unit</option>
+              {units.length > 1 && <option value="">Semua Unit (Pusat)</option>}
               {units.map(u => (
                 <option key={u.id} value={u.id}>{u.name}</option>
               ))}
