@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -71,7 +71,7 @@ export default function ProfileClient({ user }: { user: any }) {
           <CardHeader>
             <CardTitle>Data Pengguna</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold text-gray-500 uppercase">Nama Lengkap</label>
@@ -100,7 +100,7 @@ export default function ProfileClient({ user }: { user: any }) {
                 <p className="text-sm text-gray-500">Tidak ada peran yang ditugaskan.</p>
               )}
             </div>
-          </CardContent>
+          </div>
         </Card>
       )}
 
@@ -110,7 +110,7 @@ export default function ProfileClient({ user }: { user: any }) {
             <CardHeader>
               <CardTitle>Ganti Email</CardTitle>
             </CardHeader>
-            <CardContent>
+            <div>
               <form onSubmit={handleUpdateEmail} className="space-y-4">
                 <Input
                   label="Email Baru"
@@ -124,14 +124,14 @@ export default function ProfileClient({ user }: { user: any }) {
                   {isPending ? "Menyimpan..." : "Simpan Email"}
                 </Button>
               </form>
-            </CardContent>
+            </div>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Ganti Kata Sandi</CardTitle>
             </CardHeader>
-            <CardContent>
+            <div>
               <form onSubmit={handleUpdatePassword} className="space-y-4">
                 <Input
                   label="Kata Sandi Baru"
@@ -152,7 +152,7 @@ export default function ProfileClient({ user }: { user: any }) {
                   {isPending ? "Menyimpan..." : "Ubah Kata Sandi"}
                 </Button>
               </form>
-            </CardContent>
+            </div>
           </Card>
         </div>
       )}
