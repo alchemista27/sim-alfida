@@ -2,6 +2,18 @@
 
 ---
 
+**tanggal:** 23 Agustus 2026 (Sesi 2)
+**progress:**
+- Memperbaiki tautan navigasi dasbor Guru dari `/teacher/dashboard` ke `/teacher/schedules` serta melengkapi *sidebar* dengan menu **Absensi Siswa**.
+- Merestrukturisasi penamaan menu RPP menjadi **Prota, Promes & RPP** agar lebih deskriptif dan mencakup semua perangkat pembelajaran.
+- Menerapkan arsitektur segregasi wewenang tingkat unit pada Modul SDM: Admin Unit kini hanya dapat memodifikasi koordinat GPS dan Kalender Libur untuk sekolah/unit miliknya sendiri.
+- Mengatur level unit `non_pendidikan` dan peran *custom* `admin_unit_nondik` (khusus untuk staf struktural Yayasan/Lazis/Asrama) agar menu dan fitur akademik tersembunyi secara otomatis.
+- Membuka akses menu **Rekap Absensi**, **Kelola Cuti/Izin**, dan **Distribusi Pegawai** kepada Admin Unit dengan filter data otomatis yang mengisolasi *output* hanya untuk staf bawahan mereka.
+- Mengembangkan fitur pembuatan (pendaftaran) akun SSO *staff* baru (Guru/Karyawan) secara langsung dari antarmuka Distribusi Pegawai yang dapat dieksekusi tanpa memutuskan sesi *login* Admin yang sedang aktif.
+**commit message:** feat: refactor unit admin segregation and enhance teacher navigation
+
+---
+
 **tanggal:** 23 Agustus 2026
 **progress:**
 - Menginvestigasi dan menyelesaikan anomali gagal kompilasi di server **Vercel** (`next/headers` digunakan di _Client Component_). Solusinya: menyuntikkan deklarasi `"use server";` ke seluruh fail _Server Actions_ Fase 3 (Dasbor HR, UPA/Liqo, Cuti, Proker).
