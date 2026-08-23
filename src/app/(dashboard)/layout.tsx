@@ -1,31 +1,27 @@
-"use client";
+import React from "react";
+import DashboardClient from "./dashboard-client";
+import { prisma } from "@/generated/client";
 
-import React, { useState } from "react";
-import { Topbar } from "@/components/layout/topbar";
-import { Sidebar } from "@/components/layout/sidebar";
-import { AuthProvider } from "@/components/providers/auth-provider";
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  let logoUrl = null;
+  let foundationName = "Yayasan Alfida";
+  try {
+    const settings = await prisma.foundationSettings.findFirst();
+    if (settings) {
+      logoUrl = settings.logoUrl;
+      foundationName = settings.foundationName;
+    }
+  } catch (e) {
+    // ignore
+  }
 
   return (
-    <AuthProvider>
-      <div className="min-h-screen flex flex-col bg-neutral">
-        <Topbar onToggleMobileSidebar={() => setMobileOpen(!mobileOpen)} />
-        <div className="flex flex-1">
-          <Sidebar
-            mobileOpen={mobileOpen}
-            onCloseMobile={() => setMobileOpen(false)}
-          />
-          <main className="flex-1 lg:ml-60 p-6 md:p-8 max-w-7xl mx-auto w-full">
-            {children}
-          </main>
-        </div>
-      </div>
-    </AuthProvider>
+    <DashboardClient logoUrl={logoUrl} foundationName={foundationName}>
+      {children}
+    </DashboardClient>
   );
 }

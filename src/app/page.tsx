@@ -2,18 +2,27 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { prisma } from "@/generated/client";
 
-export default function Home() {
+export default async function Home() {
+  const settings = await prisma.foundationSettings.findFirst();
+  const logoUrl = settings?.logoUrl || null;
+  const foundationName = settings?.foundationName || "Yayasan Alfida";
+
   return (
     <main className="min-h-screen p-8 max-w-4xl mx-auto flex flex-col gap-6">
       <div className="flex items-center gap-3 border-b border-border pb-4">
-        <Icon name="hub" className="text-4xl text-tertiary" />
+        {logoUrl ? (
+          <img src={logoUrl} alt="Logo" className="h-12 object-contain" />
+        ) : (
+          <Icon name="hub" className="text-4xl text-tertiary" />
+        )}
         <div>
           <h1 className="text-2xl font-bold font-heading text-tertiary">
             SIM-Alfida
           </h1>
           <p className="text-sm text-gray-600">
-            Sistem Informasi Manajemen — Yayasan Alfida
+            Sistem Informasi Manajemen — {foundationName}
           </p>
         </div>
       </div>
