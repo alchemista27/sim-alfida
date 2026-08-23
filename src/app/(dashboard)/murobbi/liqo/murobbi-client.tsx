@@ -25,6 +25,7 @@ export function MurobbiLiqoClient({ group, mutabaahStats = [] }: { group: any; m
   const [day, setDay] = useState<DayOfWeek | "">(group.scheduleDay || "");
   const [time, setTime] = useState(group.scheduleTime || "");
   const [location, setLocation] = useState(group.scheduleLocation || "");
+  const [whatsappLink, setWhatsappLink] = useState(group.whatsappLink || "");
   const [isUpdating, setIsUpdating] = useState(false);
 
   // modal states
@@ -49,6 +50,7 @@ export function MurobbiLiqoClient({ group, mutabaahStats = [] }: { group: any; m
         scheduleDay: day as DayOfWeek,
         scheduleTime: time,
         scheduleLocation: location,
+        whatsappLink: whatsappLink,
       });
       alert("Jadwal berhasil diperbarui");
     } catch (error) {
@@ -187,6 +189,13 @@ export function MurobbiLiqoClient({ group, mutabaahStats = [] }: { group: any; m
               label="Lokasi"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+            />
+            <Input
+              type="url"
+              label="Link WhatsApp Grup"
+              placeholder="https://chat.whatsapp.com/..."
+              value={whatsappLink}
+              onChange={(e) => setWhatsappLink(e.target.value)}
             />
           </div>
           <Button type="submit" disabled={isUpdating}>

@@ -5,6 +5,7 @@ export const LiqoScheduleSchema = z.object({
   scheduleDay: z.nativeEnum(DayOfWeek).nullable().optional(),
   scheduleTime: z.string().nullable().optional(),
   scheduleLocation: z.string().nullable().optional(),
+  whatsappLink: z.string().nullable().optional(),
 });
 
 export type LiqoScheduleInput = z.infer<typeof LiqoScheduleSchema>;

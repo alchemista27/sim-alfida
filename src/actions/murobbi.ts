@@ -46,6 +46,7 @@ export async function updateLiqoSchedule(groupId: string, data: LiqoScheduleInpu
       scheduleDay: parsed.scheduleDay,
       scheduleTime: parsed.scheduleTime,
       scheduleLocation: parsed.scheduleLocation,
+      whatsappLink: parsed.whatsappLink,
     }
   });
 

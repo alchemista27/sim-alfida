@@ -46,6 +46,19 @@ export function StaffLiqoClient({ group }: { group: any }) {
               {group.scheduleLocation ? ` di ${group.scheduleLocation}` : ""}
             </p>
           </div>
+          {group.whatsappLink && (
+            <div className="md:col-span-2 mt-2">
+              <p className="text-sm text-gray-500 mb-1">Grup WhatsApp</p>
+              <a 
+                href={group.whatsappLink} 
+                target="_blank" 
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-md font-medium text-sm hover:bg-green-100 transition-colors"
+              >
+                Gabung ke Grup WhatsApp
+              </a>
+            </div>
+          )}
         </div>
       </Card>
 

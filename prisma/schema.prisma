@@ -1023,6 +1023,7 @@ model LiqoGroup {
   scheduleDay      DayOfWeek?  @map("schedule_day")
   scheduleTime     String?     @map("schedule_time") @db.VarChar(50)
   scheduleLocation String?     @map("schedule_location") @db.VarChar(200)
+  whatsappLink     String?     @map("whatsapp_link") @db.VarChar(255)
   createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime?   @updatedAt @map("updated_at") @db.Timestamptz
 
