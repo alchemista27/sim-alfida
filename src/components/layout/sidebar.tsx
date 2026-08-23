@@ -107,7 +107,7 @@ const navGroups: NavGroup[] = [
       { title: "Dashboard Guru", href: "/teacher/schedules", icon: "home" },
       { title: "Absensi Siswa", href: "/teacher/attendance", icon: "how_to_reg" },
       { title: "Jurnal Mengajar", href: "/teacher/journals", icon: "history_edu" },
-      { title: "RPP", href: "/teacher/lesson-plans", icon: "assignment" },
+      { title: "Prota, Promes & RPP", href: "/teacher/lesson-plans", icon: "assignment" },
       { title: "Input Nilai Harian", href: "/teacher/grades", icon: "grading" },
       { title: "Penilaian Ekskul", href: "/teacher/extracurricular", icon: "sports_score" },
       { title: "Rapor (LHBS)", href: "/teacher/lhbs", icon: "contact_page" },
