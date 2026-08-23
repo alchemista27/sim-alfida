@@ -7,6 +7,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 // ── Enums ──
@@ -223,16 +224,16 @@ enum ReportType {
 
 // ── Tables ──
 model FoundationSettings {
-  id                String    @id @default(uuid()) @db.Uuid
-  foundationName    String    @default("Yayasan Alfida") @map("foundation_name") @db.VarChar(200)
-  logoUrl               String?   @map("logo_url")
-  chairmanName          String?   @map("chairman_name") @db.VarChar(200)
-  chairmanSignatureUrl  String?   @map("chairman_signature_url")
-  bankName              String?   @map("bank_name") @db.VarChar(100)
-  bankAccountNumber String?   @map("bank_account_number") @db.VarChar(50)
-  bankAccountHolder String?   @map("bank_account_holder") @db.VarChar(200)
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt         DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+  id                   String    @id @default(uuid()) @db.Uuid
+  foundationName       String    @default("Yayasan Alfida") @map("foundation_name") @db.VarChar(200)
+  logoUrl              String?   @map("logo_url")
+  chairmanName         String?   @map("chairman_name") @db.VarChar(200)
+  chairmanSignatureUrl String?   @map("chairman_signature_url")
+  bankName             String?   @map("bank_name") @db.VarChar(100)
+  bankAccountNumber    String?   @map("bank_account_number") @db.VarChar(50)
+  bankAccountHolder    String?   @map("bank_account_holder") @db.VarChar(200)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("foundation_settings")
   @@schema("sim")
@@ -311,16 +312,16 @@ model User {
   promotionDecisions  PromotionDecision[]      @relation("PromotionDecider")
 
   // Modul Karyawan (Fase 3)
-  departmentAdmins DepartmentAdmin[]
-  gpsAttendances   GpsAttendance[]
+  departmentAdmins    DepartmentAdmin[]
+  gpsAttendances      GpsAttendance[]
   liqoGroupsAsMurobbi LiqoGroup[]
-  liqoMemberships  LiqoMember[]
-  liqoAttendances  LiqoAttendance[]
-  mutabaahRecords  MutabaahRecord[]
-  leaveRequests    LeaveRequest[] @relation("UserLeaveRequests")
-  approvedLeaves   LeaveRequest[] @relation("ApprovedLeaves")
-  workProgramsAsPIC WorkProgram[] @relation("WorkProgramsPIC")
-  activityReports  ActivityReport[] @relation("SubmittedActivityReports")
+  liqoMemberships     LiqoMember[]
+  liqoAttendances     LiqoAttendance[]
+  mutabaahRecords     MutabaahRecord[]
+  leaveRequests       LeaveRequest[]    @relation("UserLeaveRequests")
+  approvedLeaves      LeaveRequest[]    @relation("ApprovedLeaves")
+  workProgramsAsPIC   WorkProgram[]     @relation("WorkProgramsPIC")
+  activityReports     ActivityReport[]  @relation("SubmittedActivityReports")
 
   @@map("users")
   @@schema("shared")
@@ -942,9 +943,9 @@ model Department {
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  unit   Unit?             @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  admins DepartmentAdmin[]
-  workPrograms WorkProgram[]
+  unit            Unit?             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  admins          DepartmentAdmin[]
+  workPrograms    WorkProgram[]
   activityReports ActivityReport[]
 
   @@map("departments")
@@ -1016,33 +1017,33 @@ model GpsAttendance {
 }
 
 model LiqoGroup {
-  id               String      @id @default(uuid()) @db.Uuid
-  name             String      @db.VarChar(200)
-  murobbiId        String      @map("murobbi_id") @db.Uuid
+  id               String     @id @default(uuid()) @db.Uuid
+  name             String     @db.VarChar(200)
+  murobbiId        String     @map("murobbi_id") @db.Uuid
   description      String?
-  scheduleDay      DayOfWeek?  @map("schedule_day")
-  scheduleTime     String?     @map("schedule_time") @db.VarChar(50)
-  scheduleLocation String?     @map("schedule_location") @db.VarChar(200)
-  whatsappLink     String?     @map("whatsapp_link") @db.VarChar(255)
-  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime?   @updatedAt @map("updated_at") @db.Timestamptz
+  scheduleDay      DayOfWeek? @map("schedule_day")
+  scheduleTime     String?    @map("schedule_time") @db.VarChar(50)
+  scheduleLocation String?    @map("schedule_location") @db.VarChar(200)
+  whatsappLink     String?    @map("whatsapp_link") @db.VarChar(255)
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime?  @updatedAt @map("updated_at") @db.Timestamptz
 
-  murobbi          User          @relation(fields: [murobbiId], references: [id], onDelete: Restrict)
-  members          LiqoMember[]
-  meetings         LiqoMeeting[]
+  murobbi  User          @relation(fields: [murobbiId], references: [id], onDelete: Restrict)
+  members  LiqoMember[]
+  meetings LiqoMeeting[]
 
   @@map("liqo_groups")
   @@schema("sim")
 }
 
 model LiqoMember {
-  id        String   @id @default(uuid()) @db.Uuid
-  groupId   String   @map("group_id") @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  joinedAt  DateTime @default(now()) @map("joined_at") @db.Timestamptz
+  id       String   @id @default(uuid()) @db.Uuid
+  groupId  String   @map("group_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz
 
-  group     LiqoGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group LiqoGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
   @@map("liqo_members")
@@ -1058,8 +1059,8 @@ model LiqoMeeting {
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
-  group         LiqoGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  attendances   LiqoAttendance[]
+  group       LiqoGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  attendances LiqoAttendance[]
 
   @@map("liqo_meetings")
   @@schema("sim")
@@ -1074,8 +1075,8 @@ model LiqoAttendance {
   createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime?        @updatedAt @map("updated_at") @db.Timestamptz
 
-  meeting   LiqoMeeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meeting LiqoMeeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([meetingId, userId])
   @@map("liqo_attendances")
@@ -1083,20 +1084,20 @@ model LiqoAttendance {
 }
 
 model MutabaahRecord {
-  id            String   @id @default(uuid()) @db.Uuid
-  userId        String   @map("user_id") @db.Uuid
-  date          DateTime @db.Date
-  sholatJamaah  Int      @default(0) @map("sholat_jamaah")
-  sholatRawatib Int      @default(0) @map("sholat_rawatib")
-  sholatDhuha   Boolean  @default(false) @map("sholat_dhuha")
-  sholatTahajud Boolean  @default(false) @map("sholat_tahajud")
-  tilawahPages  Int      @default(0) @map("tilawah_pages")
-  puasaSunnah   Boolean  @default(false) @map("puasa_sunnah")
-  infaq         Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  date          DateTime  @db.Date
+  sholatJamaah  Int       @default(0) @map("sholat_jamaah")
+  sholatRawatib Int       @default(0) @map("sholat_rawatib")
+  sholatDhuha   Boolean   @default(false) @map("sholat_dhuha")
+  sholatTahajud Boolean   @default(false) @map("sholat_tahajud")
+  tilawahPages  Int       @default(0) @map("tilawah_pages")
+  puasaSunnah   Boolean   @default(false) @map("puasa_sunnah")
+  infaq         Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime? @updatedAt @map("updated_at") @db.Timestamptz
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
   @@map("mutabaah_records")
@@ -1116,8 +1117,8 @@ model LeaveRequest {
   createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime?   @updatedAt @map("updated_at") @db.Timestamptz
 
-  user          User        @relation("UserLeaveRequests", fields: [userId], references: [id], onDelete: Cascade)
-  approvedBy    User?       @relation("ApprovedLeaves", fields: [approvedById], references: [id], onDelete: SetNull)
+  user       User  @relation("UserLeaveRequests", fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy User? @relation("ApprovedLeaves", fields: [approvedById], references: [id], onDelete: SetNull)
 
   @@map("leave_requests")
   @@schema("sim")
@@ -1127,6 +1128,7 @@ enum WorkProgramStatus {
   planned
   ongoing
   completed
+
   @@schema("sim")
 }
 
@@ -1142,28 +1144,28 @@ model WorkProgram {
   createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime?         @updatedAt @map("updated_at") @db.Timestamptz
 
-  department     Department        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  academicYear   AcademicYear?     @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
-  user           User?             @relation("WorkProgramsPIC", fields: [userId], references: [id], onDelete: SetNull)
+  department   Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  user         User?         @relation("WorkProgramsPIC", fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("work_programs")
   @@schema("sim")
 }
 
 model ActivityReport {
-  id            String      @id @default(uuid()) @db.Uuid
-  departmentId  String      @map("department_id") @db.Uuid
+  id            String     @id @default(uuid()) @db.Uuid
+  departmentId  String     @map("department_id") @db.Uuid
   type          ReportType
-  periodStart   DateTime    @map("period_start") @db.Date
-  periodEnd     DateTime    @map("period_end") @db.Date
-  content       String      @db.Text
-  attachmentUrl String?     @map("attachment_url") @db.Text
-  submittedById String      @map("submitted_by_id") @db.Uuid
-  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime?   @updatedAt @map("updated_at") @db.Timestamptz
+  periodStart   DateTime   @map("period_start") @db.Date
+  periodEnd     DateTime   @map("period_end") @db.Date
+  content       String     @db.Text
+  attachmentUrl String?    @map("attachment_url") @db.Text
+  submittedById String     @map("submitted_by_id") @db.Uuid
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime?  @updatedAt @map("updated_at") @db.Timestamptz
 
-  department    Department  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  submittedBy   User        @relation("SubmittedActivityReports", fields: [submittedById], references: [id], onDelete: Cascade)
+  department  Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  submittedBy User       @relation("SubmittedActivityReports", fields: [submittedById], references: [id], onDelete: Cascade)
 
   @@map("activity_reports")
   @@schema("sim")

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/client";
 
 // Cache invalidation comment to force Vercel to rebundle PrismaClient
 const globalForPrisma = globalThis as unknown as {

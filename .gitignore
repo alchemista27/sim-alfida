@@ -29,3 +29,6 @@ pnpm-debug.log*
 
 sistem-data/
 .agents/
+
+# Generated Prisma Client
+src/generated/client/
