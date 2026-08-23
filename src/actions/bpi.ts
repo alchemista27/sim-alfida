@@ -48,6 +48,16 @@ export async function upsertLiqoGroup(data: LiqoGroupInput) {
     });
   }
 
+  const roleExists = await prisma.userRoleAssignment.findFirst({
+    where: { userId: parsed.murobbiId, role: UserRole.murobbi }
+  });
+  
+  if (!roleExists) {
+    await prisma.userRoleAssignment.create({
+      data: { userId: parsed.murobbiId, role: UserRole.murobbi }
+    });
+  }
+
   revalidatePath("/admin/bpi/liqo");
 }
 
