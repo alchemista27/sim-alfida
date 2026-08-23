@@ -102,6 +102,7 @@ const navGroups: NavGroup[] = [
     title: "Guru (Akademik)",
     items: [
       { title: "Dashboard Guru", href: "/teacher/schedules", icon: "home" },
+      { title: "Absensi Siswa", href: "/teacher/attendance", icon: "how_to_reg" },
       { title: "Jurnal Mengajar", href: "/teacher/journals", icon: "history_edu" },
       { title: "RPP", href: "/teacher/lesson-plans", icon: "assignment" },
       { title: "Input Nilai Harian", href: "/teacher/grades", icon: "grading" },
