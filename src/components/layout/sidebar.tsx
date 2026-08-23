@@ -38,6 +38,7 @@ const navGroups: NavGroup[] = [
     title: "Manajemen Karyawan",
     items: [
       { title: "Dasbor Kepegawaian", href: "/admin/hr/dashboard", icon: "analytics" },
+      { title: "Pengaturan Absensi", href: "/admin/attendance-settings", icon: "settings_suggest" },
       { title: "Rekap Absensi", href: "/admin/hr/attendance", icon: "summarize" },
       { title: "Departemen / Bidang", href: "/admin/departments", icon: "domain" },
       { title: "Distribusi Pegawai", href: "/admin/staff", icon: "badge" },
@@ -177,6 +178,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
     }
 
     // Filter groups based on role strictly for non-super-admins
+    if (group.title === "Super Admin" && !isSuperAdmin) return false;
     if (group.title === "Manajemen Karyawan" && !isAdminKepegawaian) return false;
     if (group.title === "Bina Pribadi Islami" && !isAdminBpi) return false;
     if (group.title === "Grup Mentoring" && !isMurobbi) return false;
