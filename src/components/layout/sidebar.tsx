@@ -38,7 +38,7 @@ const navGroups: NavGroup[] = [
     title: "Manajemen Karyawan",
     items: [
       { title: "Dasbor Kepegawaian", href: "/admin/hr/dashboard", icon: "analytics" },
-      { title: "Pengaturan Absensi", href: "/admin/attendance-settings", icon: "settings_suggest" },
+      { title: "GPS & Hari Libur", href: "/admin/attendance-settings", icon: "settings_suggest" },
       { title: "Rekap Absensi", href: "/admin/hr/attendance", icon: "summarize" },
       { title: "Departemen / Bidang", href: "/admin/departments", icon: "domain" },
       { title: "Distribusi Pegawai", href: "/admin/staff", icon: "badge" },
