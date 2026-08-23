@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth-guard";
 import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
+// Force Vercel recompilation of this action
 export async function getFoundationSettings() {
   await requireRole([UserRole.super_admin]);
   let settings = await prisma.foundationSettings.findFirst();
