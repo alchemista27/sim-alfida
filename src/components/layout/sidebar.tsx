@@ -70,7 +70,10 @@ const navGroups: NavGroup[] = [
   {
     title: "Admin Unit (SDM & Absensi)",
     items: [
+      { title: "Distribusi Pegawai", href: "/admin/staff", icon: "badge" },
       { title: "Pengaturan GPS & Libur", href: "/admin/attendance-settings", icon: "settings_suggest" },
+      { title: "Rekap Absensi", href: "/admin/hr/attendance", icon: "summarize" },
+      { title: "Kelola Cuti/Izin", href: "/admin/hr/leaves", icon: "event_available" },
     ],
   },
   {

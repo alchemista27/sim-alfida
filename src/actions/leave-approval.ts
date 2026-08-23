@@ -6,9 +6,27 @@ import { UserRole, LeaveStatus, LeaveType } from "@prisma/client";
 import { requireRole } from "@/lib/auth-guard";
 
 export async function getAllLeaveRequests() {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser) throw new Error("Unauthorized");
+  
+  const isGlobalAdmin = currentUser.roles.some((r: any) => 
+    r.role === "super_admin" || r.role === "admin_kepegawaian"
+  );
+  
+  const adminUnitIds = currentUser.roles
+    .filter((r: any) => (r.role === "admin_unit" || r.role === "admin_unit_nondik") && r.unitId)
+    .map((r: any) => r.unitId as string);
+
+  let whereClause: any = {};
+  if (!isGlobalAdmin) {
+    if (adminUnitIds.length === 0) return [];
+    whereClause = { user: { roles: { some: { unitId: { in: adminUnitIds } } } } };
+  }
 
   return await prisma.leaveRequest.findMany({
+    where: whereClause,
     include: {
       user: {
         select: {
@@ -24,7 +42,7 @@ export async function getAllLeaveRequests() {
 export async function approveLeaveRequest(leaveId: string) {
   const approver = await getCurrentUser();
   if (!approver) throw new Error("Unauthorized");
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
 
   const leave = await prisma.leaveRequest.findUnique({
     where: { id: leaveId }
@@ -68,7 +86,7 @@ export async function approveLeaveRequest(leaveId: string) {
 export async function rejectLeaveRequest(leaveId: string) {
   const approver = await getCurrentUser();
   if (!approver) throw new Error("Unauthorized");
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
 
   await prisma.leaveRequest.update({
     where: { id: leaveId },

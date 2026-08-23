@@ -40,9 +40,27 @@ export async function getStaffDemographics() {
 }
 
 export async function getAttendanceRecap(startDate: Date, endDate: Date, unitId?: string) {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
 
-  const userWhere = unitId ? { roles: { some: { unitId } } } : {};
+  const currentUser = await getCurrentUser();
+  if (!currentUser) throw new Error("Unauthorized");
+  
+  const isGlobalAdmin = currentUser.roles.some((r: any) => 
+    r.role === "super_admin" || r.role === "admin_kepegawaian"
+  );
+  
+  const adminUnitIds = currentUser.roles
+    .filter((r: any) => (r.role === "admin_unit" || r.role === "admin_unit_nondik") && r.unitId)
+    .map((r: any) => r.unitId as string);
+
+  let userWhere: any = {};
+
+  if (!isGlobalAdmin) {
+    if (adminUnitIds.length === 0) return []; // No access
+    userWhere = { roles: { some: { unitId: { in: adminUnitIds } } } };
+  } else if (unitId) {
+    userWhere = { roles: { some: { unitId } } };
+  }
 
   // Get all active users
   const users = await prisma.user.findMany({
