@@ -2,6 +2,16 @@
 
 ---
 
+**tanggal:** 23 Agustus 2026
+**progress:**
+- Menginvestigasi dan menyelesaikan anomali gagal kompilasi di server **Vercel** (`next/headers` digunakan di _Client Component_). Solusinya: menyuntikkan deklarasi `"use server";` ke seluruh fail _Server Actions_ Fase 3 (Dasbor HR, UPA/Liqo, Cuti, Proker).
+- Menambahkan *hook* `"postinstall": "prisma generate"` ke `package.json` untuk memaksa Vercel melakukan regenerasi _Prisma Client_ guna menghindari *Type error* dari *cache*.
+- Merombak total `prisma/seed.ts` untuk merepresentasikan hierarki *Kantor Pusat Yayasan* dan departemen nyata (Keuangan, Sarpras, Pendidikan) serta menangani entitas _double job_ seperti **Murobbi** (yang ditugaskan ke Guru).
+- Mengembangkan skrip utilitas khusus (`scripts/import-sso.ts`) yang membaca *file* `data-sso-pegawai.xlsx`, memetakan *roles* dan *groups* otomatis, dan menyinkronkan 130+ akun ke pangkalan data relasional dan otentikasi *Supabase Auth*.
+**commit message:** chore: fix vercel build issue with server actions and prisma cache, add SSO import script
+
+---
+
 **tanggal:** 19 Agustus 2026 (Sesi Akhir Phase 3)
 **progress:**
 - Menyelesaikan inisiatif **Sprint 22-36** secara menyeluruh (Modul Manajemen Karyawan & Absensi).
