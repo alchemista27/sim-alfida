@@ -17,6 +17,7 @@ enum UnitLevel {
   sma
   pesantren
   kantor_yayasan
+  non_pendidikan
 
   @@schema("sim")
 }
@@ -24,6 +25,7 @@ enum UnitLevel {
 enum UserRole {
   super_admin
   admin_unit
+  admin_unit_nondik
   guru
   karyawan
   orang_tua

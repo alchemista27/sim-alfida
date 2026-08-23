@@ -122,13 +122,12 @@ export function StaffClient({ staff, units }: StaffClientProps) {
             <select
               name="unitId"
               required
+              defaultValue={units.length === 1 ? units[0].id : ""}
               className="w-full px-3 py-2 text-sm bg-surface border border-border rounded focus:outline-none focus:border-secondary"
             >
-              <option value="">Pilih unit...</option>
+              {units.length > 1 && <option value="">Pilih unit...</option>}
               {units.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
+                <option key={u.id} value={u.id}>{u.name}</option>
               ))}
             </select>
           </div>

@@ -12,7 +12,7 @@ export default async function AttendanceSettingsPage() {
   
   // Ambil ID unit yang dikepalai oleh user ini
   const adminUnitRoleIds = user.roles
-    .filter((r: any) => r.role === "admin_unit" && r.unitId)
+    .filter((r: any) => (r.role === "admin_unit" || r.role === "admin_unit_nondik") && r.unitId)
     .map((r: any) => r.unitId as string);
 
   let units;

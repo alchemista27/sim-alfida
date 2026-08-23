@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { AssignStaffSchema, type AssignStaffInput } from "@/lib/validators/department";
 
 export async function getStaffAssignments() {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
   
   // Ambil user yang berpotensi menjadi staf/guru
   return await prisma.user.findMany({
@@ -23,7 +23,7 @@ export async function getStaffAssignments() {
 }
 
 export async function assignStaffToUnit(data: AssignStaffInput) {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
   const parsed = AssignStaffSchema.parse(data);
 
   // Periksa apakah role sudah ada di unit tersebut
@@ -49,7 +49,7 @@ export async function assignStaffToUnit(data: AssignStaffInput) {
 }
 
 export async function removeStaffAssignment(assignmentId: string) {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
   
   await prisma.userRoleAssignment.delete({
     where: { id: assignmentId }

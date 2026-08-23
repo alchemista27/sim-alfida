@@ -148,6 +148,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const userRoles = user?.roles || [];
   const isSuperAdmin = userRoles.some((r: any) => r.role === "super_admin");
   const isAdminUnit = userRoles.some((r: any) => r.role === "admin_unit");
+  const isAdminUnitNondik = userRoles.some((r: any) => r.role === "admin_unit_nondik");
   const isObserver = userRoles.some((r: any) => r.role === "observer");
   const isTeacher = userRoles.some((r: any) => r.role === "guru");
   const isKaryawan = userRoles.some((r: any) => r.role === "karyawan");
@@ -191,7 +192,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
     if (group.title === "Grup Mentoring" && !isMurobbi) return false;
     if (group.title === "Admin Unit (PPDB)" && !isAdminUnit) return false;
     if (group.title === "Admin Unit (Akademik)" && !isAdminUnit) return false;
-    if (group.title === "Admin Unit (SDM & Absensi)" && !isAdminUnit) return false;
+    if (group.title === "Admin Unit (SDM & Absensi)" && !isAdminUnit && !isAdminUnitNondik) return false;
     if (group.title === "Portal Orang Tua" && !isParent) return false;
     if (group.title === "Portal Orang Tua (Akademik)" && !isParent) return false;
     if (group.title === "Guru (Akademik)" && !isTeacher) return false;
