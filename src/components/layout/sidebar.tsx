@@ -68,6 +68,12 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    title: "Admin Unit (SDM & Absensi)",
+    items: [
+      { title: "Pengaturan GPS & Libur", href: "/admin/attendance-settings", icon: "settings_suggest" },
+    ],
+  },
+  {
     title: "Portal Orang Tua",
     items: [
       { title: "Dashboard Ortu", href: "/parent/dashboard", icon: "home" },
@@ -184,6 +190,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
     if (group.title === "Grup Mentoring" && !isMurobbi) return false;
     if (group.title === "Admin Unit (PPDB)" && !isAdminUnit) return false;
     if (group.title === "Admin Unit (Akademik)" && !isAdminUnit) return false;
+    if (group.title === "Admin Unit (SDM & Absensi)" && !isAdminUnit) return false;
     if (group.title === "Portal Orang Tua" && !isParent) return false;
     if (group.title === "Portal Orang Tua (Akademik)" && !isParent) return false;
     if (group.title === "Guru (Akademik)" && !isTeacher) return false;

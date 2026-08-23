@@ -9,7 +9,7 @@ import { GpsConfigSchema, HolidaySchema, type GpsConfigInput, type HolidayInput 
 // ── GPS Config ──
 
 export async function getGpsConfigs() {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit]);
   return await prisma.gpsAttendanceConfig.findMany({
     include: {
       unit: true
@@ -18,7 +18,7 @@ export async function getGpsConfigs() {
 }
 
 export async function upsertGpsConfig(data: GpsConfigInput) {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit]);
   const parsed = GpsConfigSchema.parse(data);
 
   await prisma.gpsAttendanceConfig.upsert({
@@ -42,7 +42,7 @@ export async function upsertGpsConfig(data: GpsConfigInput) {
 // ── Holidays ──
 
 export async function getHolidays(month: number, year: number, unitId?: string) {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit]);
   
   const startDate = new Date(year, month - 1, 1);
   const endDate = new Date(year, month, 0);
@@ -72,7 +72,7 @@ export async function getHolidays(month: number, year: number, unitId?: string) 
 }
 
 export async function upsertHoliday(data: HolidayInput) {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit]);
   const parsed = HolidaySchema.parse(data);
 
   if (parsed.id) {
@@ -100,7 +100,7 @@ export async function upsertHoliday(data: HolidayInput) {
 }
 
 export async function deleteHoliday(id: string) {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit]);
   await prisma.holiday.delete({ where: { id } });
   revalidatePath("/admin/attendance-settings");
 }
