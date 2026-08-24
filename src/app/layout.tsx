@@ -4,7 +4,13 @@ import "./globals.css";
 import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await prisma.foundationSettings.findFirst();
+  let settings = null;
+  try {
+    settings = await prisma.foundationSettings.findFirst();
+  } catch (e) {
+    console.warn("Could not fetch foundation settings during build prerender.");
+  }
+  
   return {
     title: settings?.foundationName ? `SIM-Alfida — ${settings.foundationName}` : "SIM-Alfida — Sistem Informasi Manajemen Yayasan Alfida",
     description: "Sistem Informasi Manajemen Pegawai, Karyawan, dan PPDB Yayasan Alfida",
