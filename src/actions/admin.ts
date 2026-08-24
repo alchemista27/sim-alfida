@@ -91,7 +91,7 @@ export async function searchUsersAction(query: string) {
   const { requireAuth } = await import("@/lib/auth-guard");
   await requireAuth();
   
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 1) return [];
 
   const users = await prisma.user.findMany({
     where: {

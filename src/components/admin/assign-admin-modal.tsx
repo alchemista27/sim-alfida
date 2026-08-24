@@ -23,7 +23,7 @@ export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
 
   useEffect(() => {
     // Jangan cari jika userId sudah ada (berarti sedang memilih)
-    if (searchQuery.length >= 3 && !userId) {
+    if (searchQuery.length >= 1 && !userId) {
       const timer = setTimeout(async () => {
         setIsSearching(true);
         try {
@@ -99,7 +99,7 @@ export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
                     setSearchQuery(e.target.value);
                     setUserId(""); // Reset selection if typing
                   }}
-                  placeholder="Ketik nama pengguna (min. 3 huruf)..."
+                  placeholder="Ketik nama atau email..."
                   className="w-full rounded-md border border-border pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-tertiary"
                 />
               </div>
@@ -125,7 +125,7 @@ export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
                 </ul>
               )}
               
-              {!isSearching && searchQuery.length >= 3 && searchResults.length === 0 && !userId && (
+              {!isSearching && searchQuery.length >= 1 && searchResults.length === 0 && !userId && (
                 <div className="absolute z-10 w-full mt-1 p-3 bg-white border border-gray-200 rounded-md shadow-lg text-sm text-gray-500 text-center">
                   Tidak ditemukan.
                 </div>
