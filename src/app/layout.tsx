@@ -20,6 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import AppProgressBar from "@/components/progress-bar";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,6 +50,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased min-h-screen bg-neutral text-primary">
         {children}
+        <AppProgressBar />
       </body>
     </html>
   );

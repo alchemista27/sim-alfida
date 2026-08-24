@@ -4,30 +4,38 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
 import { Prisma, UserRole, GpsAttendanceStatus, LeaveStatus } from "@prisma/client";
 import { requireRole } from "@/lib/auth-guard";
+import { unstable_cache } from "next/cache";
+
+const getCachedStaffDemographics = unstable_cache(
+  async () => {
+    const [totalUsers, rolesCount, unitBreakdown, units] = await Promise.all([
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.userRoleAssignment.groupBy({
+        by: ['role'],
+        _count: { userId: true }
+      }),
+      prisma.userRoleAssignment.groupBy({
+        by: ['unitId'],
+        _count: { userId: true },
+        where: { unitId: { not: null } }
+      }),
+      prisma.unit.findMany({ select: { id: true, name: true } })
+    ]);
+    
+    const formattedUnitBreakdown = unitBreakdown.map(u => {
+      const unitName = units.find(un => un.id === u.unitId)?.name || 'Unknown Unit';
+      return { unitName, count: u._count.userId };
+    });
+
+    return { totalUsers, rolesCount, formattedUnitBreakdown };
+  },
+  ['hr-dashboard-staff-demographics'],
+  { revalidate: 60 }
+);
 
 export async function getStaffDemographics() {
   await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
-
-  const [totalUsers, rolesCount, unitBreakdown, units] = await Promise.all([
-    prisma.user.count({ where: { isActive: true } }),
-    prisma.userRoleAssignment.groupBy({
-      by: ['role'],
-      _count: { userId: true }
-    }),
-    prisma.userRoleAssignment.groupBy({
-      by: ['unitId'],
-      _count: { userId: true },
-      where: { unitId: { not: null } }
-    }),
-    prisma.unit.findMany({ select: { id: true, name: true } })
-  ]);
-  
-  const formattedUnitBreakdown = unitBreakdown.map(u => {
-    const unitName = units.find(un => un.id === u.unitId)?.name || 'Unknown Unit';
-    return { unitName, count: u._count.userId };
-  });
-
-  return { totalUsers, rolesCount, formattedUnitBreakdown };
+  return getCachedStaffDemographics();
 }
 
 export async function getAttendanceRecap(startDate: Date, endDate: Date, unitId?: string) {

@@ -262,6 +262,7 @@ model Unit {
   gpsAttendanceConfig GpsAttendanceConfig?
   gpsAttendances      GpsAttendance[]
 
+  @@index([isActive])
   @@map("units")
   @@schema("sim")
 }
@@ -324,6 +325,7 @@ model User {
   workProgramsAsPIC   WorkProgram[]     @relation("WorkProgramsPIC")
   activityReports     ActivityReport[]  @relation("SubmittedActivityReports")
 
+  @@index([isActive])
   @@map("users")
   @@schema("shared")
 }
@@ -619,6 +621,8 @@ model StudentEnrollment {
   promotionDecision PromotionDecision?
 
   @@unique([studentDataId, academicYearId])
+  @@index([status])
+  @@index([academicYearId])
   @@map("student_enrollments")
   @@schema("sim")
 }
@@ -696,6 +700,7 @@ model Grade {
   teacher      User              @relation("GradeTeacher", fields: [teacherId], references: [id], onDelete: Restrict)
   academicYear AcademicYear      @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
 
+  @@index([academicYearId])
   @@map("grades")
   @@schema("sim")
 }
@@ -715,6 +720,8 @@ model Attendance {
   teacher    User              @relation("AttendanceTeacher", fields: [teacherId], references: [id], onDelete: Restrict)
 
   @@unique([enrollmentId, subjectId, date])
+  @@index([date])
+  @@index([status])
   @@map("attendances")
   @@schema("sim")
 }
@@ -1013,6 +1020,8 @@ model GpsAttendance {
   unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
+  @@index([date])
+  @@index([status])
   @@map("gps_attendances")
   @@schema("sim")
 }
@@ -1101,6 +1110,7 @@ model MutabaahRecord {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
+  @@index([date])
   @@map("mutabaah_records")
   @@schema("sim")
 }
