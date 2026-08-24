@@ -2,7 +2,7 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { prisma } from "@/generated/client";
+import { prisma } from "@/lib/prisma";
 
 export default async function Home() {
   const settings = await prisma.foundationSettings.findFirst();

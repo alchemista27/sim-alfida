@@ -1,6 +1,6 @@
 import React from "react";
 import DashboardClient from "./dashboard-client";
-import { prisma } from "@/generated/client";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({
   children,
