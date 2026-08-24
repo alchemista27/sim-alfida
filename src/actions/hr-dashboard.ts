@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
-import { UserRole, GpsAttendanceStatus, LeaveStatus } from "@prisma/client";
+import { Prisma, UserRole, GpsAttendanceStatus, LeaveStatus } from "@prisma/client";
 import { requireRole } from "@/lib/auth-guard";
 
 export async function getStaffDemographics() {
@@ -62,62 +62,39 @@ export async function getAttendanceRecap(startDate: Date, endDate: Date, unitId?
     userWhere = { roles: { some: { unitId } } };
   }
 
-  // Get all active users
+  // Get all active users matching the access criteria
   const users = await prisma.user.findMany({
     where: { isActive: true, ...userWhere },
-    select: { id: true, fullName: true }
+    select: { id: true }
   });
 
-  // Get GPS Attendances for the period
-  const attendances = await prisma.gpsAttendance.findMany({
-    where: {
-      date: { gte: startDate, lte: endDate },
-      userId: { in: users.map(u => u.id) }
-    },
-    select: { userId: true, status: true }
-  });
+  if (users.length === 0) return [];
 
-  // Get Approved Leaves for the period
-  const leaves = await prisma.leaveRequest.findMany({
-    where: {
-      status: LeaveStatus.approved,
-      startDate: { lte: endDate },
-      endDate: { gte: startDate },
-      userId: { in: users.map(u => u.id) }
-    },
-    select: { userId: true, startDate: true, endDate: true }
-  });
+  const userIds = users.map(u => u.id);
 
-  const recap = users.map(user => {
-    const userAtts = attendances.filter(a => a.userId === user.id);
-    const userLeaves = leaves.filter(l => l.userId === user.id);
-    
-    let presentCount = 0;
-    let lateCount = 0;
-    
-    userAtts.forEach(a => {
-      if (a.status === GpsAttendanceStatus.present) presentCount++;
-      if (a.status === GpsAttendanceStatus.late) lateCount++;
-    });
-
-    let leaveDays = 0;
-    userLeaves.forEach(l => {
-      const start = l.startDate < startDate ? startDate : l.startDate;
-      const end = l.endDate > endDate ? endDate : l.endDate;
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      leaveDays += diffDays;
-    });
-
-    return {
-      userId: user.id,
-      fullName: user.fullName,
-      present: presentCount,
-      late: lateCount,
-      leave: leaveDays,
-      absent: 0 // Calculate working days minus (present+late+leave) later if needed
-    };
-  });
+  // Use Raw SQL for heavy aggregations inside the DB (prevents Node.js memory spikes)
+  const recap = await prisma.$queryRaw<any[]>`
+    SELECT 
+      u.id as "userId",
+      u.full_name as "fullName",
+      COUNT(a.id) FILTER (WHERE a.status = 'present')::int as present,
+      COUNT(a.id) FILTER (WHERE a.status = 'late')::int as late,
+      COALESCE((
+        SELECT SUM(
+          (LEAST(l.end_date, ${endDate}::date) - GREATEST(l.start_date, ${startDate}::date)) + 1
+        )
+        FROM sim.leave_requests l
+        WHERE l.user_id = u.id 
+          AND l.status = 'approved'
+          AND l.start_date <= ${endDate}::date
+          AND l.end_date >= ${startDate}::date
+      ), 0)::int as leave,
+      0 as absent
+    FROM shared.users u
+    LEFT JOIN sim.gps_attendances a ON a.user_id = u.id AND a.date >= ${startDate}::date AND a.date <= ${endDate}::date
+    WHERE u.id IN (${Prisma.join(userIds)})
+    GROUP BY u.id, u.full_name
+  `;
 
   return recap;
 }
