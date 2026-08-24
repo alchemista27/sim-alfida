@@ -12,6 +12,7 @@ import {
   ExtracurricularJournalSchema,
   ExtracurricularGradeSchema
 } from "@/lib/validators/extracurricular";
+import { ensureUserRole } from "@/lib/ensure-role";
 import { z } from "zod";
 
 // --- UNIT ADMIN ACTIONS ---
@@ -60,6 +61,15 @@ export async function assignCoach(formData: z.infer<typeof CoachAssignmentSchema
         academicYearId
       }
     });
+
+    // Pastikan pembina punya UserRoleAssignment "guru" di unit terkait
+    const extra = await prisma.extracurricular.findUnique({
+      where: { id: parsed.extraId }
+    });
+    if (extra) {
+      await ensureUserRole(parsed.coachId, UserRole.guru, extra.unitId);
+    }
+
     revalidatePath("/unit/extracurriculars");
     return { success: true };
   } catch (error: any) {

@@ -10,6 +10,7 @@ import {
   TeacherAssignmentSchema, 
   HomeroomAssignmentSchema 
 } from "@/lib/validators/academic";
+import { ensureUserRole } from "@/lib/ensure-role";
 
 // --- Subject Management ---
 
@@ -123,6 +124,12 @@ export async function assignTeacherToSubject(formData: any, academicYearId: stri
       }
     });
     
+    // Pastikan guru punya UserRoleAssignment "guru" di unit terkait
+    const subject = await prisma.subject.findUnique({ where: { id: parsed.subjectId } });
+    if (subject) {
+      await ensureUserRole(parsed.teacherId, UserRole.guru, subject.unitId);
+    }
+    
     revalidatePath("/unit/academic-teachers");
     return { success: true };
   } catch (error: any) {
@@ -174,6 +181,15 @@ export async function assignHomeroomTeacher(formData: any, academicYearId: strin
         academicYearId: academicYearId,
       }
     });
+    
+    // Pastikan wali kelas punya UserRoleAssignment "guru" di unit terkait
+    const classRoom = await prisma.classRoom.findUnique({
+      where: { id: parsed.classId },
+      include: { unit: true }
+    });
+    if (classRoom) {
+      await ensureUserRole(parsed.teacherId, UserRole.guru, classRoom.unitId);
+    }
     
     revalidatePath("/unit/academic-teachers");
     return { success: true };
