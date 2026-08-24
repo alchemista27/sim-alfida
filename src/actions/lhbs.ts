@@ -38,73 +38,12 @@ export async function generateLhbsReport(formData: FormData) {
       if (!isSuperAdmin) throw new Error("Akses ditolak. Anda bukan Wali Kelas untuk siswa ini.");
     }
 
-    // 1. Kalkulasi Nilai per Mata Pelajaran
-    // Filter grade types based on semester.
-    // For "mid" (ATS): daily, exam, ats
-    // For "final" (AAS): daily, exam, aas
-    const typesToInclude = parsed.semester === "mid" ? ['daily', 'exam', 'ats'] : ['daily', 'exam', 'aas'];
-
-    const allGrades = await prisma.grade.findMany({
-      where: {
-        enrollmentId: parsed.enrollmentId,
-        type: { in: typesToInclude as any }
-      },
-      include: { subject: true }
-    });
-
-    const gradesBySubject: Record<string, { subject: any, daily: number[], exam: number[], summative: number[] }> = {};
-
-    for (const g of allGrades) {
-      if (!gradesBySubject[g.subjectId]) {
-        gradesBySubject[g.subjectId] = {
-          subject: g.subject,
-          daily: [],
-          exam: [],
-          summative: [] // ats or aas
-        };
-      }
-      if (g.type === 'daily') gradesBySubject[g.subjectId].daily.push(Number(g.score));
-      else if (g.type === 'exam') gradesBySubject[g.subjectId].exam.push(Number(g.score));
-      else if (g.type === 'ats' || g.type === 'aas') gradesBySubject[g.subjectId].summative.push(Number(g.score));
-    }
-
-    const gradesSnapshot: any[] = [];
+    // 1. Kalkulasi Nilai per Mata Pelajaran (menggunakan PostgreSQL RPC untuk menghapus CPU JS Bottleneck)
+    const gradesRpcResult: any = await prisma.$queryRaw`
+      SELECT calculate_lhbs_grades(${parsed.enrollmentId}::uuid, ${parsed.semester}::text) as grades
+    `;
     
-    for (const subjectId in gradesBySubject) {
-      const data = gradesBySubject[subjectId];
-      
-      const avgDaily = data.daily.length > 0 ? data.daily.reduce((a, b) => a + b, 0) / data.daily.length : 0;
-      const avgExam = data.exam.length > 0 ? data.exam.reduce((a, b) => a + b, 0) / data.exam.length : 0;
-      const avgSummative = data.summative.length > 0 ? data.summative.reduce((a, b) => a + b, 0) / data.summative.length : 0;
-
-      // Bobot: 40% Harian, 30% Ujian, 30% Summative (ATS/AAS)
-      let finalScore = 0;
-      if (data.summative.length > 0) {
-        finalScore = (avgDaily * 0.4) + (avgExam * 0.3) + (avgSummative * 0.3);
-      } else if (data.exam.length > 0) {
-        // Fallback jika belum ada nilai ATS
-        finalScore = (avgDaily * 0.5) + (avgExam * 0.5);
-      } else {
-        finalScore = avgDaily;
-      }
-
-      // Predikat sederhana
-      let predikat = "D";
-      if (finalScore >= 90) predikat = "A";
-      else if (finalScore >= 80) predikat = "B";
-      else if (finalScore >= 70) predikat = "C";
-
-      gradesSnapshot.push({
-        subjectId: data.subject.id,
-        subjectCode: data.subject.code,
-        subjectName: data.subject.name,
-        avgDaily: Math.round(avgDaily * 100) / 100,
-        avgExam: Math.round(avgExam * 100) / 100,
-        summative: Math.round(avgSummative * 100) / 100,
-        finalScore: Math.round(finalScore * 100) / 100,
-        predikat
-      });
-    }
+    const gradesSnapshot: any[] = gradesRpcResult[0]?.grades || [];
     
     // Sort grades by subject name
     gradesSnapshot.sort((a, b) => a.subjectName.localeCompare(b.subjectName));

@@ -2,6 +2,17 @@
 
 ---
 
+**tanggal:** 24 Agustus 2026
+**progress:**
+- Melakukan investigasi mendalam terhadap *bottleneck* performa Vercel Serverless akibat beban komputasi Node.js (CPU dan Memori).
+- Memisahkan seluruh pembuatan *file* PDF (Surat Kelulusan, Rapor, RPP, Jadwal Kelas, IMC) dari API Routes Vercel ke sebuah **Supabase Edge Function** (`generate-pdf`) tersentralisasi menggunakan Deno dan `@react-pdf/renderer`.
+- Menerapkan pendelegasian komputasi nilai **Raport (LHBS)** ke basis data dengan memindahkan ratusan baris logika JavaScript ke **PostgreSQL RPC** (`calculate_lhbs_grades`).
+- Menghapus perulangan JS pada agregasi data ribuan catatan mutabaah BPI (Bina Pribadi Islam) dan menggantinya dengan kueri murni PostgreSQL (`COUNT(*) FILTER (WHERE...)`).
+- Merombak total alur penyimpanan massal (*Batch Upsert*) seperti **Absensi Kelas**, **Input Nilai**, dan **Keputusan Kenaikan Kelas**; menyingkirkan Prisma `$transaction` *looping promises array* demi prosedur "INSERT ON CONFLICT" kilat di Database melalui *RPC batch functions* murni.
+**commit message:** perf: extreme optimization offloading batch processing and PDF rendering to Supabase
+
+---
+
 **tanggal:** 23 Agustus 2026 (Sesi 3)
 **progress:**
 - Membangun fitur **Identitas Yayasan** di dasbor *Super Admin* yang memungkinkan manajemen pengaturan global seperti nama yayasan, detail rekening bank, serta fitur unggah logo dan tanda tangan pimpinan yayasan yang terintegrasi langsung dengan CDN *Cloudinary*.

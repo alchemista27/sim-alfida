@@ -226,50 +226,22 @@ export async function submitBatchAttendance(formData: any, academicYearId: strin
     const parsed = BatchAttendanceSchema.parse(formData);
     const targetDate = new Date(parsed.date);
     
-    // 1. Ambil semua data absensi yang sudah ada (Bulk Fetch)
-    const existingRecords = await prisma.attendance.findMany({
-      where: {
-        subjectId: parsed.subjectId,
-        date: targetDate,
-        enrollmentId: { in: parsed.attendances.map((a: any) => a.enrollmentId) }
-      }
-    });
+    // Menggunakan PostgreSQL RPC untuk bulk upsert (Ekstrem Performa)
+    const payload = parsed.attendances.map((item: any) => ({
+      enrollmentId: item.enrollmentId,
+      subjectId: parsed.subjectId,
+      teacherId: user.id,
+      date: targetDate,
+      status: item.status,
+      notes: item.notes,
+    }));
 
-    const existingMap = new Map(existingRecords.map(r => [r.enrollmentId, r]));
+    const rpcResult: any = await prisma.$queryRaw`
+      SELECT batch_upsert_attendance(${payload}::jsonb) as result
+    `;
 
-    const toCreate: any[] = [];
-    const toUpdate: any[] = [];
+    const count = rpcResult[0]?.result?.count || 0;
 
-    // 2. Pilah mana yang harus dibuat dan diubah
-    for (const item of parsed.attendances) {
-      const existing = existingMap.get(item.enrollmentId);
-      if (existing) {
-        toUpdate.push(prisma.attendance.update({
-          where: { id: existing.id },
-          data: { status: item.status, notes: item.notes }
-        }));
-      } else {
-        toCreate.push({
-          enrollmentId: item.enrollmentId,
-          subjectId: parsed.subjectId,
-          teacherId: user.id,
-          date: targetDate,
-          status: item.status,
-          notes: item.notes,
-        });
-      }
-    }
-
-    // 3. Eksekusi bersamaan (Prisma Transaction API)
-    const txOperations = [];
-    if (toCreate.length > 0) {
-      txOperations.push(prisma.attendance.createMany({ data: toCreate }));
-    }
-    txOperations.push(...toUpdate);
-
-    if (txOperations.length > 0) {
-      await prisma.$transaction(txOperations);
-    }
 
     revalidatePath("/teacher/attendance");
     return { success: true };
@@ -288,53 +260,22 @@ export async function submitBatchGrade(formData: any, academicYearId: string) {
 
     const parsed = BatchGradeSchema.parse(formData);
     
-    // 1. Ambil semua data nilai yang sudah ada di tahun ajaran, subject, type, label ini
-    const existingRecords = await prisma.grade.findMany({
-      where: {
-        academicYearId: academicYearId,
-        subjectId: parsed.subjectId,
-        type: parsed.type,
-        label: parsed.label,
-        enrollmentId: { in: parsed.grades.map((g: any) => g.enrollmentId) }
-      }
-    });
+    // Menggunakan PostgreSQL RPC untuk bulk upsert nilai (Ekstrem Performa)
+    const payload = parsed.grades.map((item: any) => ({
+      enrollmentId: item.enrollmentId,
+      subjectId: parsed.subjectId,
+      teacherId: user.id,
+      academicYearId: academicYearId,
+      type: parsed.type,
+      label: parsed.label,
+      score: item.score
+    }));
 
-    const existingMap = new Map(existingRecords.map(r => [r.enrollmentId, r]));
+    const rpcResult: any = await prisma.$queryRaw`
+      SELECT batch_upsert_grades(${payload}::jsonb) as result
+    `;
 
-    const toCreate: any[] = [];
-    const toUpdate: any[] = [];
-
-    // 2. Pilah mana yang harus dibuat dan diubah
-    for (const item of parsed.grades) {
-      const existing = existingMap.get(item.enrollmentId);
-      if (existing) {
-        toUpdate.push(prisma.grade.update({
-          where: { id: existing.id },
-          data: { score: item.score }
-        }));
-      } else {
-        toCreate.push({
-          enrollmentId: item.enrollmentId,
-          subjectId: parsed.subjectId,
-          teacherId: user.id,
-          academicYearId: academicYearId,
-          type: parsed.type,
-          label: parsed.label,
-          score: item.score
-        });
-      }
-    }
-
-    // 3. Eksekusi transaksi
-    const txOperations = [];
-    if (toCreate.length > 0) {
-      txOperations.push(prisma.grade.createMany({ data: toCreate }));
-    }
-    txOperations.push(...toUpdate);
-
-    if (txOperations.length > 0) {
-      await prisma.$transaction(txOperations);
-    }
+    const count = rpcResult[0]?.result?.count || 0;
 
     revalidatePath("/teacher/grades");
     return { success: true };

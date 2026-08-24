@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { renderToStream } from "@react-pdf/renderer";
-import { AcceptanceLetterDocument } from "@/lib/pdf/acceptance-letter";
-import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -54,11 +52,19 @@ export async function GET(req: NextRequest) {
     date: new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" }),
   };
 
-  const stream = await renderToStream(<AcceptanceLetterDocument {...props} />);
-  
+  // Panggil Supabase Edge Function untuk merender PDF
+  const { data: pdfBlob, error } = await supabase.functions.invoke("generate-pdf", {
+    body: { type: "acceptance", props },
+  });
+
+  if (error || !pdfBlob) {
+    console.error("PDF Generation Error:", error);
+    return new NextResponse("Gagal membuat PDF", { status: 500 });
+  }
+
   const headers = new Headers();
   headers.set("Content-Type", "application/pdf");
   headers.set("Content-Disposition", `attachment; filename="Surat_Kelulusan_${reg.registrationNumber}.pdf"`);
 
-  return new NextResponse(stream as any, { headers });
+  return new NextResponse(pdfBlob, { headers });
 }

@@ -40,46 +40,16 @@ export async function processPromotions(formData: FormData) {
       return true;
     });
 
-    // 3. Ambil data keputusan yang sudah ada sebelumnya
-    const existingDecisions = await prisma.promotionDecision.findMany({
-      where: { enrollmentId: { in: authorizedDecisions.map(d => d.enrollmentId) } }
-    });
-    const existingSet = new Set(existingDecisions.map(d => d.enrollmentId));
+    // Menggunakan PostgreSQL RPC untuk bulk upsert kenaikan kelas (Ekstrem Performa)
+    const rpcPayload = authorizedDecisions.map(d => ({
+      enrollmentId: d.enrollmentId,
+      decision: d.decision,
+      decidedBy: user.id
+    }));
 
-    const toCreate: any[] = [];
-    const toUpdate: any[] = [];
-
-    // 4. Pilah mana yang dibuat baru dan diperbarui
-    for (const d of authorizedDecisions) {
-      if (existingSet.has(d.enrollmentId)) {
-        toUpdate.push(prisma.promotionDecision.update({
-          where: { enrollmentId: d.enrollmentId },
-          data: {
-            decision: d.decision as any,
-            decidedBy: user.id,
-            decidedAt: new Date()
-          }
-        }));
-      } else {
-        toCreate.push({
-          enrollmentId: d.enrollmentId,
-          decision: d.decision as any,
-          decidedBy: user.id,
-          decidedAt: new Date()
-        });
-      }
-    }
-
-    // 5. Eksekusi bersamaan via Transaksi Prisma
-    const txOperations = [];
-    if (toCreate.length > 0) {
-      txOperations.push(prisma.promotionDecision.createMany({ data: toCreate }));
-    }
-    txOperations.push(...toUpdate);
-
-    if (txOperations.length > 0) {
-      await prisma.$transaction(txOperations);
-    }
+    const rpcResult: any = await prisma.$queryRaw`
+      SELECT batch_upsert_promotions(${rpcPayload}::jsonb) as result
+    `;
 
     let count = authorizedDecisions.length;
 

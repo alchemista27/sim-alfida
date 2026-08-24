@@ -217,17 +217,21 @@ export async function getLiqoAttendanceStats() {
 export async function getGlobalMutabaahStats(startDate: Date, endDate: Date) {
   await requireRole([UserRole.super_admin, UserRole.admin_bpi]);
 
-  const records = await prisma.mutabaahRecord.findMany({
-    where: {
-      date: {
-        gte: startDate,
-        lte: endDate,
-      }
-    }
-  });
+  // Gunakan PostgreSQL Aggregate Query (Super Cepat, Menghemat Memori JS)
+  const result: any = await prisma.$queryRaw`
+    SELECT 
+      COUNT(*)::int as "totalRecords",
+      COALESCE(AVG(sholat_jamaah), 0) as "avgSholatJamaah",
+      COALESCE((COUNT(*) FILTER (WHERE sholat_dhuha = true)::float / NULLIF(COUNT(*), 0)) * 100, 0) as "pctSholatDhuha",
+      COALESCE((COUNT(*) FILTER (WHERE sholat_tahajud = true)::float / NULLIF(COUNT(*), 0)) * 100, 0) as "pctSholatTahajud",
+      COALESCE(AVG(tilawah_pages), 0) as "avgTilawahPages",
+      COALESCE((COUNT(*) FILTER (WHERE puasa_sunnah = true)::float / NULLIF(COUNT(*), 0)) * 100, 0) as "pctPuasaSunnah",
+      COALESCE((COUNT(*) FILTER (WHERE infaq = true)::float / NULLIF(COUNT(*), 0)) * 100, 0) as "pctInfaq"
+    FROM sim.mutabaah_records
+    WHERE "date" >= ${startDate} AND "date" <= ${endDate}
+  `;
 
-  const total = records.length;
-  if (total === 0) return {
+  return result[0] || {
     totalRecords: 0,
     avgSholatJamaah: 0,
     pctSholatDhuha: 0,
@@ -235,31 +239,5 @@ export async function getGlobalMutabaahStats(startDate: Date, endDate: Date) {
     avgTilawahPages: 0,
     pctPuasaSunnah: 0,
     pctInfaq: 0,
-  };
-
-  const sums = records.reduce((acc, curr) => ({
-    sholatJamaah: acc.sholatJamaah + curr.sholatJamaah,
-    sholatDhuha: acc.sholatDhuha + (curr.sholatDhuha ? 1 : 0),
-    sholatTahajud: acc.sholatTahajud + (curr.sholatTahajud ? 1 : 0),
-    tilawahPages: acc.tilawahPages + curr.tilawahPages,
-    puasaSunnah: acc.puasaSunnah + (curr.puasaSunnah ? 1 : 0),
-    infaq: acc.infaq + (curr.infaq ? 1 : 0),
-  }), {
-    sholatJamaah: 0,
-    sholatDhuha: 0,
-    sholatTahajud: 0,
-    tilawahPages: 0,
-    puasaSunnah: 0,
-    infaq: 0,
-  });
-
-  return {
-    totalRecords: total,
-    avgSholatJamaah: sums.sholatJamaah / total,
-    pctSholatDhuha: (sums.sholatDhuha / total) * 100,
-    pctSholatTahajud: (sums.sholatTahajud / total) * 100,
-    avgTilawahPages: sums.tilawahPages / total,
-    pctPuasaSunnah: (sums.puasaSunnah / total) * 100,
-    pctInfaq: (sums.infaq / total) * 100,
   };
 }
