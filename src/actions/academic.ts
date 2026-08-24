@@ -224,40 +224,52 @@ export async function submitBatchAttendance(formData: any, academicYearId: strin
     if (!user) throw new Error("Unauthorized");
 
     const parsed = BatchAttendanceSchema.parse(formData);
+    const targetDate = new Date(parsed.date);
     
-    // Gunakan transaksi untuk memastikan semua tersimpan
-    await prisma.$transaction(async (tx) => {
-      for (const item of parsed.attendances) {
-        // Cek jika sudah ada berdasarkan composite unique
-        const existing = await tx.attendance.findUnique({
-          where: {
-            enrollmentId_subjectId_date: {
-              enrollmentId: item.enrollmentId,
-              subjectId: parsed.subjectId,
-              date: new Date(parsed.date),
-            }
-          }
-        });
-
-        if (existing) {
-          await tx.attendance.update({
-            where: { id: existing.id },
-            data: { status: item.status, notes: item.notes }
-          });
-        } else {
-          await tx.attendance.create({
-            data: {
-              enrollmentId: item.enrollmentId,
-              subjectId: parsed.subjectId,
-              teacherId: user.id, // Guru yang input
-              date: new Date(parsed.date),
-              status: item.status,
-              notes: item.notes,
-            }
-          });
-        }
+    // 1. Ambil semua data absensi yang sudah ada (Bulk Fetch)
+    const existingRecords = await prisma.attendance.findMany({
+      where: {
+        subjectId: parsed.subjectId,
+        date: targetDate,
+        enrollmentId: { in: parsed.attendances.map((a: any) => a.enrollmentId) }
       }
     });
+
+    const existingMap = new Map(existingRecords.map(r => [r.enrollmentId, r]));
+
+    const toCreate: any[] = [];
+    const toUpdate: any[] = [];
+
+    // 2. Pilah mana yang harus dibuat dan diubah
+    for (const item of parsed.attendances) {
+      const existing = existingMap.get(item.enrollmentId);
+      if (existing) {
+        toUpdate.push(prisma.attendance.update({
+          where: { id: existing.id },
+          data: { status: item.status, notes: item.notes }
+        }));
+      } else {
+        toCreate.push({
+          enrollmentId: item.enrollmentId,
+          subjectId: parsed.subjectId,
+          teacherId: user.id,
+          date: targetDate,
+          status: item.status,
+          notes: item.notes,
+        });
+      }
+    }
+
+    // 3. Eksekusi bersamaan (Prisma Transaction API)
+    const txOperations = [];
+    if (toCreate.length > 0) {
+      txOperations.push(prisma.attendance.createMany({ data: toCreate }));
+    }
+    txOperations.push(...toUpdate);
+
+    if (txOperations.length > 0) {
+      await prisma.$transaction(txOperations);
+    }
 
     revalidatePath("/teacher/attendance");
     return { success: true };
@@ -275,43 +287,54 @@ export async function submitBatchGrade(formData: any, academicYearId: string) {
     if (!user) throw new Error("Unauthorized");
 
     const parsed = BatchGradeSchema.parse(formData);
-
-    await prisma.$transaction(async (tx) => {
-      for (const item of parsed.grades) {
-        // Cari nilai yang sudah ada untuk (enrollmentId, subjectId, type, label) di tahun ajaran ini
-        // Karena tabel Grade tidak punya composite unique untuk keempat itu (hanya id PK),
-        // kita cari secara manual lalu update/create
-        const existingList = await tx.grade.findMany({
-          where: {
-            enrollmentId: item.enrollmentId,
-            subjectId: parsed.subjectId,
-            academicYearId: academicYearId,
-            type: parsed.type,
-            label: parsed.label
-          }
-        });
-
-        if (existingList.length > 0) {
-          // Update yang pertama ketemu
-          await tx.grade.update({
-            where: { id: existingList[0].id },
-            data: { score: item.score }
-          });
-        } else {
-          await tx.grade.create({
-            data: {
-              enrollmentId: item.enrollmentId,
-              subjectId: parsed.subjectId,
-              teacherId: user.id,
-              academicYearId: academicYearId,
-              type: parsed.type,
-              label: parsed.label,
-              score: item.score
-            }
-          });
-        }
+    
+    // 1. Ambil semua data nilai yang sudah ada di tahun ajaran, subject, type, label ini
+    const existingRecords = await prisma.grade.findMany({
+      where: {
+        academicYearId: academicYearId,
+        subjectId: parsed.subjectId,
+        type: parsed.type,
+        label: parsed.label,
+        enrollmentId: { in: parsed.grades.map((g: any) => g.enrollmentId) }
       }
     });
+
+    const existingMap = new Map(existingRecords.map(r => [r.enrollmentId, r]));
+
+    const toCreate: any[] = [];
+    const toUpdate: any[] = [];
+
+    // 2. Pilah mana yang harus dibuat dan diubah
+    for (const item of parsed.grades) {
+      const existing = existingMap.get(item.enrollmentId);
+      if (existing) {
+        toUpdate.push(prisma.grade.update({
+          where: { id: existing.id },
+          data: { score: item.score }
+        }));
+      } else {
+        toCreate.push({
+          enrollmentId: item.enrollmentId,
+          subjectId: parsed.subjectId,
+          teacherId: user.id,
+          academicYearId: academicYearId,
+          type: parsed.type,
+          label: parsed.label,
+          score: item.score
+        });
+      }
+    }
+
+    // 3. Eksekusi transaksi
+    const txOperations = [];
+    if (toCreate.length > 0) {
+      txOperations.push(prisma.grade.createMany({ data: toCreate }));
+    }
+    txOperations.push(...toUpdate);
+
+    if (txOperations.length > 0) {
+      await prisma.$transaction(txOperations);
+    }
 
     revalidatePath("/teacher/grades");
     return { success: true };

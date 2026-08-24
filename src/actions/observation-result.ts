@@ -45,28 +45,20 @@ export async function submitObservationResult(data: {
         },
       });
 
-      // 4. Kalkulasi ulang ranking (Auto-Ranking)
-      // Ambil seluruh hasil observasi di tahun ajaran yang sama
-      const allResults = await tx.observationResult.findMany({
-        where: {
-          booking: {
-            registration: {
-              academicYearId: booking.registration.academicYearId,
-            },
-          },
-        },
-        orderBy: {
-          score: "desc",
-        },
-      });
-
-      // Update ranking
-      for (let i = 0; i < allResults.length; i++) {
-        await tx.observationResult.update({
-          where: { id: allResults[i].id },
-          data: { rank: i + 1 },
-        });
-      }
+      // 4. Kalkulasi ulang ranking (Auto-Ranking) menggunakan 1 SQL Query (Sangat Cepat)
+      await tx.$executeRaw`
+        WITH RankedResults AS (
+          SELECT r.id, ROW_NUMBER() OVER (ORDER BY r.score DESC) as new_rank
+          FROM sim.observation_results r
+          JOIN sim.observation_bookings b ON r.observation_booking_id = b.id
+          JOIN sim.ppdb_registrations p ON b.registration_id = p.id
+          WHERE p.academic_year_id = ${booking.registration.academicYearId}::uuid
+        )
+        UPDATE sim.observation_results
+        SET rank = RankedResults.new_rank
+        FROM RankedResults
+        WHERE sim.observation_results.id = RankedResults.id
+      `;
 
       revalidatePath("/observer");
       revalidatePath("/admin/ppdb/observations/results");

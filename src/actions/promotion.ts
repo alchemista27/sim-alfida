@@ -24,38 +24,64 @@ export async function processPromotions(formData: FormData) {
     const isSuperAdmin = roles.some(r => r.role === 'super_admin');
     const userUnits = roles.filter(r => r.role === 'admin_unit').map(r => r.unitId);
 
-    let count = 0;
+    // 1. Bulk Fetch Enrollments
+    const enrollments = await prisma.studentEnrollment.findMany({
+      where: { id: { in: decisions.map(d => d.enrollmentId) } },
+      include: { class: true }
+    });
+
+    const enrollmentsMap = new Map(enrollments.map(e => [e.id, e]));
     
-    // In a real app, we should use a transaction, but we'll process sequentially for simplicity in Sprint 19
-    for (const d of decisions) {
-      const enrollment = await prisma.studentEnrollment.findUnique({
-        where: { id: d.enrollmentId },
-        include: { class: true }
-      });
-      
-      if (!enrollment) continue;
-      
-      if (!isSuperAdmin && !userUnits.includes(enrollment.class.unitId)) {
-        continue; // Skip if not authorized
-      }
-      
-      // Upsert PromotionDecision
-      await prisma.promotionDecision.upsert({
-        where: { enrollmentId: enrollment.id },
-        update: {
+    // 2. Filter authorized decisions
+    const authorizedDecisions = decisions.filter(d => {
+      const enrollment = enrollmentsMap.get(d.enrollmentId);
+      if (!enrollment) return false;
+      if (!isSuperAdmin && !userUnits.includes(enrollment.class.unitId)) return false;
+      return true;
+    });
+
+    // 3. Ambil data keputusan yang sudah ada sebelumnya
+    const existingDecisions = await prisma.promotionDecision.findMany({
+      where: { enrollmentId: { in: authorizedDecisions.map(d => d.enrollmentId) } }
+    });
+    const existingSet = new Set(existingDecisions.map(d => d.enrollmentId));
+
+    const toCreate: any[] = [];
+    const toUpdate: any[] = [];
+
+    // 4. Pilah mana yang dibuat baru dan diperbarui
+    for (const d of authorizedDecisions) {
+      if (existingSet.has(d.enrollmentId)) {
+        toUpdate.push(prisma.promotionDecision.update({
+          where: { enrollmentId: d.enrollmentId },
+          data: {
+            decision: d.decision as any,
+            decidedBy: user.id,
+            decidedAt: new Date()
+          }
+        }));
+      } else {
+        toCreate.push({
+          enrollmentId: d.enrollmentId,
           decision: d.decision as any,
           decidedBy: user.id,
           decidedAt: new Date()
-        },
-        create: {
-          enrollmentId: enrollment.id,
-          decision: d.decision as any,
-          decidedBy: user.id
-        }
-      });
-      
-      count++;
+        });
+      }
     }
+
+    // 5. Eksekusi bersamaan via Transaksi Prisma
+    const txOperations = [];
+    if (toCreate.length > 0) {
+      txOperations.push(prisma.promotionDecision.createMany({ data: toCreate }));
+    }
+    txOperations.push(...toUpdate);
+
+    if (txOperations.length > 0) {
+      await prisma.$transaction(txOperations);
+    }
+
+    let count = authorizedDecisions.length;
 
     revalidatePath("/unit/promotions");
     return { success: true, count };
