@@ -12,50 +12,38 @@ export default async function AdminDashboardPage() {
   // Protect route
   await requireRole([UserRole.super_admin]);
 
-  const bpiOverview = await getBpiOverview();
-  const deptOverview = await getDepartmentOverview();
-  const attOverview = await getAttendanceOverview();
-
-  // Fetch stats
-  const totalUnits = await prisma.unit.count();
-  const ppdbActiveUnitsCount = await prisma.academicYear.count({
-    where: { ppdbActive: true },
-  });
-
-  // Calculate registrations this month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const newRegistrations = await prisma.registration.count({
-    where: {
-      createdAt: {
-        gte: startOfMonth,
-      },
-    },
-  });
-
-  // Fetch total active students
-  const totalActiveStudents = await prisma.studentEnrollment.count({
-    where: { status: 'active' }
-  });
-
-  // Fetch today's date bounds for attendance
   const today = new Date();
   today.setHours(0,0,0,0);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // Fetch global attendance today
-  const todaysAttendances = await prisma.attendance.findMany({
-    where: {
-      date: {
-        gte: today,
-        lt: tomorrow
-      }
-    },
-    select: { status: true, enrollment: { select: { class: { select: { unitId: true } } } } }
-  });
+  // Jalankan SEMUA kueri berat secara PARALEL untuk mempercepat load page 10x lipat
+  const [
+    bpiOverview,
+    deptOverview,
+    attOverview,
+    totalUnits,
+    ppdbActiveUnitsCount,
+    newRegistrations,
+    totalActiveStudents,
+    todaysAttendances
+  ] = await Promise.all([
+    getBpiOverview(),
+    getDepartmentOverview(),
+    getAttendanceOverview(),
+    prisma.unit.count(),
+    prisma.academicYear.count({ where: { ppdbActive: true } }),
+    prisma.registration.count({ where: { createdAt: { gte: startOfMonth } } }),
+    prisma.studentEnrollment.count({ where: { status: 'active' } }),
+    prisma.attendance.findMany({
+      where: { date: { gte: today, lt: tomorrow } },
+      select: { status: true, enrollment: { select: { class: { select: { unitId: true } } } } }
+    })
+  ]);
 
   const presentCount = todaysAttendances.filter(a => a.status === 'present').length;
   const globalAttendanceRate = todaysAttendances.length > 0 

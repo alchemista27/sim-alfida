@@ -8,28 +8,19 @@ import { requireRole } from "@/lib/auth-guard";
 export async function getStaffDemographics() {
   await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
 
-  const totalUsers = await prisma.user.count({
-    where: { isActive: true }
-  });
-
-  const rolesCount = await prisma.userRoleAssignment.groupBy({
-    by: ['role'],
-    _count: {
-      userId: true
-    }
-  });
-
-  const unitBreakdown = await prisma.userRoleAssignment.groupBy({
-    by: ['unitId'],
-    _count: {
-      userId: true
-    },
-    where: {
-      unitId: { not: null }
-    }
-  });
-
-  const units = await prisma.unit.findMany({ select: { id: true, name: true } });
+  const [totalUsers, rolesCount, unitBreakdown, units] = await Promise.all([
+    prisma.user.count({ where: { isActive: true } }),
+    prisma.userRoleAssignment.groupBy({
+      by: ['role'],
+      _count: { userId: true }
+    }),
+    prisma.userRoleAssignment.groupBy({
+      by: ['unitId'],
+      _count: { userId: true },
+      where: { unitId: { not: null } }
+    }),
+    prisma.unit.findMany({ select: { id: true, name: true } })
+  ]);
   
   const formattedUnitBreakdown = unitBreakdown.map(u => {
     const unitName = units.find(un => un.id === u.unitId)?.name || 'Unknown Unit';
