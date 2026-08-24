@@ -91,7 +91,7 @@ export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
                 Cari Pengguna
               </label>
               <div className="relative">
-                <Icon name="search" className="absolute left-3 top-2.5 text-gray-400" size="sm" />
+                <Icon name="search" className="absolute left-3 top-2.5 text-gray-400 text-sm" />
                 <input
                   type="text"
                   value={searchQuery}
