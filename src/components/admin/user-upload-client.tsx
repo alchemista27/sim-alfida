@@ -35,7 +35,7 @@ export function UserUploadClient() {
       const res = await batchImportUsers(jsonData);
       
       if (res.success) {
-        alert(`Berhasil! ${res.count} pengguna telah diimpor/diperbarui.`);
+        alert(`Berhasil! ${res.imported} pengguna telah diimpor/diperbarui.`);
       } else {
         alert(`Gagal: ${res.error}`);
       }

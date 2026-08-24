@@ -31,54 +31,32 @@ export async function generateBulkSppInvoices(formData: FormData) {
     });
     if (!userRole && !isSuperAdmin) throw new Error("Akses ditolak");
 
-    // Get all active enrollments for this unit and academic year
-    const enrollments = await prisma.studentEnrollment.findMany({
-      where: {
+    // Call Supabase Edge Function instead of processing here to avoid timeouts
+    const { data: result, error } = await supabase.functions.invoke("generate-spp", {
+      body: {
+        unitId: parsed.unitId,
         academicYearId: parsed.academicYearId,
-        status: 'active',
-        class: { unitId: parsed.unitId }
-      },
-      select: { id: true }
-    });
-
-    if (enrollments.length === 0) {
-      throw new Error("Tidak ada siswa aktif yang ditemukan pada tahun ajaran dan unit ini.");
-    }
-
-    // Check if invoices already exist for this month/year for these enrollments to avoid duplicate errors
-    const existingInvoices = await prisma.sppInvoice.findMany({
-      where: {
         month: parsed.month,
         year: parsed.year,
-        enrollmentId: { in: enrollments.map(e => e.id) }
-      },
-      select: { enrollmentId: true }
+        amount: parsed.amount,
+        generatedBy: user.id
+      }
     });
 
-    const existingEnrollmentIds = new Set(existingInvoices.map(e => e.enrollmentId));
-    const newEnrollments = enrollments.filter(e => !existingEnrollmentIds.has(e.id));
-
-    if (newEnrollments.length === 0) {
-      return { success: true, count: 0, message: "Seluruh tagihan untuk bulan ini sudah pernah dibuat sebelumnya." };
+    if (error) {
+      console.error("Edge function error:", error);
+      throw new Error(error.message || "Gagal membuat tagihan massal.");
     }
 
-    // Create invoices
-    const payload = newEnrollments.map(e => ({
-      enrollmentId: e.id,
-      month: parsed.month,
-      year: parsed.year,
-      amount: parsed.amount,
-      status: 'unpaid' as const
-    }));
-
-    const result = await prisma.sppInvoice.createMany({
-      data: payload
-    });
+    if (result.error) {
+      throw new Error(result.error);
+    }
 
     revalidatePath("/unit/spp");
-    return { success: true, count: result.count, message: `Berhasil membuat ${result.count} tagihan baru.` };
+    return { success: true, count: result.count, message: result.message };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    console.error("generateBulkSppInvoices error:", error);
+    return { success: false, error: error.message || "Gagal membuat tagihan massal." };
   }
 }
 
