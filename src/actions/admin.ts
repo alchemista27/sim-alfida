@@ -87,12 +87,18 @@ export async function removeAdminUnitAction(userId: string, unitId: string) {
 }
 
 export async function searchUsersAction(query: string) {
-  await requireRole([UserRole.super_admin, UserRole.admin_unit]);
+  // Hanya pastikan user login, tidak perlu cek role berat untuk pencarian nama
+  const { requireAuth } = await import("@/lib/auth-guard");
+  await requireAuth();
+  
   if (!query || query.length < 2) return [];
 
   const users = await prisma.user.findMany({
     where: {
-      fullName: { contains: query, mode: "insensitive" }
+      OR: [
+        { fullName: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } }
+      ]
     },
     take: 10,
     select: {

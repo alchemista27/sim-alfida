@@ -22,7 +22,8 @@ export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (searchQuery.length >= 3) {
+    // Jangan cari jika userId sudah ada (berarti sedang memilih)
+    if (searchQuery.length >= 3 && !userId) {
       const timer = setTimeout(async () => {
         setIsSearching(true);
         try {
@@ -38,7 +39,7 @@ export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
     } else {
       setSearchResults([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, userId]);
 
   const handleAssign = async () => {
     if (!userId) {
