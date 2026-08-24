@@ -85,3 +85,22 @@ export async function removeAdminUnitAction(userId: string, unitId: string) {
 
   revalidatePath(`/admin/units/${unitId}`);
 }
+
+export async function searchUsersAction(query: string) {
+  await requireRole([UserRole.super_admin, UserRole.admin_unit]);
+  if (!query || query.length < 2) return [];
+
+  const users = await prisma.user.findMany({
+    where: {
+      fullName: { contains: query, mode: "insensitive" }
+    },
+    take: 10,
+    select: {
+      id: true,
+      fullName: true,
+      email: true
+    }
+  });
+  
+  return users;
+}

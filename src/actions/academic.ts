@@ -183,7 +183,7 @@ export async function assignHomeroomTeacher(formData: any, academicYearId: strin
     });
     
     // Pastikan wali kelas punya UserRoleAssignment "guru" di unit terkait
-    const classRoom = await prisma.classRoom.findUnique({
+    const classRoom = await prisma.class.findUnique({
       where: { id: parsed.classId },
       include: { unit: true }
     });
