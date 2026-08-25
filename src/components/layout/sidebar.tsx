@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
@@ -146,6 +147,7 @@ interface SidebarProps {
 
 export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, status } = useAuth();
 
   // Determine user roles
@@ -232,12 +234,15 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
                 {group.items.map((item) => {
                   const isActive = pathname === item.href;
                   return (
-                    <Link
+                    <button
                       key={item.href}
-                      href={item.href}
-                      onClick={onCloseMobile}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (onCloseMobile) onCloseMobile();
+                        router.push(item.href);
+                      }}
                       className={cn(
-                        "flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded transition-colors",
+                        "w-full flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded transition-colors text-left",
                         isActive
                           ? "bg-teal-50 text-tertiary font-semibold border-r-2 border-tertiary"
                           : "text-primary hover:bg-neutral hover:text-tertiary"
@@ -245,7 +250,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
                     >
                       <Icon name={item.icon} className="text-base" />
                       <span>{item.title}</span>
-                    </Link>
+                    </button>
                   );
                 })}
               </div>
