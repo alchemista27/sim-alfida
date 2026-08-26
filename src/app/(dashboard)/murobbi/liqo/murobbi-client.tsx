@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
-import { DayOfWeek, AttendanceStatus } from "@prisma/client";
+import { DayOfWeek, AttendanceStatus } from "@/generated/client";
 import { updateLiqoSchedule, createLiqoMeeting, saveLiqoAttendance } from "@/actions/murobbi";
 
 const DAYS: Record<string, string> = {

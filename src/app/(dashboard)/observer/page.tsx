@@ -1,5 +1,5 @@
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { prisma } from "@/lib/prisma";
 import { ObserverInputClient } from "@/components/observer/observer-input-client";
 

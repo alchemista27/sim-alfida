@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { PpdbFsm } from "@/lib/ppdb-fsm";
-import { RegistrationStatus } from "@prisma/client";
+import { RegistrationStatus } from "@/generated/client";
 
 describe("PPDB State Machine", () => {
   it("should allow transition from pending_payment to payment_uploaded", () => {

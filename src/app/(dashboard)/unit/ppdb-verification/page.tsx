@@ -1,6 +1,6 @@
 import React from "react";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole, RegistrationStatus } from "@prisma/client";
+import { UserRole, RegistrationStatus } from "@/generated/client";
 import { resolveUnitId } from "@/lib/unit-context";
 import { prisma } from "@/lib/prisma";
 import { VerificationClient } from "@/components/unit/ppdb-verification-client";

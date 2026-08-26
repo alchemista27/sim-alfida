@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { UserRole, GpsAttendanceStatus, LeaveStatus, WorkProgramStatus } from "@prisma/client";
+import { UserRole, GpsAttendanceStatus, LeaveStatus, WorkProgramStatus } from "@/generated/client";
 import { requireRole } from "@/lib/auth-guard";
 import { unstable_cache } from "next/cache";
 

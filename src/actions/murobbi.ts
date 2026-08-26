@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { revalidatePath } from "next/cache";
 import { LiqoScheduleSchema, LiqoMeetingSchema, LiqoAttendanceSchema, type LiqoScheduleInput, type LiqoMeetingInput, type LiqoAttendanceInput } from "@/lib/validators/murobbi";
 import { getCurrentUser } from "@/actions/user";

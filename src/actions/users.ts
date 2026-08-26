@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 
 function mapRole(roleStr: string): UserRole {
   const r = roleStr.toLowerCase();

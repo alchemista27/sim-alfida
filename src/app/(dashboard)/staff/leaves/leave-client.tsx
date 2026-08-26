@@ -7,7 +7,7 @@ import { Modal } from "@/components/ui/modal";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { LeaveRequest, LeaveType, LeaveStatus } from "@prisma/client";
+import { LeaveRequest, LeaveType, LeaveStatus } from "@/generated/client";
 import { createLeaveRequest } from "@/actions/leave-request";
 
 interface LeaveClientProps {

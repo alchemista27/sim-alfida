@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Icon } from "@/components/ui/icon";
-import { SubjectLevel } from "@prisma/client";
+import { SubjectLevel } from "@/generated/client";
 import { createSubject, updateSubject, deleteSubject } from "@/actions/academic";
 
 interface SubjectData {
@@ -184,6 +184,7 @@ export function SubjectClient({ initialData }: { initialData: SubjectData[] }) {
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="all">Semua Tingkat (All)</option>
+              <option value="level_0">TK (Level 0)</option>
               <option value="level_1">Kelas 1</option>
               <option value="level_2">Kelas 2</option>
               <option value="level_3">Kelas 3</option>
@@ -196,6 +197,7 @@ export function SubjectClient({ initialData }: { initialData: SubjectData[] }) {
               <option value="level_10">Kelas 10</option>
               <option value="level_11">Kelas 11</option>
               <option value="level_12">Kelas 12</option>
+              <option value="level_13">Pesantren (Level 13)</option>
             </select>
           </div>
 

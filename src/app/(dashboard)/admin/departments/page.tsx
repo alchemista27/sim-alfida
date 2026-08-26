@@ -3,7 +3,7 @@ import { getDepartments } from "@/actions/departments";
 import { prisma } from "@/lib/prisma";
 import { DepartmentClient } from "./department-client";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 
 export default async function AdminDepartmentsPage() {
   await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);

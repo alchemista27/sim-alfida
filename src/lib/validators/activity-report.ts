@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ReportType } from "@prisma/client";
+import { ReportType } from "@/generated/client";
 
 export const ActivityReportSchema = z.object({
   departmentId: z.string().uuid("ID Departemen tidak valid"),

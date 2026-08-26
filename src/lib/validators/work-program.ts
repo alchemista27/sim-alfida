@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { WorkProgramStatus } from "@prisma/client";
+import { WorkProgramStatus } from "@/generated/client";
 
 export const WorkProgramSchema = z.object({
   departmentId: z.string().uuid("ID Departemen tidak valid"),

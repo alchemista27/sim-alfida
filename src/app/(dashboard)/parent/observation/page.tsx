@@ -1,6 +1,6 @@
 import React from "react";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { getActiveRegistration } from "@/actions/parent";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";

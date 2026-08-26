@@ -3,7 +3,7 @@ import { UnitForm } from "@/components/admin/unit-form";
 import { AssignAdminModal } from "@/components/admin/assign-admin-modal";
 import { RemoveAdminButton } from "@/components/admin/remove-admin-button";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";

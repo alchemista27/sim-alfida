@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole, GpsAttendanceStatus } from "@prisma/client";
+import { UserRole, GpsAttendanceStatus } from "@/generated/client";
 import { revalidatePath } from "next/cache";
 import { GpsCheckInOutSchema, type GpsCheckInOutInput } from "@/lib/validators/staff-attendance";
 import { calculateDistance } from "@/lib/haversine";

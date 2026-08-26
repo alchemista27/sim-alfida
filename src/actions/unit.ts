@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
 import { unitSettingsSchema, academicYearSchema } from "@/lib/validations/unit";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { revalidatePath } from "next/cache";
 
 // ── Helper: get the unit ID scoped to the current admin_unit session ──

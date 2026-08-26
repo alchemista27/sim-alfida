@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { revalidatePath } from "next/cache";
 import { DepartmentSchema, AssignDepartmentAdminSchema, type DepartmentInput, type AssignDepartmentAdminInput } from "@/lib/validators/department";
 

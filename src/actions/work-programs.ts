@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
-import { UserRole, WorkProgramStatus } from "@prisma/client";
+import { UserRole, WorkProgramStatus } from "@/generated/client";
 import { requireRole } from "@/lib/auth-guard";
 import { WorkProgramSchema, type WorkProgramInput } from "@/lib/validators/work-program";
 

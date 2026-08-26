@@ -1,4 +1,4 @@
-import { RegistrationStatus } from "@prisma/client";
+import { RegistrationStatus } from "@/generated/client";
 
 export const PPDB_STEPS = [
   RegistrationStatus.pending_payment,

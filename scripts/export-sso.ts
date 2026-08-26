@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/client";
 import * as fs from "fs";
 import * as xlsx from "xlsx";
 

@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
 import { unitSchema, assignAdminSchema } from "@/lib/validations/admin";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { revalidatePath } from "next/cache";
 
 export async function createUnitAction(data: unknown) {

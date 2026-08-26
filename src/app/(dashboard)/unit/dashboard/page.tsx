@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth-guard";
 import { resolveUnitId } from "@/lib/unit-context";
 import { prisma } from "@/lib/prisma";
-import { UserRole, RegistrationStatus } from "@prisma/client";
+import { UserRole, RegistrationStatus } from "@/generated/client";
 
 interface ShortcutCardProps {
   title: string;

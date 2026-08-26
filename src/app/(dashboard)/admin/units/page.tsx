@@ -1,7 +1,7 @@
 import React from "react";
 import { UnitTable, UnitTableRow } from "@/components/admin/unit-table";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";

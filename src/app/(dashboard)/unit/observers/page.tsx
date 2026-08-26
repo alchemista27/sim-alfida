@@ -1,6 +1,6 @@
 import React from "react";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { getTeachersWithObserverStatus } from "@/actions/unit-observers";
 import { ObserverAssignmentClient } from "@/components/unit/observer-assignment-client";
 

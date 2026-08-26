@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DayOfWeek } from "@prisma/client";
+import { DayOfWeek } from "@/generated/client";
 
 export const ClassScheduleSchema = z.object({
   id: z.string().uuid().optional(),

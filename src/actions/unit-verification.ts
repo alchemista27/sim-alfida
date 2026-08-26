@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole, RegistrationStatus } from "@prisma/client";
+import { UserRole, RegistrationStatus } from "@/generated/client";
 import { revalidatePath } from "next/cache";
 
 export async function verifyDocumentsAction(

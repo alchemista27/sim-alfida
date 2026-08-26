@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getClassSchedules, upsertClassSchedule, deleteClassSchedule } from "@/actions/schedules";
-import { DayOfWeek } from "@prisma/client";
+import { DayOfWeek } from "@/generated/client";
 
 export function ScheduleManager({ 
   classes, 

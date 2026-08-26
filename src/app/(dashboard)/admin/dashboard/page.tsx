@@ -3,7 +3,7 @@ import Link from "next/link";
 import { StatCard } from "@/components/admin/stat-card";
 import { UnitTable, UnitTableRow } from "@/components/admin/unit-table";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { prisma } from "@/lib/prisma";
 import { getBpiOverview, getDepartmentOverview, getAttendanceOverview } from "@/actions/super-dashboard";
 import { SuperDashboardClient } from "./super-dashboard-client";

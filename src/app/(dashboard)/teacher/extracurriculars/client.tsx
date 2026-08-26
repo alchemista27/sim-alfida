@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { upsertExtraSchedule, deleteExtraSchedule, upsertExtraJournal, deleteExtraJournal, upsertExtraGrade } from "@/actions/extracurricular";
-import { DayOfWeek } from "@prisma/client";
+import { DayOfWeek } from "@/generated/client";
 
 export function ExtracurricularCoachClient({ extras }: { extras: any[] }) {
   const [selectedExtraId, setSelectedExtraId] = useState<string>(extras.length > 0 ? extras[0].id : "");

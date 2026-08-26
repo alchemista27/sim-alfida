@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
 import { LeaveRequestSchema, type LeaveRequestInput } from "@/lib/validators/leave-request";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { requireRole } from "@/lib/auth-guard";
 
 export async function getMyLeaveRequests() {

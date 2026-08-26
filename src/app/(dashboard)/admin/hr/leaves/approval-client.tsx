@@ -5,10 +5,10 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LeaveStatus, LeaveType } from "@prisma/client";
+import { LeaveStatus, LeaveType } from "@/generated/client";
 import { approveLeaveRequest, rejectLeaveRequest } from "@/actions/leave-approval";
 import { useRouter } from "next/navigation";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/client";
 
 type LeaveRequestWithUser = Prisma.LeaveRequestGetPayload<{
   include: {

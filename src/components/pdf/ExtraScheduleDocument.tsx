@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import { DayOfWeek } from "@prisma/client";
+import { DayOfWeek } from "@/generated/client";
 
 const styles = StyleSheet.create({
   page: {

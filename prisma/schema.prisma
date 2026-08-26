@@ -113,6 +113,7 @@ enum EnrollmentType {
 }
 
 enum SubjectLevel {
+  level_0  @map("0")
   level_1  @map("1")
   level_2  @map("2")
   level_3  @map("3")
@@ -125,6 +126,7 @@ enum SubjectLevel {
   level_10 @map("10")
   level_11 @map("11")
   level_12 @map("12")
+  level_13 @map("13")
   all
 
   @@schema("sim")

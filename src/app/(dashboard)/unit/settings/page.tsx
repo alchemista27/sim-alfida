@@ -3,7 +3,7 @@ import { UnitSettingsForm } from "@/components/unit/unit-settings-form";
 import { requireRole } from "@/lib/auth-guard";
 import { resolveUnitId } from "@/lib/unit-context";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 
 export default async function UnitSettingsPage() {
   await requireRole([UserRole.admin_unit, UserRole.super_admin]);

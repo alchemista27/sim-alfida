@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { ScheduleManager } from "@/components/schedules/schedule-manager";
 import { resolveUnitId } from "@/lib/unit-context";
 

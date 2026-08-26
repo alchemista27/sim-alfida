@@ -3,7 +3,7 @@
 // removed auth
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { RegistrationStatus } from "@prisma/client";
+import { RegistrationStatus } from "@/generated/client";
 import { PpdbFsm } from "@/lib/ppdb-fsm";
 import { studentDataSchema, parentDataSchema } from "@/lib/validations/ppdb";
 import { revalidatePath } from "next/cache";

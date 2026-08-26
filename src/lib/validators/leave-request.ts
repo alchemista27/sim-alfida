@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LeaveType } from "@prisma/client";
+import { LeaveType } from "@/generated/client";
 
 export const LeaveRequestSchema = z.object({
   type: z.nativeEnum(LeaveType),

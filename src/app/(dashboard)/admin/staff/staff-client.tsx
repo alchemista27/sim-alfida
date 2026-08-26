@@ -7,7 +7,7 @@ import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 import { assignStaffToUnit, createStaffUser } from "@/actions/staff";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { Input } from "@/components/ui/input";
 
 type User = any;
@@ -15,10 +15,11 @@ type Unit = any;
 
 interface StaffClientProps {
   staff: User[];
+  allUsers: User[];
   units: Unit[];
 }
 
-export function StaffClient({ staff, units }: StaffClientProps) {
+export function StaffClient({ staff, allUsers, units }: StaffClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -192,7 +193,7 @@ export function StaffClient({ staff, units }: StaffClientProps) {
               className="w-full px-3 py-2 text-sm bg-surface border border-border rounded focus:outline-none focus:border-secondary"
             >
               <option value="">Pilih pengguna...</option>
-              {staff.map((u) => (
+              {allUsers.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.fullName} ({u.email})
                 </option>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations/auth";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: Request) {

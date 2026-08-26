@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
 import { getCurrentUser } from "@/actions/user";
 import { MutabaahRecordSchema, type MutabaahRecordInput } from "@/lib/validators/mutabaah";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 
 export async function getMyLiqoGroup() {
   const user = await getCurrentUser();

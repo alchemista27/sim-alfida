@@ -416,7 +416,6 @@ Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, AT
 ## Catatan
 
 - **Modul Phase 3** (Manajemen Karyawan) sedang dalam pengembangan. Modul berikutnya (Surat Menyurat, Payroll, Rekrutmen) akan direncanakan setelah Phase 3 go-live.
-- **SSO Integration** dengan WordPress & Moodle disiapkan di arsitektur tapi implementasinya masuk iterasi berikutnya.
 - Sprint plan ini bersifat *living document* — akan di-update setiap Sprint Review berdasarkan velocity aktual tim.
 
 ---

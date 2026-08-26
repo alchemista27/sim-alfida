@@ -48,8 +48,6 @@ graph TB
     end
 
     subgraph External["Integrasi Eksternal"]
-        WP["WordPress (SSO)"]
-        MDL["Moodle (SSO)"]
         PG["Payment Gateway"]
     end
 

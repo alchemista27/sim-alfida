@@ -2,7 +2,7 @@ import React from "react";
 import { requireRole } from "@/lib/auth-guard";
 import { resolveUnitId } from "@/lib/unit-context";
 import { prisma } from "@/lib/prisma";
-import { UserRole, RegistrationStatus } from "@prisma/client";
+import { UserRole, RegistrationStatus } from "@/generated/client";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { PaymentVerificationClient } from "@/components/unit/payment-verification-client";

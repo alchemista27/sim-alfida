@@ -36,7 +36,6 @@ Platform dibangun dengan arsitektur **multi-tenant** yang memungkinkan setiap un
 | Digitalisasi proses PPDB seluruh unit                | 100%             |
 | Pengurangan waktu proses administrasi PPDB           | ≥ 50%            |
 | Adopsi sistem oleh seluruh unit pendidikan/yayasan         | 9/9 unit         |
-| Integrasi SSO dengan WordPress & Moodle              | Selesai di v1.0  |
 
 ---
 
@@ -128,7 +127,6 @@ Yayasan Alfida (Root)
 ### 5.3 SSO (Single Sign-On)
 
 - Satu akun untuk seluruh modul SIM-Alfida
-- Integrasi dengan **WordPress** (Website Yayasan) dan **Moodle** (LMS Yayasan)
 - Mendukung multi-role per pengguna (satu user bisa memiliki peran di lebih dari satu unit)
 
 ---
@@ -543,8 +541,6 @@ flowchart TD
 
 | Sistem           | Tipe Integrasi | Status       | Keterangan                                 |
 | ---------------- | -------------- | ------------ | ------------------------------------------ |
-| WordPress        | SSO            | Planned v1.0 | Website Yayasan Alfida                     |
-| Moodle           | SSO            | Planned v1.0 | LMS Yayasan Alfida                         |
 | Payment Gateway  | API            | Future       | DOKU / Midtrans / Duitku / Xendit          |
 
 ---
@@ -596,7 +592,7 @@ flowchart TD
 
 ### Fase 4 — Integrasi Eksternal
 
-> SSO WordPress, SSO Moodle, Payment Gateway.
+> Payment Gateway.
 
 ---
 
@@ -605,7 +601,6 @@ flowchart TD
 | Risiko                                              | Dampak | Mitigasi                                                      |
 | --------------------------------------------------- | ------ | ------------------------------------------------------------- |
 | Adopsi rendah oleh admin unit                       | Tinggi | Pelatihan intensif, UX yang intuitif, dukungan teknis aktif   |
-| Integrasi SSO dengan WordPress/Moodle kompleks      | Sedang | Riset teknis awal, implementasi di fase terpisah              |
 | Keamanan data siswa dan orang tua                   | Tinggi | Enkripsi data sensitif, audit keamanan berkala, RBAC ketat    |
 | Perubahan requirement dari unit-unit                 | Sedang | Arsitektur modular, sprint review rutin dengan stakeholder    |
 | Ketergantungan pada payment gateway pihak ketiga     | Rendah | Fallback ke transfer manual, abstraksi layer pembayaran       |

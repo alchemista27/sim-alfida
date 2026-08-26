@@ -1,4 +1,4 @@
-import { PrismaClient, UnitLevel, UserRole } from "@prisma/client";
+import { PrismaClient, UnitLevel, UserRole } from "@/generated/client";
 import * as xlsx from "xlsx";
 import { createClient } from "@supabase/supabase-js";
 

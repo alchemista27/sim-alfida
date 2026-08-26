@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DayOfWeek, AttendanceStatus } from "@prisma/client";
+import { DayOfWeek, AttendanceStatus } from "@/generated/client";
 
 export const LiqoScheduleSchema = z.object({
   scheduleDay: z.nativeEnum(DayOfWeek).nullable().optional(),

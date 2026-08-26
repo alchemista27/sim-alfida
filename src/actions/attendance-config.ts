@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { revalidatePath } from "next/cache";
 import { GpsConfigSchema, HolidaySchema, type GpsConfigInput, type HolidayInput } from "@/lib/validators/attendance";
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LessonPlanType } from "@prisma/client";
+import { LessonPlanType } from "@/generated/client";
 
 export const TeachingJournalSchema = z.object({
   id: z.string().uuid().optional(),

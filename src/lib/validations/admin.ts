@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UnitLevel } from "@prisma/client";
+import { UnitLevel } from "@/generated/client";
 
 export const unitSchema = z.object({
   name: z.string().min(3, "Nama unit minimal 3 karakter"),

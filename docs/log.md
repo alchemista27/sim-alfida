@@ -2,6 +2,19 @@
 
 ---
 
+**tanggal:** 26 Agustus 2026
+**progress:**
+- Mengatasi _bug_ 404 pada navigasi menu Admin Unit (Akademik) dengan menyelaraskan kembali _URL sidebar_ (Mata Pelajaran, Kelas, Ekstrakurikuler) terhadap struktur _folder routes_ Next.js yang sebenarnya.
+- Mengatasi 245 peringatan _error_ tipe TypeScript bawaan yang mengakibatkan `TypeError: Cannot read properties of undefined` dengan merombak struktur impor `@prisma/client` menjadi kustom `@/generated/client` secara global (massal) pada 100+ fail sumber.
+- Melakukan ekspansi skema _database_ (Prisma) pada _enum_ `SubjectLevel` dengan menyisipkan opsi `level_0` (TK) dan `level_13` (Pesantren) untuk mengakomodasi seluruh spektrum lembaga pendidikan Yayasan Alfida, beserta sinkronisasinya pada antarmuka manajemen mata pelajaran.
+- Memisahkan arsitektur pengelolaan Tahun Ajaran: menciptakan laman mandiri `/unit/academic-years` khusus untuk modul akademik (*existing cohorts*) agar tidak lagi bergantungan pada form pengaktifan PPDB.
+- Memperketat visibilitas hierarki kepegawaian: Admin Unit kini hanya dapat melihat daftar staf milik unitnya pada _dashboard_ tabel, namun tetap diberikan akses global ke seluruh akun yayasan saat membuka _modal_ "Assign Staf/Guru".
+- Menyiapkan integrasi ekosistem AI terotomasi (*Model Context Protocol* / MCP) untuk Vercel dan Supabase melalui sistem _plugin workspace_ lokal (`.agents/plugins`).
+- Melakukan pembersihan dokumen desain arsitektur (PRD, TDD, Sprint Plan) dengan mencabut wacana integrasi SSO menuju WordPress dan Moodle demi berfokus pada MVP internal.
+**commit message:** refactor: decouple academic years from ppdb, fix prisma client imports, expand subject levels for TK/Pesantren, and restrict staff visibility per unit
+
+---
+
 **tanggal:** 24 Agustus 2026
 **progress:**
 - Melakukan investigasi mendalam terhadap *bottleneck* performa Vercel Serverless akibat beban komputasi Node.js (CPU dan Memori).

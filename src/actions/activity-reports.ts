@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
-import { UserRole, ReportType } from "@prisma/client";
+import { UserRole, ReportType } from "@/generated/client";
 import { requireRole } from "@/lib/auth-guard";
 import { ActivityReportSchema, type ActivityReportInput } from "@/lib/validators/activity-report";
 

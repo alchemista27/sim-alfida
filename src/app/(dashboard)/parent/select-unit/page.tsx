@@ -1,7 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { createRegistrationAction, getActiveRegistration } from "@/actions/parent";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

@@ -3,7 +3,7 @@ import { getStaffAssignments } from "@/actions/staff";
 import { prisma } from "@/lib/prisma";
 import { StaffClient } from "./staff-client";
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 import { getCurrentUser } from "@/actions/user";
 
 export default async function AdminStaffPage() {
@@ -19,8 +19,9 @@ export default async function AdminStaffPage() {
     .filter((r: any) => (r.role === "admin_unit" || r.role === "admin_unit_nondik") && r.unitId)
     .map((r: any) => r.unitId as string);
 
-  const staff = await getStaffAssignments();
+  const allStaff = await getStaffAssignments();
   
+  let visibleStaff = allStaff;
   let units;
   if (isSuperAdmin || isAdminKepegawaian) {
     units = await prisma.unit.findMany({ orderBy: { name: "asc" } });
@@ -29,6 +30,11 @@ export default async function AdminStaffPage() {
       where: { id: { in: adminUnitRoleIds } },
       orderBy: { name: "asc" }
     });
+    
+    // Only show staff that have a role in the admin's unit
+    visibleStaff = allStaff.filter((u: any) => 
+      u.roles.some((r: any) => adminUnitRoleIds.includes(r.unitId))
+    );
   }
 
   return (
@@ -42,7 +48,7 @@ export default async function AdminStaffPage() {
         </p>
       </div>
 
-      <StaffClient staff={staff} units={units} />
+      <StaffClient staff={visibleStaff} allUsers={allStaff} units={units} />
     </div>
   );
 }

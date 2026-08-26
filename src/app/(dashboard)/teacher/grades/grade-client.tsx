@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { GradeType } from "@prisma/client";
+import { GradeType } from "@/generated/client";
 import { submitBatchGrade } from "@/actions/academic";
 import { Input } from "@/components/ui/input";
 

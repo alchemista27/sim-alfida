@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { WorkProgramStatus } from "@prisma/client";
+import { WorkProgramStatus } from "@/generated/client";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";

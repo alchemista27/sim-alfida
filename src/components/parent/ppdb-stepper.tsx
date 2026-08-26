@@ -1,5 +1,5 @@
 import React from "react";
-import { RegistrationStatus } from "@prisma/client";
+import { RegistrationStatus } from "@/generated/client";
 import { STEP_INDEX_MAP } from "@/lib/ppdb-fsm";
 import { Icon } from "@/components/ui/icon";
 import { Card } from "@/components/ui/card";

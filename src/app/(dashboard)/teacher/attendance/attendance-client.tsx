@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { AttendanceStatus } from "@prisma/client";
+import { AttendanceStatus } from "@/generated/client";
 import { submitBatchAttendance } from "@/actions/academic";
 import { Input } from "@/components/ui/input";
 

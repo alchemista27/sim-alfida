@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 
 /**
  * Memastikan user memiliki UserRoleAssignment tertentu.

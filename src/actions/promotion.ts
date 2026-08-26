@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/client";
 
 export async function processPromotions(formData: FormData) {
   try {

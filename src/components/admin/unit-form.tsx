@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { unitSchema, UnitInput } from "@/lib/validations/admin";
-import { UnitLevel } from "@prisma/client";
+import { UnitLevel } from "@/generated/client";
 import { createUnitAction, updateUnitAction } from "@/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";

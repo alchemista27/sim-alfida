@@ -1,7 +1,7 @@
 import React from "react";
 import { getActiveRegistration } from "@/actions/parent";
 import { PpdbStepper } from "@/components/parent/ppdb-stepper";
-import { RegistrationStatus } from "@prisma/client";
+import { RegistrationStatus } from "@/generated/client";
 import { redirect } from "next/navigation";
 import { DocumentUploadClient } from "@/components/parent/document-upload-client";
 import { prisma } from "@/lib/prisma";

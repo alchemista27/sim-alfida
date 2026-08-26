@@ -1,7 +1,7 @@
 "use server";
 
 import { requireRole } from "@/lib/auth-guard";
-import { UserRole, RegistrationStatus } from "@prisma/client";
+import { UserRole, RegistrationStatus } from "@/generated/client";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 

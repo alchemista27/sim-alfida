@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth-guard";
 import { resolveUnitId } from "@/lib/unit-context";
 import { prisma } from "@/lib/prisma";
-import { UserRole, RegistrationStatus } from "@prisma/client";
+import { UserRole, RegistrationStatus } from "@/generated/client";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 

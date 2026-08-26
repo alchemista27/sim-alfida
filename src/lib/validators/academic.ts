@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SubjectLevel, GradeType, AttendanceStatus } from "@prisma/client";
+import { SubjectLevel, GradeType, AttendanceStatus } from "@/generated/client";
 
 export const BatchAttendanceSchema = z.object({
   subjectId: z.string().uuid(),

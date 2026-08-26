@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
-import { Prisma, UserRole, GpsAttendanceStatus, LeaveStatus } from "@prisma/client";
+import { Prisma, UserRole, GpsAttendanceStatus, LeaveStatus } from "@/generated/client";
 import { requireRole } from "@/lib/auth-guard";
 import { unstable_cache } from "next/cache";
 

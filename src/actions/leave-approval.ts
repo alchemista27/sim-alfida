@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/actions/user";
-import { UserRole, LeaveStatus, LeaveType } from "@prisma/client";
+import { UserRole, LeaveStatus, LeaveType } from "@/generated/client";
 import { requireRole } from "@/lib/auth-guard";
 
 export async function getAllLeaveRequests() {

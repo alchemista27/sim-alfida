@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 
 import { Badge } from "@/components/ui/badge";
-import { AttendanceStatus } from "@prisma/client";
+import { AttendanceStatus } from "@/generated/client";
 
 const DAYS: Record<string, string> = {
   monday: "Senin",

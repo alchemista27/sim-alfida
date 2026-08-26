@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getLessonPlans, upsertLessonPlan, deleteLessonPlan } from "@/actions/lesson-plans";
-import { LessonPlanType } from "@prisma/client";
+import { LessonPlanType } from "@/generated/client";
 
 export function PlanClient({ academicYearId, subjects }: { academicYearId: string, subjects: any[] }) {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");

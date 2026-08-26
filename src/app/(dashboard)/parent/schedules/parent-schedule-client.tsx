@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DayOfWeek } from "@prisma/client";
+import { DayOfWeek } from "@/generated/client";
 
 export function ParentScheduleClient({ 
   enrollments, 
