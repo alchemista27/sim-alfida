@@ -43,10 +43,13 @@ Platform dibangun dengan arsitektur **multi-tenant** yang memungkinkan setiap un
 
 | Layer            | Teknologi                                         |
 | ---------------- | ------------------------------------------------- |
-| **Framework**    | Next.js (React · App Router)                      |
-| **Database/Auth**| Supabase (PostgreSQL & Supabase Auth)             |
+| **Monorepo**     | Turborepo (pnpm workspaces)                       |
+| **Frontend**     | Next.js (React · App Router) — `apps/web`         |
+| **Backend**      | NestJS (REST API) — `apps/api`                    |
 | **Bahasa**       | TypeScript (strict, no `any`)                     |
-| **ORM**          | Prisma (Connection to Supabase Pooler)            |
+| **Auth**         | Supabase Auth (SSR) — Identity Provider only      |
+| **Database**     | PostgreSQL (Docker lokal / Supabase)               |
+| **ORM**          | Prisma (dikelola di `packages/database`)           |
 | **Styling**      | Tailwind CSS                                      |
 | **Icons**        | Material UI Icons (tanpa emoji)                   |
 | **Validasi**     | Zod / Valibot                                     |
@@ -126,8 +129,9 @@ Yayasan Alfida (Root)
 
 ### 5.3 SSO (Single Sign-On)
 
-- Satu akun untuk seluruh modul SIM-Alfida
+- Satu akun Supabase Auth untuk seluruh modul SIM-Alfida
 - Mendukung multi-role per pengguna (satu user bisa memiliki peran di lebih dari satu unit)
+- Token Supabase Auth dikirim ke NestJS API sebagai Bearer token untuk validasi server-side
 
 ---
 
@@ -502,7 +506,7 @@ flowchart TD
 
 | Aspek                  | Ketentuan                                                                         |
 | ---------------------- | --------------------------------------------------------------------------------- |
-| **Autentikasi**        | SSO berbasis session/token. Setiap API route wajib cek auth & authorization server-side. |
+| **Autentikasi**        | Supabase Auth (JWT). Setiap NestJS endpoint wajib menggunakan AuthGuard & RolesGuard server-side. Next.js middleware hanya untuk redirect. |
 | **Validasi Input**     | Semua input eksternal divalidasi dengan Zod/Valibot sebelum diproses.             |
 | **Secrets Management** | Tidak ada API key, token, atau credential di source code. Gunakan `.env.local`.   |
 | **File Upload**        | Validasi tipe file, ukuran maksimal, dan scan malware dasar.                      |
@@ -619,7 +623,7 @@ Sebuah fitur dianggap selesai jika:
 - [ ] Responsive di mobile, tablet, dan desktop
 - [ ] Code review dilakukan dan disetujui
 - [ ] Dokumentasi diperbarui (jika diperlukan)
-- [ ] `pnpm lint && pnpm test && pnpm build` berjalan tanpa error
+- [ ] `pnpm lint && pnpm test && pnpm build` berjalan tanpa error di seluruh workspace (web & api)
 
 ---
 

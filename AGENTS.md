@@ -6,20 +6,24 @@ This file gives AI coding agents the context they need to work effectively in th
 
 ## Stack
 
-- **Framework**: Next.js (React · App Router)
-- **Database & Auth**: Supabase (PostgreSQL & Supabase Auth SSR)
-- **ORM**: Prisma (Connected via Supabase Transaction Pooler)
+- **Monorepo**: Turborepo (pnpm workspaces)
+- **Frontend**: Next.js (React · App Router) — `apps/web`
+- **Backend**: NestJS (REST API) — `apps/api`
+- **Auth**: Supabase Auth (SSR) — hanya untuk autentikasi
+- **Database**: PostgreSQL (Docker lokal atau Supabase) — Prisma ORM di `packages/database`
 - **Storage**: Cloudinary (Image & PDF storage)
 - **Icons**: Material UI Icons (Google) — Never use emojis for icons.
 
 ## Setup
 
-- **install**: `pnpm install`
-- **dev**: `pnpm dev`
-- **build**: `pnpm build`
+- **install**: `pnpm install` (root — installs all workspaces)
+- **dev**: `pnpm dev` (starts both web & api concurrently via Turborepo)
+- **dev:web**: `pnpm --filter web dev` (frontend only)
+- **dev:api**: `pnpm --filter api start:dev` (backend only)
+- **build**: `pnpm build` (builds all packages via Turborepo pipeline)
 - **lint**: `pnpm lint`
 - **test**: `pnpm test`
-- **typecheck**: `pnpm tsc --noEmit`
+- **typecheck**: `pnpm --filter web tsc --noEmit && pnpm --filter api tsc --noEmit`
 
 ## Code Style
 
@@ -29,6 +33,14 @@ This file gives AI coding agents the context they need to work effectively in th
 - **Tailwind CSS** — Use utility classes. Extract to a component when patterns repeat 3+ times.
 - **Naming conventions** — kebab-case files, PascalCase components, camelCase variables, SCREAMING_SNAKE for env vars.
 - **Sorted imports** — Group external → internal → relative. Path aliases over deep relative imports.
+
+## Monorepo Workspace Rules
+
+- **`apps/web/`** — Hanya berisi kode UI (React Components, Pages, Layouts). TIDAK BOLEH ada import Prisma atau logika bisnis.
+- **`apps/api/`** — Hanya berisi kode Backend (NestJS Controllers, Services, Guards). TIDAK BOLEH ada komponen React.
+- **`packages/database/`** — Prisma schema, generated client, dan seed scripts. Di-import oleh `apps/api`.
+- **`packages/shared/`** — TypeScript interfaces, Zod schemas, dan utility functions. Di-import oleh kedua apps.
+- **Komunikasi Frontend ↔ Backend**: Gunakan `fetch()` atau library HTTP client (axios/ky) untuk memanggil REST API NestJS. JANGAN gunakan Server Actions untuk operasi database.
 
 ## Testing
 
@@ -40,7 +52,7 @@ This file gives AI coding agents the context they need to work effectively in th
 
 - **Never commit secrets** — No API keys, tokens, or credentials in code. Use .env.local (gitignored) and .env.example for templates.
 - **Validate all external input** — Schema-validate request bodies, URL params, and untrusted JSON with Zod or Valibot.
-- **Server-side auth checks** — Every API route must check authentication AND authorization on the server. Don't rely on client guards.
+- **Server-side auth checks** — Every NestJS endpoint must use Guards for authentication AND authorization. Don't rely on client guards. Next.js middleware hanya untuk redirect unauthenticated users.
 
 ## Pull Requests & Commits
 

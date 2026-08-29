@@ -12,8 +12,8 @@
 | **Nama** | SIM-Alfida — Sistem Informasi Manajemen Yayasan Alfida |
 | **Fokus Fase 1, 2, 3** | Modul PPDB, Modul Akademik & Modul Manajemen Karyawan |
 | **Target User** | 8 unit pendidikan (Admin Unit, Guru, Wali Kelas, Pembina Ekskul, Orang Tua) |
-| **Stack** | Next.js 15 (App Router) · Prisma · PostgreSQL 16 · Tailwind CSS · NextAuth v5 |
-| **Deployment** | Vercel (Next.js) + Supabase (DB & Auth) + Cloudinary (Storage) |
+| **Stack** | Turborepo · Next.js 15 (Frontend) · NestJS (Backend) · Prisma · PostgreSQL · Tailwind CSS · Supabase Auth |
+| **Deployment** | Vercel (Frontend) + Render/Railway/VPS (Backend NestJS) + PostgreSQL (Docker/Supabase) + Cloudinary (Storage) |
 | **Estimasi Total** | **36 Sprint (~72 minggu kerja)** |
 | **Metode** | Scrum · Sprint 2 minggu |
 
@@ -391,11 +391,12 @@ Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, AT
 
 | Risiko | Dampak | Probabilitas | Mitigasi |
 |--------|--------|--------------|----------|
-| Limitasi Vercel Hobby/Pro | Deployment macet | Rendah | Monitor usage Vercel, upgrade plan jika traffic PPDB/Akademik sangat tinggi |
+| Limitasi Vercel Hobby/Pro | Build timeout | Rendah | Frontend di Vercel tidak lagi melakukan operasi DB, sehingga sangat ringan |
 | Perubahan requirement form PPDB/Rapor | Rework Sprint | Sedang | Lock requirement di awal Sprint, tampung perubahan di backlog iterasi berikutnya |
 | Integrasi Cloudinary kompleks | Upload gagal | Rendah | Fallback ke local filesystem storage di dev, optimalkan presigned URL di staging/prod |
 | Performance query nilai/rapor lambat | Dashboard lemot | Rendah | Gunakan agregasi dan snapshot JSONB (contoh pada `lhbs_reports`) untuk laporan |
-| PDF generation memory-intensive | Server crash | Sedang | Limit concurrent PDF gen di serverless function, delegasikan ke service khusus jika timeout (Vercel max 10s) |
+| PDF generation memory-intensive | Server crash | Rendah | NestJS persistent server memiliki RAM stabil, tidak ada cold start seperti serverless |
+| Migrasi monorepo memakan waktu lebih lama | Sprint delay | Sedang | Migrasi bertahap per modul. Jalankan arsitektur lama & baru secara paralel selama transisi |
 
 ---
 
@@ -415,7 +416,7 @@ Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, AT
 
 ## Catatan
 
-- **Modul Phase 3** (Manajemen Karyawan) sedang dalam pengembangan. Modul berikutnya (Surat Menyurat, Payroll, Rekrutmen) akan direncanakan setelah Phase 3 go-live.
+- **Phase 4** (Migrasi ke Monorepo NestJS + Next.js) direncanakan untuk meningkatkan efisiensi resource hosting dan memisahkan concerns antara UI dan business logic.
 - Sprint plan ini bersifat *living document* — akan di-update setiap Sprint Review berdasarkan velocity aktual tim.
 
 ---
@@ -620,3 +621,55 @@ Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, AT
 | S36-03 | Lokasi GPS Spoofing Test | Cek proteksi mock location (jika memungkinkan di FE) | 4 jam | ✅ Selesai |
 | S36-04 | User Acceptance Testing | UAT internal dengan admin BPI, admin kepegawaian & yayasan | 6 jam | ✅ Selesai |
 | S36-05 | Release ke Production | Push fitur ke live Vercel & sinkronisasi database prod | 4 jam | ✅ Selesai |
+
+---
+
+
+## Phase 4 — Migrasi Arsitektur ke Turborepo Monorepo (Sprint 37 - 39) [PLANNED]
+
+**Fokus Utama:** Memecah monolith Next.js menjadi Turborepo Monorepo (Next.js Frontend + NestJS Backend) untuk efisiensi resource dan fleksibilitas deployment.
+
+---
+
+## Sprint 37 — Inisialisasi Monorepo & Fondasi NestJS
+**Durasi:** 2 minggu
+**Goal:** Struktur Turborepo siap, NestJS ter-bootstrap, Prisma dipindahkan ke shared package.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S37-01 | Inisialisasi Turborepo | Setup `turbo.json`, workspace config, dan `pnpm-workspace.yaml` | 4 jam | ✅ Selesai |
+| S37-02 | Bootstrap NestJS | Scaffold NestJS di `apps/api/` dengan modul Auth (Supabase JWT Guard) | 8 jam | ✅ Selesai |
+| S37-03 | Migrasi Prisma | Pindahkan `prisma/schema.prisma` ke `packages/database/` | 4 jam | ✅ Selesai |
+| S37-04 | Shared Package | Pindahkan Zod schemas dan TypeScript types ke `packages/shared/` | 6 jam | ✅ Selesai |
+| S37-05 | Docker Compose Update | Update `docker-compose.yml` untuk menjalankan NestJS + PostgreSQL + Next.js | 4 jam | ✅ Selesai |
+
+---
+
+## Sprint 38 — Migrasi Server Actions ke NestJS Controllers
+**Durasi:** 2 minggu
+**Goal:** Seluruh logika bisnis dipindahkan dari Next.js Server Actions ke NestJS.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S38-01 | Modul PPDB (NestJS) | Konversi `actions/ppdb.ts` → `PPDBController` + `PPDBService` | 12 jam | ✅ Selesai |
+| S38-02 | Modul Akademik (NestJS) | Konversi `actions/academic.ts` → `AcademicController` + `AcademicService` | 12 jam | ✅ Selesai |
+| S38-03 | Modul Karyawan (NestJS) | Konversi `actions/staff.ts`, `actions/liqo.ts` → NestJS modules | 12 jam | ✅ Selesai |
+| S38-04 | Modul File & PDF (NestJS) | Pindahkan logika upload Cloudinary dan PDF generation ke NestJS | 8 jam | ✅ Selesai |
+
+---
+
+## Sprint 39 — Refaktor Frontend & QA Migrasi
+**Durasi:** 2 minggu
+**Goal:** Next.js hanya melakukan fetch ke NestJS API. Seluruh alur tervalidasi end-to-end.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S39-01 | Refaktor Next.js Pages | Ganti semua import Server Actions menjadi `fetch()` ke NestJS endpoints | 16 jam | ✅ Selesai |
+| S39-02 | HTTP Client Wrapper | Buat wrapper `api.ts` di Next.js untuk centralized API calls + error handling | 4 jam | ✅ Selesai |
+| S39-03 | E2E Testing Migrasi | Jalankan seluruh suite Playwright untuk memastikan zero regression | 8 jam | ✅ Selesai |
+| S39-04 | Deployment Setup | Deploy NestJS ke Render/Railway, update Vercel env vars | 6 jam | ✅ Selesai |
+| S39-05 | Dokumentasi Final | Update README, AGENTS.md, dan runbook deployment | 4 jam | ✅ Selesai |
+

@@ -16,68 +16,64 @@
 
 ### 1.1 Gambaran Umum
 
-SIM-Alfida menggunakan arsitektur **monolitik modular** berbasis Next.js App Router. Seluruh modul (PPDB, Akademik, Surat Menyurat, dll.) hidup dalam satu codebase Next.js namun diorganisir sebagai feature modules yang independen.
+SIM-Alfida menggunakan arsitektur **Turborepo Monorepo** yang memisahkan Frontend (Next.js) dan Backend (NestJS) ke dalam workspace independen. Seluruh modul (PPDB, Akademik, Karyawan) diorganisir sebagai NestJS modules di backend, sementara Next.js bertanggung jawab murni untuk rendering UI.
 
 ```mermaid
 graph TB
     subgraph Client["Client (Browser)"]
-        RSC["React Server Components"]
-        RCC["React Client Components"]
+        RSC["React Components (SSR/CSR)"]
     end
 
-    subgraph NextJS["Next.js App Router"]
-        MW["Middleware (Auth + Tenant)"]
-        API["API Route Handlers"]
-        SC["Server Components"]
-        SA["Server Actions"]
+    subgraph "apps/web (Next.js)"
+        MW["Middleware (Auth Redirect)"]
+        Pages["Pages & Layouts"]
+        ClientFetch["HTTP Client (fetch/axios)"]
     end
 
-    subgraph Services["Service Layer"]
-        AuthSvc["Auth Service"]
-        PPDBSvc["PPDB Service"]
-        AcadSvc["Academic Service"]
-        UnitSvc["Unit Service"]
-        FileSvc["File Service"]
-        PDFSvc["PDF Service"]
+    subgraph "apps/api (NestJS)"
+        Guards["AuthGuard + RolesGuard"]
+        Controllers["REST Controllers"]
+        NestServices["Service Layer"]
+        NestModules["Feature Modules (PPDB, Academic, Employee)"]
     end
 
-    subgraph Data["Data Layer"]
+    subgraph "packages/database"
         ORM["Prisma ORM"]
         DB[("PostgreSQL")]
-        S3["Object Storage (S3/Cloudinary)"]
     end
 
-    subgraph External["Integrasi Eksternal"]
-        PG["Payment Gateway"]
+    subgraph External["External Services"]
+        SupaAuth["Supabase Auth"]
+        Storage["Cloudinary"]
+        PG["Payment Gateway (Future)"]
     end
 
     Client --> MW
-    MW --> API
-    MW --> SC
-    SC --> SA
-    SA --> Services
-    API --> Services
-    Services --> ORM
+    MW --> Pages
+    Pages --> ClientFetch
+    ClientFetch -->|REST API calls| Guards
+    Guards -->|Verify Supabase JWT| SupaAuth
+    Guards --> Controllers
+    Controllers --> NestServices
+    NestServices --> NestModules
+    NestModules --> ORM
     ORM --> DB
-    FileSvc --> S3
-    PDFSvc --> S3
-    AuthSvc --> WP
-    AuthSvc --> MDL
-    PPDBSvc --> PG
+    NestServices --> Storage
 ```
 
 ### 1.2 Keputusan Arsitektur
 
 | Keputusan                          | Pilihan              | Alasan                                                                                      |
 | ---------------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
-| Arsitektur                         | Monolitik modular    | Tim kecil, satu domain bisnis, deploy sederhana                                             |
-| Framework                          | Next.js App Router   | SSR/SSG bawaan, Server Components, Server Actions, API Routes terpadu                       |
-| ORM                                | Prisma               | Type-safe, Developer experience (DX) sangat baik, migrasi otomatis, populer di Next.js      |
+| Arsitektur                         | Turborepo Monorepo   | Pemisahan Frontend/Backend, deploy independen, hemat resource                               |
+| Frontend                           | Next.js App Router   | SSR/SSG bawaan, UI rendering only, tidak mengakses database langsung                       |
+| Backend                            | NestJS               | Dependency Injection, modular architecture, Guards, Interceptors, hemat memori              |
+| ORM                                | Prisma               | Type-safe, Developer experience (DX) sangat baik, migrasi otomatis                         |
 | Database                           | PostgreSQL           | Relasional, mendukung multi-tenant, open source                                             |
 | Object Storage                     | S3-compatible (Cloudinary)| Untuk file upload (berkas PPDB, logo, TTD). Cloudinary untuk dev, S3 untuk prod                  |
 | PDF Generation                     | `@react-pdf/renderer`| React-based, server-side rendering, sesuai dengan stack                                     |
 | Validasi                           | Zod                  | Type inference TypeScript, composable schemas, standar di ekosistem Next.js                 |
-| Auth                               | NextAuth.js (Auth.js)| Multi-provider, session management bawaan, mendukung SSO custom                             |
+| Auth                               | Supabase Auth (JWT)  | Lightweight, managed auth, SSR cookie integration, JWT verification di NestJS               |
 | Multi-tenant                       | Shared DB + tenant_id| Sederhana, satu database, isolasi data via tenant column + RLS                              |
 
 ---
@@ -86,100 +82,83 @@ graph TB
 
 ```
 sim-alfida/
-├── docs/                         # Dokumentasi project
-│   ├── PRD.md
-│   └── TDD.md
-├── public/                       # Aset statis
-├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── (auth)/               # Route group: halaman auth (login, register)
-│   │   │   ├── login/
-│   │   │   │   └── page.tsx
-│   │   │   ├── register/
-│   │   │   │   └── page.tsx
-│   │   │   └── layout.tsx
-│   │   ├── (dashboard)/          # Route group: halaman terautentikasi
-│   │   │   ├── modules/          # Halaman Dashboard Pilih Modul
-│   │   │   │   └── page.tsx
-│   │   │   ├── admin/            # Super admin pages
-│   │   │   │   ├── units/
-│   │   │   │   └── users/
-│   │   │   ├── unit/             # Admin unit pages
-│   │   │   │   ├── settings/
-│   │   │   │   └── ppdb/
-│   │   │   ├── ppdb/             # Portal PPDB (orang tua)
-│   │   │   │   ├── register/
-│   │   │   │   ├── payment/
-│   │   │   │   ├── form/
-│   │   │   │   ├── documents/
-│   │   │   │   ├── observation/
-│   │   │   │   └── result/
-│   │   │   ├── academic/          # Modul Akademik
-│   │   │   │   ├── re-enrollment/ # Daftar ulang
-│   │   │   │   ├── subjects/      # Mata pelajaran (admin unit)
-│   │   │   │   ├── grades/        # Input nilai (guru mapel)
-│   │   │   │   ├── attendance/    # Absensi (guru mapel)
-│   │   │   │   ├── journal/       # Jurnal pembelajaran (guru)
-│   │   │   │   ├── planning/      # Prota / Promes / RPP (guru)
-│   │   │   │   ├── schedule/      # Jadwal pelajaran (wali kelas)
-│   │   │   │   ├── extracurricular/ # Ekskul (admin / pembina)
-│   │   │   │   ├── spp/           # Pembayaran SPP (orang tua)
-│   │   │   │   ├── lhbs/          # Rapor (wali kelas / orang tua)
-│   │   │   │   └── promotion/     # Kenaikan kelas
-│   │   │   └── layout.tsx
-│   │   ├── api/                  # API Route Handlers
-│   │   │   ├── auth/
-│   │   │   ├── units/
-│   │   │   ├── ppdb/
-│   │   │   ├── academic/
-│   │   │   └── upload/
-│   │   ├── layout.tsx            # Root layout
-│   │   └── page.tsx              # Landing page
-│   ├── components/               # Komponen UI reusable
-│   │   ├── ui/                   # Primitif (Button, Input, Card, etc.)
-│   │   ├── layout/               # Shell, Sidebar, Header, etc.
-│   │   └── features/             # Komponen domain-specific
-│   │       ├── ppdb/
-│   │       └── academic/
-│   ├── lib/                      # Utility & konfigurasi
-│   │   ├── auth.ts               # Konfigurasi NextAuth
-│   │   ├── prisma.ts             # Instansiasi Prisma Client
-│   │   ├── validators/           # Zod schemas
-│   │   │   ├── auth.ts
-│   │   │   ├── unit.ts
-│   │   │   └── ppdb.ts
-│   │   └── utils.ts              # Helper functions
-│   ├── server/                   # Server-only code
-│   │   ├── actions/              # Server Actions
-│   │   │   ├── auth.ts
-│   │   │   ├── unit.ts
-│   │   │   └── ppdb.ts
-│   │   └── services/             # Business logic layer
-│   │       ├── auth-service.ts
-│   │       ├── unit-service.ts
-│   │       ├── ppdb-service.ts
-│   │       ├── file-service.ts
-│   │       └── pdf-service.ts
-│   ├── hooks/                    # Custom React hooks
-│   ├── types/                    # Shared TypeScript types
-│   │   ├── auth.ts
-│   │   ├── unit.ts
-│   │   └── ppdb.ts
-│   └── config/                   # App configuration
-│       ├── site.ts
-│       └── navigation.ts
+├── apps/
+│   ├── web/                      # Next.js Frontend
+│   │   ├── src/
+│   │   │   ├── app/              # Next.js App Router (Pages & Layouts)
+│   │   │   │   ├── (auth)/       # Route group: halaman auth (login, register)
+│   │   │   │   ├── (dashboard)/  # Route group: halaman terautentikasi
+│   │   │   │   │   ├── modules/  # Dashboard Pilih Modul
+│   │   │   │   │   ├── admin/    # Super admin pages
+│   │   │   │   │   ├── unit/     # Admin unit pages
+│   │   │   │   │   ├── ppdb/     # Portal PPDB (orang tua)
+│   │   │   │   │   ├── academic/ # Modul Akademik
+│   │   │   │   │   └── layout.tsx
+│   │   │   │   ├── layout.tsx    # Root layout
+│   │   │   │   └── page.tsx      # Landing page
+│   │   │   ├── components/       # UI Components
+│   │   │   │   ├── ui/           # Primitif (Button, Input, Card, etc.)
+│   │   │   │   ├── layout/       # Shell, Sidebar, Header, etc.
+│   │   │   │   └── features/     # Komponen domain-specific
+│   │   │   ├── lib/              # Client-side utilities
+│   │   │   │   ├── api.ts        # Centralized HTTP client wrapper untuk NestJS
+│   │   │   │   ├── supabase/     # Supabase Auth client
+│   │   │   │   └── utils.ts      # Helper functions
+│   │   │   └── hooks/            # Custom React hooks
+│   │   ├── public/               # Aset statis
+│   │   ├── next.config.ts
+│   │   ├── tailwind.config.ts
+│   │   └── package.json
+│   └── api/                      # NestJS Backend
+│       ├── src/
+│       │   ├── modules/
+│       │   │   ├── auth/         # AuthModule (Supabase JWT Guard)
+│       │   │   ├── unit/         # UnitModule (CRUD unit pendidikan)
+│       │   │   ├── ppdb/         # PPDBModule (seluruh alur PPDB)
+│       │   │   ├── academic/     # AcademicModule (nilai, absensi, LHBS)
+│       │   │   ├── employee/     # EmployeeModule (GPS, cuti, liqo)
+│       │   │   ├── file/         # FileModule (Cloudinary upload)
+│       │   │   └── pdf/          # PDFModule (react-pdf generation)
+│       │   ├── common/           # Guards, Interceptors, Filters, Pipes
+│       │   │   ├── guards/
+│       │   │   │   ├── auth.guard.ts
+│       │   │   │   └── roles.guard.ts
+│       │   │   ├── interceptors/
+│       │   │   └── filters/
+│       │   ├── app.module.ts
+│       │   └── main.ts
+│       ├── test/                  # NestJS unit & integration tests
+│       └── package.json
+├── packages/
+│   ├── database/                 # Prisma schema & client
+│   │   ├── prisma/
+│   │   │   ├── schema.prisma
+│   │   │   └── seed.ts
+│   │   ├── src/
+│   │   │   └── index.ts          # Re-export Prisma Client
+│   │   └── package.json
+│   └── shared/                   # Shared types, Zod schemas, utils
+│       ├── src/
+│       │   ├── types/
+│       │   │   ├── auth.ts
+│       │   │   ├── unit.ts
+│       │   │   └── ppdb.ts
+│       │   ├── validators/
+│       │   │   ├── auth.ts
+│       │   │   ├── ppdb.ts
+│       │   │   └── academic.ts
+│       │   └── utils.ts
+│       └── package.json
 ├── tests/
 │   └── e2e/                      # Playwright E2E tests
-├── prisma/                       # Prisma ORM
-│   ├── schema.prisma             # Skema Prisma
-│   ├── migrations/               # Prisma migrations
-│   └── seed.ts                   # Seed script
-├── next.config.ts
-├── tailwind.config.ts
-├── tsconfig.json
-├── package.json
-├── .env.example
-├── .env.local                    # (gitignored)
+├── turbo.json                    # Turborepo pipeline configuration
+├── docker-compose.yml            # PostgreSQL + NestJS + Next.js
+├── package.json                  # Root workspace config
+├── pnpm-workspace.yaml
+├── docs/
+│   ├── PRD.md
+│   ├── TDD.md
+│   └── SPRINT-PLAN.md
 ├── AGENTS.md
 ├── DESIGN.md
 └── PROJECTS.md
@@ -813,9 +792,9 @@ const ROUTE_RULES: RouteRule[] = [
 
 ### 5.1 Konvensi
 
-- **Server Actions** sebagai primary pattern untuk mutasi data dari React Server Components
-- **API Route Handlers** (`app/api/`) hanya untuk: webhook, integrasi pihak ketiga, dan endpoint yang dikonsumsi di luar Next.js
-- Semua input divalidasi dengan **Zod schema** sebelum masuk ke service layer
+- **NestJS REST Controllers** sebagai primary pattern untuk seluruh operasi data (CRUD, mutasi, kalkulasi)
+- **Next.js** tidak lagi berisi logika database. Semua request data dilakukan via HTTP ke NestJS API
+- Semua input divalidasi dengan **Zod schema** atau **class-validator** di NestJS sebelum masuk ke service layer
 - Response menggunakan pattern konsisten:
 
 ```typescript
@@ -1282,16 +1261,16 @@ tests/e2e/academic-spp.spec.ts            # E2E test
 
 ## 12. Deployment & Infrastructure
 
-Proyek ini menggunakan arsitektur *Serverless/Managed Services* tanpa VPS konvensional maupun Docker Compose. 
+Proyek ini menggunakan arsitektur **Hybrid Monorepo** dengan pemisahan hosting Frontend dan Backend.
 
 ### 12.1 Environments & Layanan
 
 | Komponen            | Layanan / Provider               | Deskripsi                                             |
 | ------------------- | -------------------------------- | ----------------------------------------------------- |
-| **Aplikasi Web**    | Vercel                           | Hosting Next.js App Router (Serverless Functions)     |
-| **Database**        | Supabase PostgreSQL (Managed)    | Skema Prisma di-migrate via koneksi langsung (`5432`) |
-| **Koneksi DB**      | Supabase Transaction Pooler      | Koneksi operasional aplikasi (`6543`)                 |
-| **Authentication**  | Supabase Auth (SSR)              | Terintegrasi dengan Next.js Middleware                |
+| **Frontend (web)**  | Vercel (Free tier)               | Hosting Next.js — murni UI rendering, tanpa DB ops    |
+| **Backend (api)**   | Render / Railway / Koyeb / VPS   | Hosting NestJS — persistent server, connection pool   |
+| **Database**        | PostgreSQL (Docker / Supabase)   | Skema Prisma di-push via koneksi langsung             |
+| **Authentication**  | Supabase Auth                    | Identity Provider — JWT token verification            |
 | **Object Storage**  | Cloudinary                       | Penyimpanan media (logo, PDF, bukti bayar)            |
 
 ### 12.2 Arsitektur Infrastruktur
@@ -1299,43 +1278,44 @@ Proyek ini menggunakan arsitektur *Serverless/Managed Services* tanpa VPS konven
 ```mermaid
 graph TB
     subgraph "Client Side"
-        Browser["Web Browser (User)"]
+        Browser["Web Browser"]
     end
 
-    subgraph "Vercel Cloud"
-        NextApp["Next.js Application\n(Edge/Serverless)"]
-        Middleware["Next.js Middleware\n(Auth Check)"]
+    subgraph "Vercel (Free Tier)"
+        NextApp["Next.js (UI Only)"]
     end
 
-    subgraph "Supabase Cloud"
+    subgraph "Render / Railway / VPS"
+        NestApp["NestJS API Server"]
+    end
+
+    subgraph "Database"
+        DB[("PostgreSQL (Docker / Supabase)")]
+    end
+
+    subgraph "External"
         Auth["Supabase Auth"]
-        Pooler["Transaction Pooler\n(Port 6543)"]
-        DB[("PostgreSQL 15+")]
-    end
-
-    subgraph "Cloudinary Cloud"
-        Storage["Object Storage"]
+        CDN["Cloudinary"]
     end
 
     Browser -->|HTTPS| NextApp
-    Browser -->|Auth Token| Middleware
-    NextApp -->|Query via Prisma| Pooler
-    Pooler --> DB
-    NextApp -->|Upload/Get Media| Storage
-    Middleware -.->|Verify| Auth
+    NextApp -->|REST API| NestApp
+    NestApp -->|Prisma| DB
+    NestApp -->|Upload/Get| CDN
+    NextApp -.->|Verify cookie| Auth
+    NestApp -.->|Verify JWT| Auth
 ```
 
-### 12.3 CI/CD Pipeline (Vercel Integration)
+### 12.3 CI/CD Pipeline
 
 ```mermaid
 flowchart LR
-    A["Push to GitHub branch"] --> B["Vercel Build Process"]
-    B --> C["Lint (ESLint) & Type Check (tsc)"]
+    A["Push to GitHub"] --> B["Turborepo Build"]
+    B --> C["Lint + Type Check (all workspaces)"]
     C --> D["Prisma Generate"]
-    D --> E["Next Build"]
-    E --> F{"Branch?"}
-    F -- main --> G["Deploy to Preview Environment"]
-    F -- release/* --> H["Deploy to Production Environment"]
+    D --> E{"Workspace?"}
+    E -- apps/web --> F["Vercel Auto Deploy"]
+    E -- apps/api --> G["Render/Railway Auto Deploy"]
 ```
 
 ---

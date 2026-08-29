@@ -1,3 +1,14 @@
+**tanggal:** 29 Agustus 2026
+**progress:**
+- Menginvestigasi tantangan komputasi pada arsitektur monolith Next.js, dan berhasil memigrasikannya secara utuh ke arsitektur **Turborepo Monorepo** (Next.js + NestJS).
+- Menyelesaikan inisiatif **Sprint 37** (Inisialisasi Monorepo): Mengatur `turbo.json`, `pnpm-workspace.yaml`, dan mengekstrak kode menjadi 4 ruang lingkup independen (`@sim/web`, `@sim/api`, `@sim/database`, `@sim/shared`).
+- Menyelesaikan inisiatif **Sprint 38** (Modul NestJS): Mengerahkan *Autonomous Subagents* untuk mereplika logika Server Actions (PPDB, Akademik, HR) menjadi struktur *Controller* dan *Service* di NestJS lengkap dengan perlindungan otorisasi dan `ZodValidationPipe`.
+- Menyelesaikan inisiatif **Sprint 39** (Penyatuan BFF): Membangun utilitas proksi (`apiFetch`) di Next.js yang secara aman meneruskan *token session* JWT dari Supabase *cookies* ke _header_ NestJS API. *Server Actions* lama disederhanakan hanya untuk memicu pemanggilan API dan menjalankan `revalidatePath()`.
+- Melengkapi rancangan rilis dengan membuat `docs/DEPLOYMENT.md` khusus arsitektur terpisah (menuju Vercel, Railway/Render) dengan hasil akhir pengecekan kompilasi 100% *type-safe* tanpa satupun galat.
+**commit message:** feat: complete phase 4 migration to turborepo, nestjs backend, and bff proxy integration
+
+---
+
 # Log Pekerjaan SIM-Alfida
 
 ---

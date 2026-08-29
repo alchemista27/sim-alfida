@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # 1. Database PostgreSQL Lokal
+  db:
+    image: postgres:15-alpine
+    container_name: sim-alfida-db
+    restart: always
+    environment:
+      POSTGRES_USER: alfida
+      POSTGRES_PASSWORD: 4dmin4lfid4
+      POSTGRES_DB: alfida
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. Aplikasi NestJS (API)
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: ../../Dockerfile
+    container_name: sim-alfida-api
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://alfida:4dmin4lfid4@db:5432/alfida
+
+  # 3. Sinkronisasi Skema Database Otomatis (Prisma DB Push)
+  migrate:
+    build:
+      context: .
+      target: builder
+    container_name: sim-alfida-migrate
+    command: sh -c "corepack enable pnpm && pnpm --filter @sim/database prisma db push --accept-data-loss"
+    environment:
+      - DATABASE_URL=postgresql://alfida:4dmin4lfid4@db:5432/alfida
+      - DIRECT_URL=postgresql://alfida:4dmin4lfid4@db:5432/alfida
+    depends_on:
+      - db
+
+  # 4. Aplikasi Next.js (Frontend)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sim-alfida-app
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=http://api:3001
+      # Supabase Auth tetap membaca dari .env untuk Manajemen Autentikasi
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+
+volumes:
+  pgdata:

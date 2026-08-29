@@ -1,60 +1,75 @@
-# Panduan Deployment SIM-Alfida (Production)
+# Panduan Deployment (Turborepo + Next.js + NestJS)
 
-Dokumen ini memuat _runbook_ untuk me-_deploy_ SIM-Alfida ke mesin server produksi (VPS).
+Sistem Informasi Manajemen Alfida sekarang menggunakan arsitektur **Turborepo** yang memisahkan Frontend (Next.js) dan Backend (NestJS). Dokumen ini berisi panduan *deployment* untuk arsitektur terpisah ini.
 
-## 1. Spesifikasi Server Minimal
-- OS: Ubuntu 22.04 LTS / 24.04 LTS
-- RAM: 2GB (direkomendasikan 4GB untuk *multi-tenant*)
-- CPU: 2 Core
-- Disk: 20GB SSD
+## Arsitektur Deployment
+- **Frontend (Web)**: Vercel / Netlify
+- **Backend (API)**: Railway / Render / DigitalOcean App Platform
+- **Database**: PostgreSQL (Supabase / Neon / AWS RDS)
+- **Auth**: Supabase Auth
 
-## 2. Prasyarat (*Pre-requisites*)
-Pastikan server Anda sudah terinstal:
-- [Docker](https://docs.docker.com/engine/install/ubuntu/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- Git
+---
 
-## 3. Langkah Instalasi Awal
-1. Akses server VPS melalui SSH:
-   ```bash
-   ssh root@ip_server
-   ```
-2. Lakukan _clone_ repositori:
-   ```bash
-   git clone https://github.com/alchemista27/sim-alfida.git /opt/sim-alfida
-   cd /opt/sim-alfida
-   ```
-3. Siapkan _Environment Variables_:
-   ```bash
-   cp .env.example .env.production.local
-   nano .env.production.local
-   ```
-   *Isi `DATABASE_URL`, `DIRECT_URL`, dan token Cloudinary Anda secara benar.*
+## 1. Deploy Frontend (Next.js) ke Vercel
 
-## 4. Konfigurasi Domain & SSL (HTTPS)
-Agar aplikasi dapat diakses lewat HTTPS, Nginx dan Certbot membutuhkan domain yang valid:
-1. Buka file `nginx/sim-alfida.conf`.
-2. Ubah `sim.alfida.com` menjadi domain asli Anda.
-3. Matikan _comment_ pada baris sertifikat SSL setelah proses *Certbot* sukses.
-4. Perintah *generate* sertifikat awal:
-   ```bash
-   docker-compose -f docker-compose.prod.yml run --rm certbot certonly --webroot --webroot-path /var/www/certbot/ -d domainanda.com
-   ```
+Karena kita menggunakan Turborepo, Vercel secara otomatis akan mendeteksi `turbo` dan melakukan *caching* dengan optimal.
 
-## 5. Menjalankan Aplikasi
-Membangun *image* dan menjalankan *container* di latar belakang:
-```bash
-docker-compose -f docker-compose.prod.yml up -d --build
+### Konfigurasi di Dashboard Vercel:
+1. **Framework Preset**: Next.js
+2. **Root Directory**: `apps/web` (Atau biarkan kosong dan Vercel akan otomatis mengenali workspace `@sim/web`).
+3. **Build Command**: `pnpm build` (atau biarkan default Vercel yang akan membaca `turbo run build`).
+4. **Install Command**: `pnpm install`
+
+### Environment Variables (Vercel):
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://[YOUR_PROJECT_ID].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[YOUR_ANON_KEY]
+# URL Publik dari backend NestJS yang sudah di-deploy
+NEXT_PUBLIC_API_URL=https://api.simalfida.com 
+# URL Internal untuk Server Components jika di platform yang sama
+API_URL=https://api.simalfida.com 
 ```
 
-## 6. Migrasi Database Produksi
-Saat pertama kali berjalan atau setelah ada penambahan skema baru:
-```bash
-docker-compose -f docker-compose.prod.yml exec sim-web pnpm prisma migrate deploy
-```
-*Gunakan `pnpm prisma db push --accept-data-loss` HANYA jika Anda ingin memaksa perubahan tanpa mempedulikan data lama hilang (biasanya saat testing).*
+---
 
-## 7. Pemeliharaan (*Maintenance*)
-- **Melihat Log Aplikasi**: `docker logs -f sim-alfida_sim-web_1`
-- **Restart Aplikasi**: `docker-compose -f docker-compose.prod.yml restart sim-web`
-- **Menutup Sistem (Down)**: `docker-compose -f docker-compose.prod.yml down`
+## 2. Deploy Backend (NestJS) ke Railway / Render
+
+NestJS berjalan sebagai layanan Node.js (*long-running process*) dan memerlukan *environment* yang mendukung *Docker* atau Node.js murni.
+
+### Opsi A: Deployment via Docker (Rekomendasi)
+Di platform seperti Railway atau Render, Anda dapat mendeploy menggunakan Dockerfile.
+1. Pastikan `Dockerfile` Anda sudah mendukung Turborepo *prune* untuk package `@sim/api`.
+2. **Environment Variables**:
+   ```env
+   NODE_ENV=production
+   PORT=3001
+   DATABASE_URL=postgresql://user:password@host:port/db?schema=public
+   SUPABASE_JWT_SECRET=[SECRET_DARI_DASHBOARD_SUPABASE]
+   ```
+
+### Opsi B: Deployment via Node.js Build Pack
+1. **Build Command**: `pnpm install && pnpm --filter @sim/api build`
+2. **Start Command**: `pnpm --filter @sim/api start:prod`
+   *(Catatan: Anda mungkin memerlukan `corepack enable` jika platform tidak mendukung pnpm secara native).*
+
+---
+
+## 3. Deployment Database & Prisma
+
+### Migrasi Skema Database
+Sangat penting untuk menjalankan migrasi database **sebelum** backend NestJS siap melayani *request*.
+Tambahkan *Release Command* di platform hosting backend (Render/Railway):
+```bash
+pnpm --filter @sim/database prisma db push --accept-data-loss
+# atau
+pnpm --filter @sim/database prisma migrate deploy
+```
+
+### Prisma Client
+Setiap proses `build` (baik di Vercel maupun Railway) secara otomatis akan memicu `prisma generate` berkat konfigurasi _workspace_ `@sim/database` milik kita. Tidak ada konfigurasi tambahan yang dibutuhkan!
+
+---
+
+## Tips & Troubleshooting
+- **CORS Error**: Jika Frontend di-deploy di `https://simalfida.com` dan API di `https://api.simalfida.com`, pastikan `app.enableCors()` di `apps/api/src/main.ts` telah diizinkan untuk origin frontend Anda.
+- **Unauthorized 401**: Jika API menolak request, pastikan Next.js mengirimkan cookie yang valid melalui `apps/web/src/lib/api.ts` dan `SUPABASE_JWT_SECRET` di backend sudah sinkron dengan yang ada di Supabase Dashboard (Settings > API > JWT Secret).

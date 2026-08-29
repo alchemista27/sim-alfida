@@ -124,6 +124,14 @@ Corner radius scale:
 - rounded: `{rounded.sm}`
 - padding: `10px 14px`
 
+## Workspace & Component Architecture
+
+Seluruh aset UI (komponen, halaman, *design tokens*) berada di dalam workspace `apps/web/`. Backend (`apps/api/`) tidak memiliki kode UI sama sekali.
+
+- Komponen reusable berada di `apps/web/src/components/ui/`
+- Komponen domain-specific berada di `apps/web/src/components/features/`
+- Jika ke depan diperlukan *shared UI library*, komponen dapat dipromosikan ke `packages/ui/`
+
 ## Do's and Don'ts
 
 - Do use the tertiary color sparingly — only for the highest-emphasis action.
@@ -132,3 +140,5 @@ Corner radius scale:
 - Do default to the warm neutral background; reserve pure white for cards.
 - Do use Material UI Icons (Google) for all iconography.
 - Don't use emojis for icons in the UI.
+- Do keep all UI components exclusively in `apps/web/`. Never place React components in `apps/api/`.
+- Don't import Prisma or database logic in `apps/web/`. All data fetching goes through the NestJS API.
