@@ -12,7 +12,9 @@
     "db:seed": "pnpm --filter @sim/database tsx prisma/seed.ts",
     "db:studio": "pnpm --filter @sim/database prisma studio",
     "db:start": "/usr/lib/postgresql/18/bin/pg_ctl -D .pgdata -l .pgdata/pg.log -o \"-p 5433 -k .pgdata\" start",
-    "db:stop": "/usr/lib/postgresql/18/bin/pg_ctl -D .pgdata stop"
+    "db:stop": "/usr/lib/postgresql/18/bin/pg_ctl -D .pgdata stop",
+    "postinstall": "pnpm --filter @sim/database generate",
+    "generate": "pnpm --filter @sim/database generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
