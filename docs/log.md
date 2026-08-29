@@ -1,5 +1,14 @@
 **tanggal:** 29 Agustus 2026
 **progress:**
+- Menyelesaikan *bug* kompilasi Vercel pasca-migrasi ke Monorepo (Turborepo).
+- Memecahkan masalah gagal *build* Webpack (`UnhandledSchemeError: Reading from "node:crypto"`) yang disebabkan oleh penggunaan tipe ENUM dari Prisma Client di dalam *Client Components*. Membuat skrip otomatis `fix-enums.js` untuk menggantinya dengan *string literal* dan tipe mandiri dari `@sim/shared`.
+- Memperbaiki pengaturan *Root Directory* di Vercel menjadi `apps/web` agar Vercel mendeteksi Turborepo.
+- Memperbaiki *error* `Prisma Client could not locate the Query Engine for runtime "rhel-openssl-3.0.x"` pada proses *prerendering*. Solusinya dengan menghapus `src/generated` dari *history* Git (`git rm -r --cached`), menambahkan aturan `.gitignore`, memutakhirkan `binaryTargets` di skema Prisma, serta menyuntikkan *hook* `postinstall` di `package.json` utama agar *Query Engine* RHEL selalu diunduh secara tepat pada mesin Vercel.
+**commit message:** fix: resolve vercel monorepo build failures (prisma client in browser, missing rhel query engine)
+
+---
+**tanggal:** 29 Agustus 2026
+**progress:**
 - Menginvestigasi dan memperbaiki *crash* pada *deployment* Vercel (Next.js *Webpack UnhandledSchemeError* untuk `node:crypto` dan `node:events`).
 - Menelusuri akar masalah yang disebabkan oleh impor *value* dari Prisma Enums (seperti `UnitLevel`, `RegistrationStatus`, `DayOfWeek`) ke dalam *Client Components* (`"use client"`).
 - Melakukan refaktor global pada ~14 komponen antarmuka untuk mengganti penggunaan *runtime Enum* Prisma dengan *string literals*.
