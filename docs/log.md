@@ -5,6 +5,8 @@
 - Menyelesaikan inisiatif **Sprint 38** (Modul NestJS): Mengerahkan *Autonomous Subagents* untuk mereplika logika Server Actions (PPDB, Akademik, HR) menjadi struktur *Controller* dan *Service* di NestJS lengkap dengan perlindungan otorisasi dan `ZodValidationPipe`.
 - Menyelesaikan inisiatif **Sprint 39** (Penyatuan BFF): Membangun utilitas proksi (`apiFetch`) di Next.js yang secara aman meneruskan *token session* JWT dari Supabase *cookies* ke _header_ NestJS API. *Server Actions* lama disederhanakan hanya untuk memicu pemanggilan API dan menjalankan `revalidatePath()`.
 - Melengkapi rancangan rilis dengan membuat `docs/DEPLOYMENT.md` khusus arsitektur terpisah (menuju Vercel, Railway/Render) dengan hasil akhir pengecekan kompilasi 100% *type-safe* tanpa satupun galat.
+- Menyelesaikan anomali kompilasi NestJS pada Node.js v24 (ERR_MODULE_NOT_FOUND) dengan memastikan library internal (@sim/shared) dikompilasi secara independen dan (@sim/database) diproksi secara native untuk kepatuhan ECMAScript Modules.
+- Mengatasi problem gagal instalasi paket Vercel (ERR_PNPM_IGNORED_BUILDS) dengan memigrasikan policy `pnpm.onlyBuiltDependencies` dari package.json ke `.npmrc` demi sinkronisasi dengan keamanan arsitektur PNPM v10+.
 **commit message:** feat: complete phase 4 migration to turborepo, nestjs backend, and bff proxy integration
 
 ---
