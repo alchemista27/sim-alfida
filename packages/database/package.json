@@ -4,14 +4,6 @@
   "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "browser": "./src/generated/client/index-browser.js",
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "default": "./src/index.ts"
-    }
-  },
   "dependencies": {
     "@prisma/client": "^6.2.1"
   },
