@@ -1,5 +1,13 @@
 **tanggal:** 29 Agustus 2026
 **progress:**
+- Menginvestigasi dan memperbaiki *bug* Vercel (500 Internal Server Error) pasca-*deployment*. Akar masalahnya adalah Next.js Output File Tracing gagal menemukan berkas *binary engine* Prisma (`libquery_engine-rhel-openssl-3.0.x.so.node`).
+- Menyelesaikan masalah kompilasi dengan menyetel `outputFileTracingRoot: path.join(__dirname, '../../')` di `next.config.ts`, dan mengembalikan pengaturan *output* skema Prisma ke lokasi bawaannya (`node_modules/@prisma/client`). Dengan penyetelan ini, *bundler* Webpack milik Next.js dapat mengemas *Query Engine* secara dinamis ke lingkungan Serverless Vercel.
+- Menemukan dan membersihkan kerentanan keamanan kritis (kredensial Supabase `DATABASE_URL` asli tanpa sengaja ter-*commit*) di berkas `.env.example`. Variabel tersebut kini telah diamankan kembali menjadi templat *dummy text*.
+**commit message:** docs: update log for vercel 500 fix and env security patch
+
+---
+**tanggal:** 29 Agustus 2026
+**progress:**
 - Menyelesaikan *bug* kompilasi Vercel pasca-migrasi ke Monorepo (Turborepo).
 - Memecahkan masalah gagal *build* Webpack (`UnhandledSchemeError: Reading from "node:crypto"`) yang disebabkan oleh penggunaan tipe ENUM dari Prisma Client di dalam *Client Components*. Membuat skrip otomatis `fix-enums.js` untuk menggantinya dengan *string literal* dan tipe mandiri dari `@sim/shared`.
 - Memperbaiki pengaturan *Root Directory* di Vercel menjadi `apps/web` agar Vercel mendeteksi Turborepo.
