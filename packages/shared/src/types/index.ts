@@ -7,7 +7,7 @@ export type Role =
   | "observer"
   | "tim_ppdb";
 
-export type UnitLevel = "tk" | "sd" | "smp" | "sma" | "pesantren";
+export type UnitLevel = "tk" | "sd" | "smp" | "sma" | "pesantren" | "kantor_yayasan" | "non_pendidikan";
 
 export interface UserSession {
   id: string;
@@ -18,3 +18,29 @@ export interface UserSession {
     unitId: string | null;
   }[];
 }
+
+export type RegistrationStatus =
+  | "pending_payment"
+  | "payment_uploaded"
+  | "payment_verified"
+  | "form_filling"
+  | "documents_uploaded"
+  | "medical_pending"
+  | "medical_uploaded"
+  | "verification"
+  | "observation_scheduled"
+  | "observation_done"
+  | "accepted"
+  | "rejected"
+  | "enrolled";
+
+export const DayOfWeek = {
+  monday: "monday",
+  tuesday: "tuesday",
+  wednesday: "wednesday",
+  thursday: "thursday",
+  friday: "friday",
+  saturday: "saturday",
+} as const;
+
+export type DayOfWeek = typeof DayOfWeek[keyof typeof DayOfWeek];

@@ -7,7 +7,7 @@ import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 import { assignStaffToUnit, createStaffUser } from "@/actions/staff";
-import { UserRole } from "@sim/database";
+import type {  UserRole  } from "@sim/database";
 import { Input } from "@/components/ui/input";
 
 type User = any;

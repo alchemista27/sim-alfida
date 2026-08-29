@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { upsertExtraSchedule, deleteExtraSchedule, upsertExtraJournal, deleteExtraJournal, upsertExtraGrade } from "@/actions/extracurricular";
-import { DayOfWeek } from "@sim/database";
+import type {  DayOfWeek  } from "@sim/database";
 
 export function ExtracurricularCoachClient({ extras }: { extras: any[] }) {
   const [selectedExtraId, setSelectedExtraId] = useState<string>(extras.length > 0 ? extras[0].id : "");
@@ -16,7 +16,7 @@ export function ExtracurricularCoachClient({ extras }: { extras: any[] }) {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // Schedule Form
-  const [day, setDay] = useState<DayOfWeek>(DayOfWeek.monday);
+  const [day, setDay] = useState<DayOfWeek>("monday");
   const [startTime, setStartTime] = useState("15:00");
   const [endTime, setEndTime] = useState("16:30");
   const [location, setLocation] = useState("");
@@ -48,7 +48,7 @@ export function ExtracurricularCoachClient({ extras }: { extras: any[] }) {
       setLocation(sched.location || "");
     } else {
       setEditingId(null);
-      setDay(DayOfWeek.monday);
+      setDay("monday");
       setStartTime("15:00");
       setEndTime("16:30");
       setLocation("");

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { WorkProgramStatus } from "@sim/database";
+import type {  WorkProgramStatus  } from "@sim/database";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -52,7 +52,7 @@ export function WorkProgramClient({
         title,
         description,
         targetDate: targetDateStr ? new Date(targetDateStr) : undefined,
-        status: WorkProgramStatus.planned,
+        status: "planned",
       });
       setIsModalOpen(false);
       router.refresh();
@@ -135,9 +135,9 @@ export function WorkProgramClient({
                       handleStatusChange(wp.id, e.target.value as WorkProgramStatus)
                     }
                   >
-                    <option value={WorkProgramStatus.planned}>Planned</option>
-                    <option value={WorkProgramStatus.ongoing}>Ongoing</option>
-                    <option value={WorkProgramStatus.completed}>Completed</option>
+                    <option value={"planned"}>Planned</option>
+                    <option value={"ongoing"}>Ongoing</option>
+                    <option value={"completed"}>Completed</option>
                   </select>
                 </Td>
               </Tr>

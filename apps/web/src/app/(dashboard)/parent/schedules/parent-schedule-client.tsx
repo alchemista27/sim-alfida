@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DayOfWeek } from "@sim/database";
+import { DayOfWeek } from "@sim/shared";
 
 export function ParentScheduleClient({ 
   enrollments, 

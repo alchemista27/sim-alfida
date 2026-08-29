@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { UnitLevel } from "@sim/database";
+import type { UnitLevel } from "@sim/shared";
 
 // DTO for Unit in Table
 export interface UnitTableRow {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Icon } from "@/components/ui/icon";
-import { SubjectLevel } from "@sim/database";
+import type {  SubjectLevel  } from "@sim/database";
 import { createSubject, updateSubject, deleteSubject } from "@/actions/academic";
 
 interface SubjectData {
@@ -33,12 +33,12 @@ export function SubjectClient({ initialData }: { initialData: SubjectData[] }) {
     id: "",
     code: "",
     name: "",
-    level: SubjectLevel.all,
+    level: "all",
     isActive: true,
   });
 
   const openNew = () => {
-    setFormData({ id: "", code: "", name: "", level: SubjectLevel.all, isActive: true });
+    setFormData({ id: "", code: "", name: "", level: "all", isActive: true });
     setIsEdit(false);
     setError(null);
     setIsOpen(true);

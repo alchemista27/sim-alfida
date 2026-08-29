@@ -1,18 +1,18 @@
-import { RegistrationStatus } from "@sim/database";
+import type { RegistrationStatus } from "@sim/shared";
 
-export const PPDB_STEPS = [
-  RegistrationStatus.pending_payment,
-  RegistrationStatus.payment_uploaded,
-  RegistrationStatus.payment_verified,
-  RegistrationStatus.form_filling,
-  RegistrationStatus.documents_uploaded,
-  RegistrationStatus.medical_pending,
-  RegistrationStatus.medical_uploaded,
-  RegistrationStatus.verification,
-  RegistrationStatus.observation_scheduled,
-  RegistrationStatus.observation_done,
-  RegistrationStatus.accepted,
-  RegistrationStatus.enrolled,
+export const PPDB_STEPS: RegistrationStatus[] = [
+  "pending_payment",
+  "payment_uploaded",
+  "payment_verified",
+  "form_filling",
+  "documents_uploaded",
+  "medical_pending",
+  "medical_uploaded",
+  "verification",
+  "observation_scheduled",
+  "observation_done",
+  "accepted",
+  "enrolled",
 ];
 
 // Map each state to the frontend step index (for Stepper UI)

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import { DayOfWeek } from "@sim/database";
+import { DayOfWeek } from "@sim/shared";
 
 const styles = StyleSheet.create({
   page: {

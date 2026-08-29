@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
-import { DayOfWeek, AttendanceStatus } from "@sim/database";
+import type {  DayOfWeek, AttendanceStatus  } from "@sim/database";
 import { updateLiqoSchedule, createLiqoMeeting, saveLiqoAttendance } from "@/actions/murobbi";
 
 const DAYS: Record<string, string> = {
@@ -377,10 +377,10 @@ export function MurobbiLiqoClient({ group, mutabaahStats = [] }: { group: any; m
                     
                     <div className="flex flex-wrap gap-4">
                       {[
-                        { val: AttendanceStatus.present, label: 'Hadir' },
-                        { val: AttendanceStatus.sick, label: 'Sakit' },
-                        { val: AttendanceStatus.permitted, label: 'Izin' },
-                        { val: AttendanceStatus.absent, label: 'Alpa' },
+                        { val: "present", label: 'Hadir' },
+                        { val: "sick", label: 'Sakit' },
+                        { val: "permitted", label: 'Izin' },
+                        { val: "absent", label: 'Alpa' },
                       ].map(opt => (
                         <label key={opt.val} className="flex items-center gap-1.5 text-sm cursor-pointer">
                           <input

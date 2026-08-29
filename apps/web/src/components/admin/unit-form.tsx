@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { unitSchema, UnitInput } from "@/lib/validations/admin";
-import { UnitLevel } from "@sim/database";
 import { createUnitAction, updateUnitAction } from "@/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -31,7 +30,7 @@ export function UnitForm({ initialData, onSuccess }: UnitFormProps) {
     defaultValues: initialData || {
       name: "",
       slug: "",
-      level: UnitLevel.tk,
+      level: "tk",
       isActive: true,
     },
   });

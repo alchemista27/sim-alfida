@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getClassSchedules, upsertClassSchedule, deleteClassSchedule } from "@/actions/schedules";
-import { DayOfWeek } from "@sim/database";
+import { DayOfWeek } from "@sim/shared";
 
 export function ScheduleManager({ 
   classes, 
@@ -20,7 +20,7 @@ export function ScheduleManager({
   // Form State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [day, setDay] = useState<DayOfWeek>(DayOfWeek.monday);
+  const [day, setDay] = useState<DayOfWeek>("monday");
   const [startTime, setStartTime] = useState("07:00");
   const [endTime, setEndTime] = useState("08:30");
   const [subjectId, setSubjectId] = useState("");
@@ -54,7 +54,7 @@ export function ScheduleManager({
     } else {
       setEditingId(null);
       // Defaults
-      setDay(DayOfWeek.monday);
+      setDay("monday");
       setStartTime("07:00");
       setEndTime("08:30");
       setSubjectId(subjects.length > 0 ? subjects[0].id : "");

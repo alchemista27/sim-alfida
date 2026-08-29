@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 
 import { Badge } from "@/components/ui/badge";
-import { AttendanceStatus } from "@sim/database";
+import type {  AttendanceStatus  } from "@sim/database";
 
 const DAYS: Record<string, string> = {
   monday: "Senin",
@@ -18,10 +18,10 @@ const DAYS: Record<string, string> = {
 
 const getAttendanceBadge = (status: AttendanceStatus) => {
   switch (status) {
-    case AttendanceStatus.present: return <Badge variant="green">Hadir</Badge>;
-    case AttendanceStatus.sick: return <Badge variant="amber">Sakit</Badge>;
-    case AttendanceStatus.permitted: return <Badge variant="amber">Izin</Badge>;
-    case AttendanceStatus.absent: return <Badge variant="red">Alpa</Badge>;
+    case "present": return <Badge variant="green">Hadir</Badge>;
+    case "sick": return <Badge variant="amber">Sakit</Badge>;
+    case "permitted": return <Badge variant="amber">Izin</Badge>;
+    case "absent": return <Badge variant="red">Alpa</Badge>;
     default: return <Badge variant="gray">Unknown</Badge>;
   }
 };

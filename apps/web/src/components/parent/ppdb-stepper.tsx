@@ -1,5 +1,5 @@
 import React from "react";
-import { RegistrationStatus } from "@sim/database";
+import type { RegistrationStatus } from "@sim/shared";
 import { STEP_INDEX_MAP } from "@/lib/ppdb-fsm";
 import { Icon } from "@/components/ui/icon";
 import { Card } from "@/components/ui/card";

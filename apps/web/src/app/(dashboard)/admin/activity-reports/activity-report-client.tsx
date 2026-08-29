@@ -7,7 +7,7 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { createActivityReport } from "@/actions/activity-reports";
 import { useRouter } from "next/navigation";
-import { ReportType } from "@sim/database";
+import type {  ReportType  } from "@sim/database";
 
 type Department = { id: string; name: string };
 

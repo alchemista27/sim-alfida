@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { AttendanceStatus } from "@sim/database";
+import type {  AttendanceStatus  } from "@sim/database";
 import { submitBatchAttendance } from "@/actions/academic";
 import { Input } from "@/components/ui/input";
 
@@ -29,7 +29,7 @@ export function AttendanceClient({ academicYearId, assignments, students }: any)
     if (classStudents.length > 0) {
       const initial: any = {};
       classStudents.forEach((s: any) => {
-        initial[s.id] = { status: AttendanceStatus.present, notes: "" };
+        initial[s.id] = { status: "present", notes: "" };
       });
       setAttendanceData(initial);
     } else {
@@ -146,10 +146,10 @@ export function AttendanceClient({ academicYearId, assignments, students }: any)
                       <td className="p-4">
                         <div className="flex justify-center gap-4">
                           {[
-                            { val: AttendanceStatus.present, label: 'Hadir', color: 'text-green-600' },
-                            { val: AttendanceStatus.sick, label: 'Sakit', color: 'text-yellow-600' },
-                            { val: AttendanceStatus.permitted, label: 'Izin', color: 'text-blue-600' },
-                            { val: AttendanceStatus.absent, label: 'Alpa', color: 'text-red-600' },
+                            { val: "present", label: 'Hadir', color: 'text-green-600' },
+                            { val: "sick", label: 'Sakit', color: 'text-yellow-600' },
+                            { val: "permitted", label: 'Izin', color: 'text-blue-600' },
+                            { val: "absent", label: 'Alpa', color: 'text-red-600' },
                           ].map(opt => (
                             <label key={opt.val} className={`flex items-center gap-1.5 cursor-pointer ${opt.color}`}>
                               <input 
@@ -157,7 +157,7 @@ export function AttendanceClient({ academicYearId, assignments, students }: any)
                                 name={`status-${student.id}`} 
                                 value={opt.val}
                                 checked={currentData.status === opt.val}
-                                onChange={() => handleStatusChange(student.id, opt.val)}
+                                onChange={() => handleStatusChange(student.id, opt.val as AttendanceStatus)}
                                 className="w-4 h-4 text-current focus:ring-current"
                               />
                               <span className="font-medium text-xs uppercase">{opt.label}</span>

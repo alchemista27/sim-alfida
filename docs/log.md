@@ -1,5 +1,16 @@
 **tanggal:** 29 Agustus 2026
 **progress:**
+- Menginvestigasi dan memperbaiki *crash* pada *deployment* Vercel (Next.js *Webpack UnhandledSchemeError* untuk `node:crypto` dan `node:events`).
+- Menelusuri akar masalah yang disebabkan oleh impor *value* dari Prisma Enums (seperti `UnitLevel`, `RegistrationStatus`, `DayOfWeek`) ke dalam *Client Components* (`"use client"`).
+- Melakukan refaktor global pada ~14 komponen antarmuka untuk mengganti penggunaan *runtime Enum* Prisma dengan *string literals*.
+- Memperbarui berkas tipe publik di `@sim/shared` (menambahkan `kantor_yayasan` dan `non_pendidikan`) serta skema Zod (mengganti `z.nativeEnum` menjadi `z.enum`) agar pengecekan tipe TypeScript tetap ketat.
+- Berhasil menuntaskan *build* secara sukses dan bebas dari bocornya *runtime* Node.js ke antarmuka *browser*.
+**commit message:** fix: resolve Webpack UnhandledSchemeError by removing Prisma enum value imports from Next.js Client Components
+
+---
+
+**tanggal:** 29 Agustus 2026
+**progress:**
 - Menginvestigasi tantangan komputasi pada arsitektur monolith Next.js, dan berhasil memigrasikannya secara utuh ke arsitektur **Turborepo Monorepo** (Next.js + NestJS).
 - Menyelesaikan inisiatif **Sprint 37** (Inisialisasi Monorepo): Mengatur `turbo.json`, `pnpm-workspace.yaml`, dan mengekstrak kode menjadi 4 ruang lingkup independen (`@sim/web`, `@sim/api`, `@sim/database`, `@sim/shared`).
 - Menyelesaikan inisiatif **Sprint 38** (Modul NestJS): Mengerahkan *Autonomous Subagents* untuk mereplika logika Server Actions (PPDB, Akademik, HR) menjadi struktur *Controller* dan *Service* di NestJS lengkap dengan perlindungan otorisasi dan `ZodValidationPipe`.

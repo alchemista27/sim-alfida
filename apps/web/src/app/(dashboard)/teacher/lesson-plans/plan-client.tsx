@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getLessonPlans, upsertLessonPlan, deleteLessonPlan } from "@/actions/lesson-plans";
-import { LessonPlanType } from "@sim/database";
+import type {  LessonPlanType  } from "@sim/database";
 
 export function PlanClient({ academicYearId, subjects }: { academicYearId: string, subjects: any[] }) {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
@@ -12,7 +12,7 @@ export function PlanClient({ academicYearId, subjects }: { academicYearId: strin
   // Form State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [type, setType] = useState<LessonPlanType>(LessonPlanType.rpp);
+  const [type, setType] = useState<LessonPlanType>("rpp");
   const [title, setTitle] = useState("");
   
   // Structured Content State
@@ -54,7 +54,7 @@ export function PlanClient({ academicYearId, subjects }: { academicYearId: strin
       }
     } else {
       setEditingId(null);
-      setType(LessonPlanType.rpp);
+      setType("rpp");
       setTitle("");
       setContentGoal("");
       setContentSteps("");
@@ -199,9 +199,9 @@ export function PlanClient({ academicYearId, subjects }: { academicYearId: strin
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Perencanaan</label>
                   <select required value={type} onChange={e => setType(e.target.value as LessonPlanType)} className="w-full p-2 border rounded-md">
-                    <option value={LessonPlanType.rpp}>RPP (Rencana Pelaksanaan Pembelajaran)</option>
-                    <option value={LessonPlanType.prota}>Program Tahunan (Prota)</option>
-                    <option value={LessonPlanType.promes}>Program Semester (Promes)</option>
+                    <option value={"rpp"}>RPP (Rencana Pelaksanaan Pembelajaran)</option>
+                    <option value={"prota"}>Program Tahunan (Prota)</option>
+                    <option value={"promes"}>Program Semester (Promes)</option>
                   </select>
                 </div>
                 <div>

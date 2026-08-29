@@ -2,13 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { GradeType } from "@sim/database";
+import type {  GradeType  } from "@sim/database";
 import { submitBatchGrade } from "@/actions/academic";
 import { Input } from "@/components/ui/input";
 
 export function GradeClient({ academicYearId, assignments, students }: any) {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState("");
-  const [gradeType, setGradeType] = useState<GradeType>(GradeType.daily);
+  const [gradeType, setGradeType] = useState<GradeType>("daily");
   const [label, setLabel] = useState("Tugas 1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,10 +124,10 @@ export function GradeClient({ academicYearId, assignments, students }: any) {
             onChange={e => setGradeType(e.target.value as GradeType)}
             className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
           >
-            <option value={GradeType.daily}>Nilai Harian / Tugas</option>
-            <option value={GradeType.exam}>Ujian Formatf / UH</option>
-            <option value={GradeType.ats}>Asesmen Tengah Semester (ATS)</option>
-            <option value={GradeType.aas}>Asesmen Akhir Semester (AAS)</option>
+            <option value={"daily"}>Nilai Harian / Tugas</option>
+            <option value={"exam"}>Ujian Formatf / UH</option>
+            <option value={"ats"}>Asesmen Tengah Semester (ATS)</option>
+            <option value={"aas"}>Asesmen Akhir Semester (AAS)</option>
           </select>
         </div>
         <div className="space-y-1">

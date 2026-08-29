@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { UnitLevel } from "@sim/database";
 
 export const unitSchema = z.object({
   name: z.string().min(3, "Nama unit minimal 3 karakter"),
@@ -7,7 +6,7 @@ export const unitSchema = z.object({
     .string()
     .min(3)
     .regex(/^[a-z0-9-]+$/, "Slug hanya boleh berisi huruf kecil, angka, dan strip"),
-  level: z.nativeEnum(UnitLevel),
+  level: z.enum(["tk", "sd", "smp", "sma", "pesantren", "kantor_yayasan", "non_pendidikan"]),
   isActive: z.boolean(),
 });
 

@@ -5,10 +5,10 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LeaveStatus, LeaveType } from "@sim/database";
+import type {  LeaveStatus, LeaveType  } from "@sim/database";
 import { approveLeaveRequest, rejectLeaveRequest } from "@/actions/leave-approval";
 import { useRouter } from "next/navigation";
-import { Prisma } from "@sim/database";
+import type {  Prisma  } from "@sim/database";
 
 type LeaveRequestWithUser = Prisma.LeaveRequestGetPayload<{
   include: {
@@ -31,10 +31,10 @@ export function ApprovalClient({ initialLeaves }: ApprovalClientProps) {
   const router = useRouter();
 
   const pendingLeaves = initialLeaves.filter(
-    (leave) => leave.status === LeaveStatus.pending
+    (leave) => leave.status === "pending"
   );
   const historyLeaves = initialLeaves.filter(
-    (leave) => leave.status !== LeaveStatus.pending
+    (leave) => leave.status !== "pending"
   );
 
   const handleApprove = async (leave: LeaveRequestWithUser) => {
@@ -44,7 +44,7 @@ export function ApprovalClient({ initialLeaves }: ApprovalClientProps) {
           (1000 * 3600 * 24)
       ) + 1;
 
-    if (leave.type === LeaveType.cuti) {
+    if (leave.type === "cuti") {
       if (
         !window.confirm(
           `Menyetujui cuti ini akan memotong sisa kuota cuti karyawan sebanyak ${days} hari. Lanjutkan?`
@@ -180,7 +180,7 @@ export function ApprovalClient({ initialLeaves }: ApprovalClientProps) {
                       ) : (
                         <Badge
                           variant={
-                            leave.status === LeaveStatus.approved
+                            leave.status === "approved"
                               ? "green"
                               : "red"
                           }
