@@ -594,11 +594,24 @@ flowchart TD
 | Dashboard Rekapitulasi & Report System             | Sprint 30     |
 | QA, testing, dan bugfix modul karyawan             | Sprint 31     |
 
-### Fase 4 — Integrasi Eksternal
 
-> Payment Gateway.
+### Fase 4 — Sistem SMART Execution Control Center
+Sistem manajemen kinerja strategis terpusat untuk BPH Yayasan Alfida dan Kepala Biro/Bidang, mencakup:
+- Hierarki & Master Data Bidang (Sesuai Struktur Yayasan)
+- Manajemen Program Sekolah, KPI & Target
+- Delegasi Tugas, Milestone, & Log Realisasi
+- Evidence Register (Terintegrasi Cloudinary)
+- Manajemen Issue, Eskalasi, Rapat & Keputusan
+- Tindak Lanjut (Action Items) & Notifikasi
+- Laporan Eksekutif Bulanan & Dashboard BPH (React PDF)
 
----
+| Milestone                                          | Target        |
+| -------------------------------------------------- | ------------- |
+| Skema database & Master Data Bidang/Program/KPI    | Sprint 40     |
+| Eksekusi Tugas, Milestone, Evidence & Log          | Sprint 41     |
+| Manajemen Issue, Rapat, Keputusan & Tindak Lanjut  | Sprint 42     |
+| Review Bulanan, Dashboard BPH & Ekspor PDF         | Sprint 43     |
+
 
 ## 10. Risiko & Mitigasi
 

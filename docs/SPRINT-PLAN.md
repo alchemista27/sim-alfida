@@ -50,6 +50,8 @@
 | | **Sprint 32-33** | Work programs & activity reports per department |
 | | **Sprint 34-35** | Super admin & admin dashboards for employee module |
 | | **Sprint 36** | QA, testing, & deployment Modul Karyawan |
+| **Fase 4** | **Sprint 40-41** | Master Data Bidang, Program, KPI, Eksekusi Tugas, & Evidence |
+| | **Sprint 42-43** | Risk Management (Issue), Rapat, Tindak Lanjut, & BPH Dashboard |
 
 | Sprint | Durasi | Fokus |
 |--------|--------|-------|
@@ -673,3 +675,59 @@ Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, AT
 | S39-04 | Deployment Setup | Deploy NestJS ke Render/Railway, update Vercel env vars | 6 jam | ✅ Selesai |
 | S39-05 | Dokumentasi Final | Update README, AGENTS.md, dan runbook deployment | 4 jam | ✅ Selesai |
 
+
+---
+
+## Sprint 40 — Fondasi Master Data & Program KPI
+**Durasi:** 2 Minggu
+**Goal:** Skema database dirancang, Master Bidang/PIC siap, serta fitur Program & KPI beroperasi penuh dengan arsitektur NestJS.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S40-01 | Prisma Schema Update | Desain tabel `StrategicDepartment`, `ExecutionProgram`, dan `ExecutionKPI` | 6 jam | Todo |
+| S40-02 | CRUD Bidang & PIC | Endpoint & UI untuk mengatur hierarki pejabat Yayasan dan Biro sesuai PDF | 8 jam | Todo |
+| S40-03 | Manajemen Program Sekolah | Endpoint & UI pengelolaan `ExecutionProgram` (Tujuan, Sasaran, Tanggal, PIC) | 10 jam | Todo |
+| S40-04 | Manajemen KPI & Target | Endpoint & UI `ExecutionKPI` terhubung ke Program (Arah Kinerja, Target, Bobot) | 8 jam | Todo |
+
+---
+
+## Sprint 41 — Eksekusi, Penugasan & Kumpulan Bukti
+**Durasi:** 2 Minggu
+**Goal:** Pegawai dapat menerima tugas, menyelesaikan milestone, melaporkan log realisasi, dan mengunggah evidence pendukung.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S41-01 | Skema Milestone & Tugas | Skema Prisma dan NestJS Endpoint untuk `ExecutionMilestone` & `ExecutionTask` | 6 jam | Todo |
+| S41-02 | Delegasi Tugas (UI) | Antarmuka pembuatan dan pelimpahan tugas berserta pengatur deadline | 12 jam | Todo |
+| S41-03 | Log Realisasi Kegiatan | Fitur pencatatan harian/mingguan aktivitas penyelesaian program | 8 jam | Todo |
+| S41-04 | Evidence Register | Sistem penyerahan berkas sebagai bukti pencapaian terintegrasi Cloudinary | 10 jam | Todo |
+
+---
+
+## Sprint 42 — Manajemen Risiko & Rapat Pimpinan
+**Durasi:** 2 Minggu
+**Goal:** Hambatan dapat dieskalasi menjadi Issue, dirapatkan, dan melahirkan Tindak Lanjut otomatis.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S42-01 | Issue & Eskalasi (Risk Mgmt) | Skema & UI `ExecutionIssue` dengan kalkulasi otomatis Skor Prioritas | 8 jam | Todo |
+| S42-02 | Manajemen Rapat & Keputusan | Pencatat Notulen Rapat, absensi peserta, dan luaran Keputusan | 10 jam | Todo |
+| S42-03 | Sistem Tindak Lanjut | Pengubahan Issue/Keputusan menjadi `ExecutionActionItem` | 8 jam | Todo |
+| S42-04 | Notifikasi Otomatis | Pembuatan sistem peringatan tenggat waktu (deadline) | 6 jam | Todo |
+
+---
+
+## Sprint 43 — Analitik BPH Yayasan & Pusat Pelaporan
+**Durasi:** 2 Minggu
+**Goal:** Ketua Yayasan Alfida memiliki dasbor eksekutif paripurna beserta fungsionalitas cetak ringkasan bulanan.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S43-01 | Review Bulanan (Kalkulasi) | NestJS CRON Service mengakumulasi rata-rata proges, kelengkapan evidence, KPI | 12 jam | Todo |
+| S43-02 | Dashboard BPH Yayasan | Antarmuka eksekutif (Grafik/Statistik) per Bidang | 16 jam | Todo |
+| S43-03 | Laporan & Print Center | Integrasi React PDF mengekspor Laporan Manajerial dan Ringkasan Eksekutif | 12 jam | Todo |
+| S43-04 | QA & End-to-End Testing | Pengujian integrasi seluruh siklus eksekusi kontrol menggunakan Playwright | 8 jam | Todo |
