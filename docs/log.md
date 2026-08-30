@@ -1,3 +1,10 @@
+**tanggal:** 30 Agustus 2026
+**progress:**
+- Menginvestigasi dan menyelesaikan gagal *build* di `@sim/shared` karena `@prisma/client` gagal di-*generate* di Vercel. Memperbaikinya dengan mengintegrasikan `prisma generate` secara natif ke dalam *pipeline build* Turborepo (`@sim/database#build`) dan mematikan *cache* (`cache: false`) sehingga *Prisma Client* selalu dieksekusi terlepas dari status `postinstall`.
+- Menginvestigasi dan menyelesaikan gagal *build* NestJS (`@sim/api`) yang disebabkan oleh konflik *TypeScript Inference* pada transaksi bersarang Prisma (`TS2742`). Solusinya adalah mematikan generasi *type declaration* (`"declaration": false`) di `apps/api/tsconfig.json` mengingat aplikasi *backend* tidak diekspor ke repositori klien.
+**commit message:** fix: resolve vercel prisma client caching and nestjs ts2742 generation issues
+
+---
 **tanggal:** 29 Agustus 2026
 **progress:**
 - Menginvestigasi dan memperbaiki *bug* Vercel (500 Internal Server Error) pasca-*deployment*. Akar masalahnya adalah Next.js Output File Tracing gagal menemukan berkas *binary engine* Prisma (`libquery_engine-rhel-openssl-3.0.x.so.node`).
