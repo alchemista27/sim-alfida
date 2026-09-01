@@ -285,6 +285,42 @@ model UnitSettings {
   @@schema("sim")
 }
 
+enum ExecutionPriority {
+  critical
+  high
+  medium
+  low
+
+  @@schema("sim")
+}
+
+enum KPIIndicatorType {
+  input
+  process
+  output
+  outcome
+
+  @@schema("sim")
+}
+
+enum KPIDirection {
+  higher_is_better
+  lower_is_better
+  exact_match
+
+  @@schema("sim")
+}
+
+enum KPIUpdateFrequency {
+  weekly
+  monthly
+  quarterly
+  semester
+  yearly
+
+  @@schema("sim")
+}
+
 model User {
   id           String    @id @default(uuid()) @db.Uuid
   username     String?   @unique @db.VarChar(100)
@@ -326,6 +362,9 @@ model User {
   approvedLeaves      LeaveRequest[]    @relation("ApprovedLeaves")
   workProgramsAsPIC   WorkProgram[]     @relation("WorkProgramsPIC")
   activityReports     ActivityReport[]  @relation("SubmittedActivityReports")
+  departmentsLed      Department[]      @relation("DepartmentLeader")
+  programsCoordinated WorkProgram[]     @relation("WorkProgramsCoordinator")
+  kpisOwned           ExecutionKPI[]    @relation("ExecutionKPIPIC")
 
   @@index([isActive])
   @@map("users")
@@ -952,8 +991,13 @@ model Department {
   description String?
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  parentId    String?  @map("parent_id") @db.Uuid
+  leaderId    String?  @map("leader_id") @db.Uuid
 
   unit            Unit?             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  parent          Department?       @relation("DepartmentToDepartment", fields: [parentId], references: [id], onDelete: SetNull)
+  children        Department[]      @relation("DepartmentToDepartment")
+  leader          User?             @relation("DepartmentLeader", fields: [leaderId], references: [id], onDelete: SetNull)
   admins          DepartmentAdmin[]
   workPrograms    WorkProgram[]
   activityReports ActivityReport[]
@@ -1146,20 +1190,32 @@ enum WorkProgramStatus {
 }
 
 model WorkProgram {
-  id             String            @id @default(uuid()) @db.Uuid
-  departmentId   String            @map("department_id") @db.Uuid
-  academicYearId String?           @map("academic_year_id") @db.Uuid
-  userId         String?           @map("user_id") @db.Uuid
-  title          String            @db.VarChar(255)
-  description    String?           @db.Text
-  targetDate     DateTime?         @map("target_date") @db.Date
-  status         WorkProgramStatus @default(planned)
-  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime?         @updatedAt @map("updated_at") @db.Timestamptz
+  id              String            @id @default(uuid()) @db.Uuid
+  departmentId    String            @map("department_id") @db.Uuid
+  academicYearId  String?           @map("academic_year_id") @db.Uuid
+  userId          String?           @map("user_id") @db.Uuid
+  title           String            @db.VarChar(255)
+  description     String?           @db.Text
+  source          String?           @db.VarChar(100)
+  objective       String?           @db.Text
+  targetAudience  String?           @map("target_audience") @db.VarChar(255)
+  mainOutput      String?           @map("main_output") @db.Text
+  expectedOutcome String?           @map("expected_outcome") @db.Text
+  startDate       DateTime?         @map("start_date") @db.Date
+  endDateRencana  DateTime?         @map("end_date_rencana") @db.Date
+  coordinatorId   String?           @map("coordinator_id") @db.Uuid
+  priority        ExecutionPriority @default(medium)
+  budgetRef       String?           @map("budget_ref") @db.VarChar(255)
+  manualProgress  Int?              @map("manual_progress") @db.SmallInt
+  status          WorkProgramStatus @default(planned)
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime?         @updatedAt @map("updated_at") @db.Timestamptz
 
-  department   Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  academicYear AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
-  user         User?         @relation("WorkProgramsPIC", fields: [userId], references: [id], onDelete: SetNull)
+  department   Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear?  @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  user         User?          @relation("WorkProgramsPIC", fields: [userId], references: [id], onDelete: SetNull)
+  coordinator  User?          @relation("WorkProgramsCoordinator", fields: [coordinatorId], references: [id], onDelete: SetNull)
+  kpis         ExecutionKPI[]
 
   @@map("work_programs")
   @@schema("sim")
@@ -1181,5 +1237,30 @@ model ActivityReport {
   submittedBy User       @relation("SubmittedActivityReports", fields: [submittedById], references: [id], onDelete: Cascade)
 
   @@map("activity_reports")
+  @@schema("sim")
+}
+
+model ExecutionKPI {
+  id              String             @id @default(uuid()) @db.Uuid
+  programId       String             @map("program_id") @db.Uuid
+  name            String             @db.VarChar(255)
+  indicatorType   KPIIndicatorType   @map("indicator_type")
+  direction       KPIDirection       @default(higher_is_better)
+  baseline        Float              @default(0)
+  target          Float              @default(0)
+  realization     Float              @default(0)
+  unit            String             @db.VarChar(50)
+  weight          Float              @default(0)
+  dataSource      String?            @map("data_source") @db.VarChar(255)
+  updateFrequency KPIUpdateFrequency @default(monthly) @map("update_frequency")
+  picId           String?            @map("pic_id") @db.Uuid
+  notes           String?            @db.Text
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime?          @updatedAt @map("updated_at") @db.Timestamptz
+
+  program WorkProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  pic     User?       @relation("ExecutionKPIPIC", fields: [picId], references: [id], onDelete: SetNull)
+
+  @@map("execution_kpis")
   @@schema("sim")
 }
