@@ -285,6 +285,39 @@ model UnitSettings {
   @@schema("sim")
 }
 
+enum ExecutionStatus {
+  not_started
+  in_progress
+  completed
+  delayed
+  cancelled
+
+  @@schema("sim")
+}
+
+enum VerificationStatus {
+  unverified
+  needs_revision
+  verified
+
+  @@schema("sim")
+}
+
+enum EvidenceType {
+  document
+  photo
+  link
+
+  @@schema("sim")
+}
+
+enum EvidenceNature {
+  mandatory
+  supporting
+
+  @@schema("sim")
+}
+
 enum ExecutionPriority {
   critical
   high
@@ -365,6 +398,14 @@ model User {
   departmentsLed      Department[]      @relation("DepartmentLeader")
   programsCoordinated WorkProgram[]     @relation("WorkProgramsCoordinator")
   kpisOwned           ExecutionKPI[]    @relation("ExecutionKPIPIC")
+
+  milestonesOwned  ExecutionMilestone[]      @relation("MilestonePIC")
+  tasksAssigned    ExecutionTask[]           @relation("TaskAssignee")
+  tasksDelegated   ExecutionTask[]           @relation("TaskAssignor")
+  tasksVerified    ExecutionTask[]           @relation("TaskVerifier")
+  realizationLogs  ExecutionRealizationLog[] @relation("RealizationPIC")
+  evidenceOwned    ExecutionEvidence[]       @relation("EvidenceOwner")
+  evidenceVerified ExecutionEvidence[]       @relation("EvidenceVerifier")
 
   @@index([isActive])
   @@map("users")
@@ -1217,6 +1258,11 @@ model WorkProgram {
   coordinator  User?          @relation("WorkProgramsCoordinator", fields: [coordinatorId], references: [id], onDelete: SetNull)
   kpis         ExecutionKPI[]
 
+  milestones      ExecutionMilestone[]
+  tasks           ExecutionTask[]
+  realizationLogs ExecutionRealizationLog[]
+  evidence        ExecutionEvidence[]
+
   @@map("work_programs")
   @@schema("sim")
 }
@@ -1262,5 +1308,125 @@ model ExecutionKPI {
   pic     User?       @relation("ExecutionKPIPIC", fields: [picId], references: [id], onDelete: SetNull)
 
   @@map("execution_kpis")
+  @@schema("sim")
+}
+
+model ExecutionMilestone {
+  id               String          @id @default(uuid()) @db.Uuid
+  programId        String          @map("program_id") @db.Uuid
+  order            Int             @default(1)
+  name             String          @db.VarChar(255)
+  output           String?         @db.Text
+  weight           Float           @default(0)
+  startDate        DateTime?       @map("start_date") @db.Date
+  deadline         DateTime?       @db.Date
+  actualEndDate    DateTime?       @map("actual_end_date") @db.Date
+  picId            String?         @map("pic_id") @db.Uuid
+  status           ExecutionStatus @default(not_started)
+  progress         Float           @default(0)
+  requiredEvidence String?         @map("required_evidence") @db.Text
+  notes            String?         @db.Text
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime?       @updatedAt @map("updated_at") @db.Timestamptz
+
+  program  WorkProgram               @relation(fields: [programId], references: [id], onDelete: Cascade)
+  pic      User?                     @relation("MilestonePIC", fields: [picId], references: [id], onDelete: SetNull)
+  tasks    ExecutionTask[]
+  logs     ExecutionRealizationLog[]
+  evidence ExecutionEvidence[]
+
+  @@map("execution_milestones")
+  @@schema("sim")
+}
+
+model ExecutionTask {
+  id                 String             @id @default(uuid()) @db.Uuid
+  programId          String             @map("program_id") @db.Uuid
+  milestoneId        String?            @map("milestone_id") @db.Uuid
+  source             String?            @db.VarChar(100)
+  referenceId        String?            @map("reference_id") @db.Uuid
+  description        String             @db.Text
+  expectedOutput     String?            @map("expected_output") @db.Text
+  assignorId         String?            @map("assignor_id") @db.Uuid
+  assigneeId         String?            @map("assignee_id") @db.Uuid
+  delegationDate     DateTime           @default(now()) @map("delegation_date") @db.Date
+  deadline           DateTime?          @db.Date
+  priority           ExecutionPriority  @default(medium)
+  status             ExecutionStatus    @default(not_started)
+  progress           Float              @default(0)
+  actualEndDate      DateTime?          @map("actual_end_date") @db.Date
+  verifierId         String?            @map("verifier_id") @db.Uuid
+  verificationStatus VerificationStatus @default(unverified) @map("verification_status")
+  verificationNotes  String?            @map("verification_notes") @db.Text
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime?          @updatedAt @map("updated_at") @db.Timestamptz
+
+  program   WorkProgram         @relation(fields: [programId], references: [id], onDelete: Cascade)
+  milestone ExecutionMilestone? @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  assignor  User?               @relation("TaskAssignor", fields: [assignorId], references: [id], onDelete: SetNull)
+  assignee  User?               @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  verifier  User?               @relation("TaskVerifier", fields: [verifierId], references: [id], onDelete: SetNull)
+  evidence  ExecutionEvidence[]
+
+  @@map("execution_tasks")
+  @@schema("sim")
+}
+
+model ExecutionRealizationLog {
+  id                String   @id @default(uuid()) @db.Uuid
+  programId         String   @map("program_id") @db.Uuid
+  milestoneId       String?  @map("milestone_id") @db.Uuid
+  activityDate      DateTime @map("activity_date") @db.Date
+  activityName      String   @map("activity_name") @db.VarChar(255)
+  location          String?  @db.VarChar(255)
+  picId             String?  @map("pic_id") @db.Uuid
+  participantCount  Int?     @default(0) @map("participant_count")
+  output            String?  @db.Text
+  budgetRef         String?  @map("budget_ref") @db.VarChar(255)
+  issuesFound       String?  @map("issues_found") @db.Text
+  recommendation    String?  @db.Text
+  documentationLink String?  @map("documentation_link") @db.Text
+  issueId           String?  @map("issue_id") @db.Uuid
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  program   WorkProgram         @relation(fields: [programId], references: [id], onDelete: Cascade)
+  milestone ExecutionMilestone? @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  pic       User?               @relation("RealizationPIC", fields: [picId], references: [id], onDelete: SetNull)
+
+  @@map("execution_realization_logs")
+  @@schema("sim")
+}
+
+model ExecutionEvidence {
+  id                 String             @id @default(uuid()) @db.Uuid
+  programId          String             @map("program_id") @db.Uuid
+  milestoneId        String?            @map("milestone_id") @db.Uuid
+  taskId             String?            @map("task_id") @db.Uuid
+  name               String             @db.VarChar(255)
+  type               EvidenceType       @default(document)
+  nature             EvidenceNature     @default(mandatory)
+  ownerId            String?            @map("owner_id") @db.Uuid
+  physicalLocation   String?            @map("physical_location") @db.VarChar(255)
+  digitalLink        String?            @map("digital_link") @db.Text
+  availabilityStatus String?            @map("availability_status") @db.VarChar(100)
+  documentDate       DateTime?          @map("document_date") @db.Date
+  version            String?            @db.VarChar(50)
+  quality            String?            @db.VarChar(100)
+  verifierId         String?            @map("verifier_id") @db.Uuid
+  verificationStatus VerificationStatus @default(unverified) @map("verification_status")
+  verificationDate   DateTime?          @map("verification_date") @db.Timestamptz
+  repairNeeded       String?            @map("repair_needed") @db.Text
+  notes              String?            @db.Text
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime?          @updatedAt @map("updated_at") @db.Timestamptz
+
+  program   WorkProgram         @relation(fields: [programId], references: [id], onDelete: Cascade)
+  milestone ExecutionMilestone? @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  task      ExecutionTask?      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  owner     User?               @relation("EvidenceOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  verifier  User?               @relation("EvidenceVerifier", fields: [verifierId], references: [id], onDelete: SetNull)
+
+  @@map("execution_evidences")
   @@schema("sim")
 }
