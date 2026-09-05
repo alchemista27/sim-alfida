@@ -45,7 +45,7 @@ const navGroups: NavGroup[] = [
       { title: "Departemen / Bidang", href: "/admin/departments", icon: "domain" },
       { title: "Distribusi Pegawai", href: "/admin/staff", icon: "badge" },
       { title: "Kelola Cuti/Izin", href: "/admin/hr/leaves", icon: "event_available" },
-      { title: "Program Kerja", href: "/admin/work-programs", icon: "assignment" },
+      { title: "Program Kerja", href: "/admin/strategic", icon: "assignment" },
       { title: "Laporan Aktivitas", href: "/admin/activity-reports", icon: "article" },
     ],
   },

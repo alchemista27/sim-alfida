@@ -90,7 +90,7 @@ export default async function ModulesPage() {
   } else if (roles.some((r: any) => r.role === "admin_bpi")) {
     dashboardHref = "/admin/bpi/liqo";
   } else if (roles.some((r: any) => r.role === "admin_bidang")) {
-    dashboardHref = "/admin/work-programs";
+    dashboardHref = "/admin/strategic";
   }
 
   let hrHref = "/staff/attendance";
@@ -99,7 +99,7 @@ export default async function ModulesPage() {
   } else if (roles.some((r: any) => r.role === "admin_bpi")) {
     hrHref = "/admin/bpi/liqo";
   } else if (roles.some((r: any) => r.role === "admin_bidang")) {
-    hrHref = "/admin/work-programs";
+    hrHref = "/admin/strategic";
   }
 
   return (

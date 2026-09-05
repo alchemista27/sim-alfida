@@ -12,6 +12,5 @@ export * from "./validators/mutabaah";
 export * from "./validators/schedule";
 export * from "./validators/spp";
 export * from "./validators/staff-attendance";
-export * from "./validators/work-program";
 export * from "./types";
 export * from "./validators/ppdb";
