@@ -130,6 +130,26 @@ function PpdbDashboardView({ reg }: { reg: any }) {
             <Icon name="hourglass_empty" className="text-sm" /> Antrian Verifikasi Berkas
           </div>
         )}
+        {reg.status === "verification" && (
+          <div className="px-4 py-2 bg-amber-200/50 text-amber-800 text-sm font-medium rounded-md flex items-center gap-2">
+            <Icon name="hourglass_empty" className="text-sm" /> Menunggu Verifikasi PPDB
+          </div>
+        )}
+        {reg.status === "observation_scheduled" && !reg.observationBooking && (
+          <Link href="/parent/observation">
+            <Button variant="primary">Pilih Jadwal Observasi</Button>
+          </Link>
+        )}
+        {reg.status === "observation_scheduled" && reg.observationBooking && (
+          <Link href="/parent/observation">
+            <Button variant="outline">Lihat Jadwal Observasi</Button>
+          </Link>
+        )}
+        {reg.status === "observation_done" && (
+          <div className="px-4 py-2 bg-green-200/50 text-green-800 text-sm font-medium rounded-md flex items-center gap-2">
+            <Icon name="check_circle" className="text-sm" /> Observasi Selesai
+          </div>
+        )}
       </div>
 
       <PpdbStepper status={reg.status} />
@@ -145,8 +165,11 @@ function PpdbDashboardView({ reg }: { reg: any }) {
           {reg.status === "form_filling" && "Harap lengkapi formulir data calon siswa dan data orang tua/wali."}
           {reg.status === "documents_uploaded" && "Formulir lengkap! Silakan unggah dokumen persyaratan seperti KTP, Akte, dan KK."}
           {reg.status === "medical_pending" && "Silakan cetak surat pengantar IMC dan unggah hasil lab untuk melanjutkan."}
-          {reg.status === "medical_uploaded" && "Berkas Anda sedang dalam proses verifikasi oleh Tim PPDB."}
-          {["verification", "observation_scheduled", "observation_done"].includes(reg.status) && "Proses seleksi sedang berjalan. Harap pantau dashboard ini secara berkala."}
+          {reg.status === "medical_uploaded" && "Berkas Anda sedang dalam antrian. Tim PPDB akan segera memverifikasinya."}
+          {reg.status === "verification" && "Berkas Anda sedang diverifikasi oleh Tim PPDB."}
+          {reg.status === "observation_scheduled" && !reg.observationBooking && "Berkas Anda telah lolos! Silakan pilih jadwal observasi (tes dan wawancara) yang tersedia."}
+          {reg.status === "observation_scheduled" && reg.observationBooking && "Jadwal observasi telah dikonfirmasi. Harap hadir tepat waktu sesuai jadwal."}
+          {reg.status === "observation_done" && "Tahap observasi selesai. Harap pantau dashboard untuk pengumuman kelulusan."}
         </div>
       </Card>
     </div>
