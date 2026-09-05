@@ -46,6 +46,20 @@ export default async function ParentDashboardPage() {
     }
   });
 
+  
+  const serializedPpdbRegistrations = ppdbRegistrations.map(reg => {
+    if (reg.payment) {
+      return {
+        ...reg,
+        payment: {
+          ...reg.payment,
+          amount: Number(reg.payment.amount.toString())
+        }
+      }
+    }
+    return reg;
+  });
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
@@ -56,9 +70,10 @@ export default async function ParentDashboardPage() {
       </div>
 
       <ParentDashboardClient 
-        ppdbRegistrations={ppdbRegistrations} 
+        ppdbRegistrations={serializedPpdbRegistrations as any} 
         enrollments={enrollments} 
       />
+
     </div>
   );
 }

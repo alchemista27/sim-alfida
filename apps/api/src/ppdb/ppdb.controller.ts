@@ -4,6 +4,7 @@ import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { verifyPaymentSchema, VerifyPaymentDto } from '@sim/shared';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserRole } from '@sim/database';
 
 @Controller('ppdb')
@@ -12,7 +13,7 @@ export class PpdbController {
 
   @Post('verify-payment')
   @Roles(UserRole.admin_unit, UserRole.super_admin)
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UsePipes(new ZodValidationPipe(verifyPaymentSchema))
   async verifyPayment(@Body() body: VerifyPaymentDto) {
     const { registrationId, isApproved, reason } = body;
