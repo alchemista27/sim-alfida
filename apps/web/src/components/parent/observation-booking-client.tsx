@@ -19,7 +19,8 @@ export function ObservationBookingClient({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const router = useRouter();
 
-  const handleBooking = async () => {
+  const handleBooking = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!selectedId) return;
     setIsSubmitting(true);
     try {

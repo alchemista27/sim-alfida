@@ -28,4 +28,7 @@ export class StrategicDepartmentController {
 
   @Delete(':id')
   remove(@Param('id') id: string) { return this.service.remove(id); }
+
+  @Get('overview')
+  getDepartmentOverview() { return this.service.getDepartmentOverview(); }
 }

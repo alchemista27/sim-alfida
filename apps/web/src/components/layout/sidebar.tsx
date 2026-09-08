@@ -31,7 +31,8 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Dashboard Admin", href: "/admin/dashboard", icon: "dashboard" },
       { title: "Pantauan Akademik", href: "/admin/academic", icon: "analytics" },
-      { title: "Unit Pendidikan", href: "/admin/units", icon: "domain" },
+      { title: "Unit Pendidikan", href: "/admin/units", icon: "school" },
+      { title: "Unit Non-Pendidikan", href: "/admin/units-nondik", icon: "domain" },
       { title: "Manajemen Pengguna", href: "/admin/users", icon: "manage_accounts" },
       { title: "Identitas Yayasan", href: "/admin/foundation-settings", icon: "account_balance" },
     ],
@@ -159,8 +160,8 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const isObserver = userRoles.some((r: any) => r.role === "observer");
   const isTeacher = userRoles.some((r: any) => r.role === "guru");
   const isKaryawan = userRoles.some((r: any) => r.role === "karyawan");
-  const isAdminKepegawaian = userRoles.some((r: any) => r.role === "admin_kepegawaian");
-  const isAdminBpi = userRoles.some((r: any) => r.role === "admin_bpi");
+  const isAdminKepegawaian = userRoles.some((r: any) => r.role === "admin_bidang");
+  const isAdminBpi = userRoles.some((r: any) => r.role === "admin_bidang");
   const isMurobbi = userRoles.some((r: any) => r.role === "murobbi");
   const isParent = userRoles.some((r: any) => r.role === "orang_tua");
 
@@ -172,7 +173,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
         items: group.items.filter(item => item.title !== "Login" && item.title !== "Register")
       };
     }
-    // Filter department vs staff items for admin_kepegawaian
+    // Filter department vs staff items for admin_bidang
     if (group.title === "Manajemen Karyawan") {
       return {
         ...group,

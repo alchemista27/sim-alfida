@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { renderToStream } from "@react-pdf/renderer";
 import { ImcLetterDocument } from "@/lib/pdf/imc-letter";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+
 
 export async function GET(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: req.headers });
+  const user = session?.user;
 
   if (!user) {
     return new NextResponse("Unauthorized", { status: 401 });

@@ -21,8 +21,8 @@ export default async function ParentFormParentsPage() {
 
   let parentDataDefault = undefined;
   if (reg.parentData && reg.parentData.length > 0) {
-    const father = reg.parentData.find(p => p.type === "father");
-    const mother = reg.parentData.find(p => p.type === "mother");
+    const father = reg.parentData.find((p: any) => p.type === "father");
+    const mother = reg.parentData.find((p: any) => p.type === "mother");
     
     parentDataDefault = {
       father: father ? {

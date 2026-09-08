@@ -6,7 +6,7 @@ Sistem ini dirancang dengan arsitektur **multi-tenant** sehingga setiap unit pen
 
 ---
 
-## 📦 Modul Sistem (Modules)
+## Modul Sistem (Modules)
 
 - **Modul PPDB (Complete)** - Penerimaan Peserta Didik Baru
 - **Modul Akademik (Complete)** - Pengelolaan akademik, nilai, LHBS, ekskul
@@ -17,7 +17,7 @@ Sistem ini dirancang dengan arsitektur **multi-tenant** sehingga setiap unit pen
 
 ---
 
-## 📸 Antarmuka Layar (Screenshots)
+## Antarmuka Layar (Screenshots)
 
 ### Halaman Login
 ![Halaman Login](./assets/halaman-login.PNG)
@@ -27,25 +27,25 @@ Sistem ini dirancang dengan arsitektur **multi-tenant** sehingga setiap unit pen
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Framework:** Next.js (React · App Router)
-- **Database & Auth:** Supabase (PostgreSQL & Supabase Auth SSR)
-- **ORM:** Prisma (Connected via Supabase Transaction Pooler)
-- **Storage:** Cloudinary (Image & PDF storage)
+- **Database:** PostgreSQL (lokal)
+- **Auth:** Better Auth
+- **ORM:** Prisma
+- **Storage:** MinIO (S3-compatible local storage via Docker)
 - **Icons:** Material UI Icons (Google)
 - **Styling:** Tailwind CSS
 - **Validasi:** Zod
 
 ---
 
-## 🚀 Panduan Instalasi (Setup)
+## Panduan Instalasi (Setup)
 
 Prasyarat sebelum menjalankan proyek:
 - Node.js (v24+)
 - PNPM (*Package Manager*)
-- Kredensial akun Supabase (Database URL, Direct URL, Anon Key)
-- Kredensial akun Cloudinary
+- Docker (untuk menjalankan PostgreSQL dan MinIO lokal)
 
 ### 1. Klon Repositori & Instal Dependensi
 
@@ -55,8 +55,15 @@ cd sim-alfida
 pnpm install
 ```
 
-### 2. Atur Environment Variables
-Salin konfigurasi dari `.env.example` ke dalam `.env.local` dan isi kredensial Supabase Anda.
+### 2. Jalankan Infrastruktur Lokal (Docker)
+
+```bash
+docker compose up -d
+```
+Ini akan menjalankan PostgreSQL dan MinIO secara lokal.
+
+### 3. Atur Environment Variables
+Salin konfigurasi dari `.env.example` ke dalam `.env.local`.
 
 ```bash
 cp .env.example .env.local
@@ -64,19 +71,21 @@ cp .env.example .env.local
 
 Contoh konfigurasi `.env.local`:
 ```env
-# Database Connection (Supabase Transaction Pooler - Port 6543)
-DATABASE_URL="postgresql://...:6543/postgres?pgbouncer=true"
+# Database Connection (PostgreSQL Lokal)
+DATABASE_URL="postgresql://user:password@localhost:5432/sim_alfida"
 
-# Direct Database Connection (Untuk Prisma Migrations - Port 5432)
-DIRECT_URL="postgresql://...:5432/postgres"
+# Better Auth Configuration
+BETTER_AUTH_SECRET="your-secret-key-here"
 
-# Supabase Auth Configuration
-NEXT_PUBLIC_SUPABASE_URL="https://[YOUR_SUPABASE_ID].supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="[YOUR_ANON_KEY]"
+# MinIO Configuration
+MINIO_ENDPOINT="localhost"
+MINIO_PORT=9000
+MINIO_ACCESS_KEY="minioadmin"
+MINIO_SECRET_KEY="minioadmin"
 ```
 
-### 3. Migrasi Skema & Sinkronisasi Database
-Dorong skema Prisma ke database Supabase dan generate client Prisma.
+### 4. Migrasi Skema & Sinkronisasi Database
+Dorong skema Prisma ke database lokal dan generate client Prisma.
 
 ```bash
 npx prisma db push
@@ -103,7 +112,7 @@ Perintah lain yang tersedia:
 
 ---
 
-## 📁 Struktur Proyek (Project Structure)
+## Struktur Proyek (Project Structure)
 
 - `src/app/` - Halaman Next.js App Router
 - `src/components/` - Komponen React yang dapat digunakan ulang
@@ -114,7 +123,7 @@ Perintah lain yang tersedia:
 
 ---
 
-## 📂 Struktur Dokumentasi
+## Struktur Dokumentasi
 Untuk referensi desain dan alur bisnis sistem, kami menggunakan beberapa *single source of truth*:
 - `docs/PRD.md` — Product Requirements
 - `docs/DB-SCHEMA.md` — Skema basis data

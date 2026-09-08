@@ -1,4 +1,5 @@
-import { PrismaClient, UnitLevel, UserRole } from "@/generated/client";
+import * as bcrypt from 'bcryptjs';
+import { PrismaClient, UnitLevel, UserRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -90,18 +91,30 @@ async function main() {
     superAdminId = authData.user.id;
   }
 
+  
+  const hashedAdminPassword = await bcrypt.hash("4dmin4lfid4", 10);
   const superAdmin = await prisma.user.upsert({
     where: { email: "admin@alfida.com" },
-    update: { id: superAdminId },
+    update: { id: superAdminId, name: "Super Admin" },
     create: {
       id: superAdminId,
       fullName: "Super Admin",
+      name: "Super Admin",
       email: "admin@alfida.com",
       phone: "081234567890",
-      passwordHash: "managed_by_supabase",
+      passwordHash: "managed_by_better_auth",
+      emailVerified: true,
       isActive: true,
+      accounts: {
+        create: {
+          accountId: superAdminId,
+          providerId: "credential",
+          password: hashedAdminPassword
+        }
+      }
     },
   });
+
 
   // Assign Super Admin Role
   const existingRole = await prisma.userRoleAssignment.findFirst({
@@ -148,8 +161,8 @@ async function main() {
 
   // 5. Create Other Admin Roles
   const adminAccounts = [
-    { email: "hr@alfida.com", name: "Admin Kepegawaian", role: UserRole.admin_kepegawaian },
-    { email: "bpi@alfida.com", name: "Admin BPI", role: UserRole.admin_bpi },
+    { email: "hr@alfida.com", name: "Admin Kepegawaian", role: UserRole.admin_bidang },
+    { email: "bpi@alfida.com", name: "Admin BPI", role: UserRole.admin_bidang },
     { email: "unit@alfida.com", name: "Admin Unit", role: UserRole.admin_unit },
     { email: "ppdb@alfida.com", name: "Tim PPDB", role: UserRole.tim_ppdb },
     { email: "pendidikan@alfida.com", name: "Admin Bidang Pendidikan", role: UserRole.admin_bidang, deptName: "Bidang Pendidikan" },
@@ -181,18 +194,30 @@ async function main() {
     }
 
     if (!accId.startsWith("uuid-placeholder")) {
+      
+      const hashedUserPassword = await bcrypt.hash("Password123!", 10);
       const userRecord = await prisma.user.upsert({
         where: { email: acc.email },
-        update: { id: accId },
+        update: { id: accId, name: acc.name },
         create: {
           id: accId,
           fullName: acc.name,
+          name: acc.name,
           email: acc.email,
           phone: "08120000" + Math.floor(Math.random() * 9999),
-          passwordHash: "managed_by_supabase",
+          passwordHash: "managed_by_better_auth",
+          emailVerified: true,
           isActive: true,
+          accounts: {
+            create: {
+              accountId: accId,
+              providerId: "credential",
+              password: hashedUserPassword
+            }
+          }
         },
       });
+
 
       const existingAccRole = await prisma.userRoleAssignment.findFirst({
         where: { userId: userRecord.id, role: acc.role },

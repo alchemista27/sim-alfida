@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReEnrollmentForm } from "./form";
@@ -14,8 +15,8 @@ export default async function ReEnrollmentFormPage({
   params: Promise<{ enrollmentId: string }>;
 }) {
   const resolvedParams = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: await headers() });
+  const user = session?.user;
   if (!user) {
     redirect("/login");
   }

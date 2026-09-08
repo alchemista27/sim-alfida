@@ -675,6 +675,20 @@ Fokus utama meliputi pendaftaran ulang, manajemen mapel, input nilai (harian, AT
 | S39-04 | Deployment Setup | Deploy NestJS ke Render/Railway, update Vercel env vars | 6 jam | ✅ Selesai |
 | S39-05 | Dokumentasi Final | Update README, AGENTS.md, dan runbook deployment | 4 jam | ✅ Selesai |
 
+---
+
+## Sprint 40 — Migrasi Infrastruktur ke Stack Lokal
+**Durasi:** 1 minggu
+**Goal:** Menghapus sepenuhnya dependensi Supabase dan Cloudinary, beralih ke stack lokal/self-hosted.
+
+### Backlog
+| ID | Task | Detail | Estimasi | Status |
+|----|------|--------|----------|--------|
+| S40-01 | Setup Docker Compose | Konfigurasi PostgreSQL dan MinIO (S3-compatible) lokal | 6 jam | ✅ Selesai |
+| S40-02 | Migrasi Auth | Ganti Supabase Auth dengan Better Auth (session-based via Prisma) | 12 jam | ✅ Selesai |
+| S40-03 | Migrasi Storage | Update service upload dari Cloudinary ke MinIO via AWS SDK | 8 jam | ✅ Selesai |
+| S40-04 | Update Dokumentasi | Update README, PRD, TDD, DB-SCHEMA untuk merefleksikan perubahan arsitektur | 4 jam | ✅ Selesai |
+
 
 ---
 

@@ -1,82 +1,39 @@
 "use server";
-
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { apiFetch } from "@/lib/api";
 
-export async function createClass(data: {
-  unitId: string;
-  academicYearId: string;
-  name: string;
-  capacity: number;
-}) {
+export async function createClass(data: any) {
   try {
-    const newClass = await prisma.class.create({
-      data: {
-        unitId: data.unitId,
-        academicYearId: data.academicYearId,
-        name: data.name,
-        capacity: data.capacity,
-      },
+    const newClass = await apiFetch("/academic/classes", {
+      method: "POST",
+      body: JSON.stringify(data)
     });
-
-    revalidatePath("/admin/ppdb/classes");
+    revalidatePath("/unit/ppdb-classes");
     return { success: true, data: newClass };
-  } catch (error) {
-    console.error("Failed to create class:", error);
-    return { success: false, error: "Gagal membuat kelas baru" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal membuat kelas baru" };
   }
 }
 
-export async function updateClass(
-  id: string,
-  data: {
-    name?: string;
-    capacity?: number;
-  }
-) {
+export async function updateClass(id: string, data: any) {
   try {
-    if (data.capacity !== undefined) {
-      const current = await prisma.class.findUnique({
-        where: { id },
-        select: { assigned: true },
-      });
-      if (current && data.capacity < current.assigned) {
-        return { success: false, error: "Kapasitas kelas tidak boleh lebih kecil dari jumlah siswa yang sudah masuk" };
-      }
-    }
-
-    const updated = await prisma.class.update({
-      where: { id },
-      data,
+    const updated = await apiFetch(`/academic/classes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data)
     });
-
-    revalidatePath("/admin/ppdb/classes");
+    revalidatePath("/unit/ppdb-classes");
     return { success: true, data: updated };
-  } catch (error) {
-    console.error("Failed to update class:", error);
-    return { success: false, error: "Gagal memperbarui kelas" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal memperbarui kelas" };
   }
 }
 
 export async function deleteClass(id: string) {
   try {
-    const current = await prisma.class.findUnique({
-      where: { id },
-      select: { assigned: true },
-    });
-    
-    if (current && current.assigned > 0) {
-      return { success: false, error: "Kelas tidak bisa dihapus karena sudah ada siswa di dalamnya" };
-    }
-
-    await prisma.class.delete({
-      where: { id },
-    });
-
-    revalidatePath("/admin/ppdb/classes");
+    await apiFetch(`/academic/classes/${id}`, { method: "DELETE" });
+    revalidatePath("/unit/ppdb-classes");
     return { success: true };
-  } catch (error) {
-    console.error("Failed to delete class:", error);
-    return { success: false, error: "Gagal menghapus kelas" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal menghapus kelas" };
   }
 }

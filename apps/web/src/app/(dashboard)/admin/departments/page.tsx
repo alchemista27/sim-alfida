@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth-guard";
 import { UserRole } from "@sim/database";
 
 export default async function AdminDepartmentsPage() {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
+  await requireRole([UserRole.super_admin, UserRole.admin_bidang]);
 
   const departments = await getDepartments();
   const units = await prisma.unit.findMany({ orderBy: { name: "asc" } });

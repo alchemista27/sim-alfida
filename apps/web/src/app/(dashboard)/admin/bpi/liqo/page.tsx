@@ -1,11 +1,15 @@
 import { getLiqoGroups, getPotentialMurobbis, getPotentialMutarobbis, getLiqoAttendanceStats, getGlobalMutabaahStats } from "@/actions/bpi";
 import { LiqoClient } from "./liqo-client";
+import { requireRole } from "@/lib/auth-guard";
+import { UserRole } from "@sim/database";
 
 export const metadata = {
   title: "Manajemen Liqo | SIM-Alfida",
 };
 
 export default async function LiqoPage() {
+  await requireRole([UserRole.super_admin, UserRole.admin_bidang]);
+
   const date = new Date();
   const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
   const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);

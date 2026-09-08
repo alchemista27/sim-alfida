@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@sim/database";
 
@@ -8,8 +9,8 @@ import { UserRole } from "@sim/database";
  * Returns null if the user is super_admin without a scoped unit.
  */
 export async function getSessionUnitId(): Promise<string | null> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: await headers() });
+  const user = session?.user;
 
   if (!user) return null;
 
@@ -26,7 +27,8 @@ export async function getSessionUnitId(): Promise<string | null> {
   const isSuperAdmin = roles.some((r) => r.role === UserRole.super_admin);
   if (isSuperAdmin) return null;
 
-  const adminRole = roles.find((r) => r.role === UserRole.admin_unit);
+  // Find an admin_unit role that actually has a unitId attached to it
+  const adminRole = roles.find((r) => (r.role === UserRole.admin_unit || r.role === UserRole.admin_unit_nondik) && r.unitId);
   return adminRole?.unitId ?? null;
 }
 

@@ -2,13 +2,17 @@ import { getGpsConfigs, getHolidays } from "@/actions/attendance-config";
 import { prisma } from "@/lib/prisma";
 import SettingsClient from "./settings-client";
 import { getCurrentUser } from "@/actions/user";
+import { requireRole } from "@/lib/auth-guard";
+import { UserRole } from "@sim/database";
 
 export default async function AttendanceSettingsPage() {
+  await requireRole([UserRole.super_admin, UserRole.admin_bidang, UserRole.admin_unit, UserRole.admin_unit_nondik]);
+  
   const user = await getCurrentUser();
   if (!user) return null;
 
   const isSuperAdmin = user.roles.some((r: any) => r.role === "super_admin");
-  const isAdminKepegawaian = user.roles.some((r: any) => r.role === "admin_kepegawaian");
+  const isAdminKepegawaian = user.roles.some((r: any) => r.role === "admin_bidang");
   
   // Ambil ID unit yang dikepalai oleh user ini
   const adminUnitRoleIds = user.roles

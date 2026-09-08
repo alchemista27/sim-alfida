@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
 import { UserRole } from "@sim/database";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { UnitSppClient } from "./client";
 
 export const metadata = {
@@ -10,8 +11,8 @@ export const metadata = {
 
 export default async function UnitSppPage() {
   await requireRole([UserRole.admin_unit]);
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: await headers() });
+  const user = session?.user;
   if (!user) return <div>Unauthorized</div>;
   
   const userRole = await prisma.userRoleAssignment.findFirst({

@@ -47,8 +47,9 @@ Platform dibangun dengan arsitektur **multi-tenant** yang memungkinkan setiap un
 | **Frontend**     | Next.js (React · App Router) — `apps/web`         |
 | **Backend**      | NestJS (REST API) — `apps/api`                    |
 | **Bahasa**       | TypeScript (strict, no `any`)                     |
-| **Auth**         | Supabase Auth (SSR) — Identity Provider only      |
-| **Database**     | PostgreSQL (Docker lokal / Supabase)               |
+| **Auth**         | Better Auth — session-based, Prisma adapter       |
+| **Database**     | PostgreSQL (lokal)                                |
+| **Storage**      | MinIO (S3-compatible object storage via Docker)   |
 | **ORM**          | Prisma (dikelola di `packages/database`)           |
 | **Styling**      | Tailwind CSS                                      |
 | **Icons**        | Material UI Icons (tanpa emoji)                   |

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { getCurrentUser } from "@/actions/user";
 
 interface AuthContextType {
@@ -14,6 +14,8 @@ const AuthContext = createContext<AuthContextType>({ user: null, status: "loadin
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [status, setStatus] = useState<"loading" | "authenticated" | "unauthenticated">("loading");
+
+  const { data: session, isPending } = authClient.useSession();
 
   const fetchUser = async () => {
     try {
@@ -33,24 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const supabase = createClient();
+    if (isPending) {
+      setStatus("loading");
+      return;
+    }
     
-    // Initial fetch
-    fetchUser();
-
-    // Listen to changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        // Refetch user to get proper roles from DB
-        fetchUser();
-      } else {
-        setUser(null);
-        setStatus("unauthenticated");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (session?.user) {
+      fetchUser();
+    } else {
+      setUser(null);
+      setStatus("unauthenticated");
+    }
+  }, [session, isPending]);
 
   return <AuthContext.Provider value={{ user, status }}>{children}</AuthContext.Provider>;
 }

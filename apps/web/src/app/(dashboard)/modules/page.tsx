@@ -79,7 +79,7 @@ export default async function ModulesPage() {
   
   if (roles.some((r: any) => r.role === "super_admin")) {
     dashboardHref = "/admin/dashboard";
-  } else if (roles.some((r: any) => r.role === "admin_kepegawaian")) {
+  } else if (roles.some((r: any) => r.role === "admin_bidang")) {
     dashboardHref = "/admin/hr/dashboard";
   } else if (roles.some((r: any) => r.role === "admin_unit" || r.role === "tim_ppdb")) {
     dashboardHref = "/unit/dashboard";
@@ -87,16 +87,16 @@ export default async function ModulesPage() {
     dashboardHref = "/teacher/dashboard";
   } else if (roles.some((r: any) => r.role === "karyawan")) {
     dashboardHref = "/staff/attendance";
-  } else if (roles.some((r: any) => r.role === "admin_bpi")) {
+  } else if (roles.some((r: any) => r.role === "admin_bidang")) {
     dashboardHref = "/admin/bpi/liqo";
   } else if (roles.some((r: any) => r.role === "admin_bidang")) {
     dashboardHref = "/admin/strategic";
   }
 
   let hrHref = "/staff/attendance";
-  if (roles.some((r: any) => r.role === "super_admin" || r.role === "admin_kepegawaian")) {
+  if (roles.some((r: any) => r.role === "super_admin" || r.role === "admin_bidang")) {
     hrHref = "/admin/hr/dashboard";
-  } else if (roles.some((r: any) => r.role === "admin_bpi")) {
+  } else if (roles.some((r: any) => r.role === "admin_bidang")) {
     hrHref = "/admin/bpi/liqo";
   } else if (roles.some((r: any) => r.role === "admin_bidang")) {
     hrHref = "/admin/strategic";

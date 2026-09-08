@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
 import { UserRole } from "@sim/database";
 import { UnitPromotionClient } from "./client";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const metadata = {
   title: "Kenaikan Kelas | SIM-Alfida",
@@ -10,8 +11,8 @@ export const metadata = {
 
 export default async function UnitPromotionPage() {
   await requireRole([UserRole.admin_unit]);
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: await headers() });
+  const user = session?.user;
   if (!user) return <div>Unauthorized</div>;
 
   const activeYear = await prisma.academicYear.findFirst({

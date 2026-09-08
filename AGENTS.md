@@ -9,9 +9,9 @@ This file gives AI coding agents the context they need to work effectively in th
 - **Monorepo**: Turborepo (pnpm workspaces)
 - **Frontend**: Next.js (React · App Router) — `apps/web`
 - **Backend**: NestJS (REST API) — `apps/api`
-- **Auth**: Supabase Auth (SSR) — hanya untuk autentikasi
-- **Database**: PostgreSQL (Docker lokal atau Supabase) — Prisma ORM di `packages/database`
-- **Storage**: Cloudinary (Image & PDF storage)
+- **Auth**: Better Auth — session-based auth via Prisma adapter
+- **Database**: PostgreSQL (lokal) — Prisma ORM di `packages/database`
+- **Storage**: MinIO (S3-compatible local storage via Docker)
 - **Icons**: Material UI Icons (Google) — Never use emojis for icons.
 
 ## Setup
@@ -52,7 +52,7 @@ This file gives AI coding agents the context they need to work effectively in th
 
 - **Never commit secrets** — No API keys, tokens, or credentials in code. Use .env.local (gitignored) and .env.example for templates.
 - **Validate all external input** — Schema-validate request bodies, URL params, and untrusted JSON with Zod or Valibot.
-- **Server-side auth checks** — Every NestJS endpoint must use Guards for authentication AND authorization. Don't rely on client guards. Next.js middleware hanya untuk redirect unauthenticated users.
+- **Server-side auth checks** — Every NestJS endpoint must use Guards for authentication AND authorization. Don't rely on client guards. Next.js middleware hanya untuk redirect unauthenticated users. Verifikasi dilakukan via Better Auth session checks.
 
 ## Pull Requests & Commits
 

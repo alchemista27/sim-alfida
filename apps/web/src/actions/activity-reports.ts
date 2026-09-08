@@ -1,72 +1,20 @@
 "use server";
-
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/actions/user";
-import { UserRole, ReportType } from "@sim/database";
-import { requireRole } from "@/lib/auth-guard";
-import { ActivityReportSchema, type ActivityReportInput } from "@sim/shared";
+import { revalidatePath } from "next/cache";
+import { apiFetch } from "@/lib/api";
+import { ActivityReportInput } from "@sim/shared";
+import { ReportType } from "@sim/database";
 
 export async function getActivityReports(departmentId?: string, type?: ReportType) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error("Unauthorized");
-  await requireRole([UserRole.super_admin, UserRole.admin_bidang]);
-
-  let allowedDepartmentIds: string[] = [];
-
-  if (user.roles.some(r => r.role === UserRole.super_admin)) {
-    if (departmentId) {
-      allowedDepartmentIds = [departmentId];
-    } else {
-      const allDepts = await prisma.department.findMany({ select: { id: true } });
-      allowedDepartmentIds = allDepts.map(d => d.id);
-    }
-  } else if (user.roles.some(r => r.role === UserRole.admin_bidang)) {
-    const userDepts = await prisma.departmentAdmin.findMany({
-      where: { userId: user.id },
-      select: { departmentId: true }
-    });
-    allowedDepartmentIds = userDepts.map(d => d.departmentId);
-    if (departmentId && allowedDepartmentIds.includes(departmentId)) {
-      allowedDepartmentIds = [departmentId];
-    } else if (departmentId) {
-      throw new Error("Unauthorized access to department");
-    }
-  }
-
-  return await prisma.activityReport.findMany({
-    where: {
-      departmentId: { in: allowedDepartmentIds },
-      ...(type && { type }),
-    },
-    include: {
-      department: { select: { name: true } },
-      submittedBy: { select: { fullName: true } }
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  let url = "/bpi/reports?";
+  if (departmentId) url += `dept=${departmentId}&`;
+  if (type) url += `type=${type}&`;
+  return apiFetch(url);
 }
 
 export async function createActivityReport(data: ActivityReportInput) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error("Unauthorized");
-  await requireRole([UserRole.super_admin, UserRole.admin_bidang]);
-
-  const parsed = ActivityReportSchema.parse(data);
-
-  return await prisma.activityReport.create({
-    data: {
-      ...parsed,
-      submittedById: user.id,
-    }
-  });
+  return apiFetch("/bpi/reports", { method: "POST", body: JSON.stringify(data) });
 }
 
 export async function deleteActivityReport(id: string) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error("Unauthorized");
-  await requireRole([UserRole.super_admin, UserRole.admin_bidang]);
-
-  return await prisma.activityReport.delete({
-    where: { id }
-  });
+  return apiFetch(`/bpi/reports/${id}`, { method: "DELETE" });
 }

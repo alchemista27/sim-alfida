@@ -8,9 +8,10 @@ import { useRouter } from "next/navigation";
 
 interface AssignAdminModalProps {
   unitId: string;
+  isNondik?: boolean;
 }
 
-export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
+export function AssignAdminModal({ unitId, isNondik = false }: AssignAdminModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [userId, setUserId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,7 +50,7 @@ export function AssignAdminModal({ unitId }: AssignAdminModalProps) {
     setError(null);
     setIsSubmitting(true);
     try {
-      await assignAdminUnitAction({ userId, unitId });
+      await assignAdminUnitAction({ userId, unitId, isNondik });
       setIsOpen(false);
       setUserId("");
       setSearchQuery("");

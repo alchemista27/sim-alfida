@@ -1,7 +1,6 @@
 "use server";
-
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { apiFetch } from "@/lib/api";
 
 export async function createSchedule(data: {
   academicYearId: string;
@@ -11,21 +10,14 @@ export async function createSchedule(data: {
   quota: number;
 }) {
   try {
-    const schedule = await prisma.observationSchedule.create({
-      data: {
-        academicYearId: data.academicYearId,
-        date: data.date,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        quota: data.quota,
-      },
+    const schedule = await apiFetch("/ppdb/schedules", {
+      method: "POST",
+      body: JSON.stringify(data)
     });
-
     revalidatePath("/admin/ppdb/observations");
     return { success: true, data: schedule };
-  } catch (error) {
-    console.error("Failed to create schedule:", error);
-    return { success: false, error: "Gagal membuat jadwal observasi" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal membuat jadwal observasi" };
   }
 }
 
@@ -39,50 +31,23 @@ export async function updateSchedule(
   }
 ) {
   try {
-    // Check if new quota is less than already booked
-    if (data.quota !== undefined) {
-      const current = await prisma.observationSchedule.findUnique({
-        where: { id },
-        select: { booked: true },
-      });
-      if (current && data.quota < current.booked) {
-        return { success: false, error: "Kuota tidak boleh lebih kecil dari jumlah yang sudah mendaftar" };
-      }
-    }
-
-    const schedule = await prisma.observationSchedule.update({
-      where: { id },
-      data,
+    const schedule = await apiFetch(`/ppdb/schedules/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data)
     });
-
     revalidatePath("/admin/ppdb/observations");
     return { success: true, data: schedule };
-  } catch (error) {
-    console.error("Failed to update schedule:", error);
-    return { success: false, error: "Gagal memperbarui jadwal observasi" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal memperbarui jadwal observasi" };
   }
 }
 
 export async function deleteSchedule(id: string) {
   try {
-    // Prevent delete if already booked
-    const current = await prisma.observationSchedule.findUnique({
-      where: { id },
-      select: { booked: true },
-    });
-    
-    if (current && current.booked > 0) {
-      return { success: false, error: "Jadwal tidak bisa dihapus karena sudah ada pendaftar" };
-    }
-
-    await prisma.observationSchedule.delete({
-      where: { id },
-    });
-
+    await apiFetch(`/ppdb/schedules/${id}`, { method: "DELETE" });
     revalidatePath("/admin/ppdb/observations");
     return { success: true };
-  } catch (error) {
-    console.error("Failed to delete schedule:", error);
-    return { success: false, error: "Gagal menghapus jadwal observasi" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal menghapus jadwal observasi" };
   }
 }

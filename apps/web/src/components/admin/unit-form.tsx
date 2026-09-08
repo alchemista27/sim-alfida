@@ -12,9 +12,10 @@ import { useRouter } from "next/navigation";
 interface UnitFormProps {
   initialData?: UnitInput & { id?: string };
   onSuccess?: () => void;
+  isNondik?: boolean;
 }
 
-export function UnitForm({ initialData, onSuccess }: UnitFormProps) {
+export function UnitForm({ initialData, onSuccess, isNondik = false }: UnitFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const isEditing = !!initialData?.id;
@@ -30,7 +31,7 @@ export function UnitForm({ initialData, onSuccess }: UnitFormProps) {
     defaultValues: initialData || {
       name: "",
       slug: "",
-      level: "tk",
+      level: isNondik ? "kantor_yayasan" : "tk",
       isActive: true,
     },
   });
@@ -51,12 +52,12 @@ export function UnitForm({ initialData, onSuccess }: UnitFormProps) {
     setError(null);
     try {
       if (isEditing) {
-        await updateUnitAction(initialData.id!, data);
+        await updateUnitAction(initialData!.id!, data);
       } else {
         await createUnitAction(data);
       }
       if (onSuccess) onSuccess();
-      else router.push("/admin/units");
+      else router.push(isNondik ? "/admin/units-nondik" : "/admin/units");
     } catch (e: any) {
       setError(e.message || "Terjadi kesalahan saat menyimpan data unit.");
     }
@@ -72,14 +73,14 @@ export function UnitForm({ initialData, onSuccess }: UnitFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Nama Unit Pendidikan
+          {isNondik ? "Nama Kantor / Unit" : "Nama Unit Pendidikan"}
         </label>
         <div className="flex gap-2">
           <input
             type="text"
             {...register("name")}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-tertiary"
-            placeholder="Contoh: TK Islam Terpadu Auladuna 1"
+            placeholder={isNondik ? "Contoh: Yayasan Alfida, Biro Logistik" : "Contoh: TK Islam Terpadu Auladuna 1"}
           />
           {!isEditing && (
             <Button type="button" variant="outline" onClick={generateSlug}>
@@ -103,7 +104,7 @@ export function UnitForm({ initialData, onSuccess }: UnitFormProps) {
           className={`w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-tertiary ${
             isEditing ? "bg-gray-100 text-gray-500" : ""
           }`}
-          placeholder="tk-auladuna-1"
+          placeholder={isNondik ? "yayasan-alfida" : "tk-auladuna-1"}
         />
         {errors.slug && (
           <p className="mt-1 text-xs text-red-500">{errors.slug.message}</p>
@@ -112,17 +113,26 @@ export function UnitForm({ initialData, onSuccess }: UnitFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Jenjang
+          {isNondik ? "Jenis Unit" : "Jenjang"}
         </label>
         <select
           {...register("level")}
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-tertiary bg-white"
         >
-          <option value="tk">TK</option>
-          <option value="sd">SD</option>
-          <option value="smp">SMP</option>
-          <option value="sma">SMA</option>
-          <option value="pesantren">Pesantren</option>
+          {isNondik ? (
+            <>
+              <option value="kantor_yayasan">Kantor Pusat Yayasan</option>
+              <option value="non_pendidikan">Unit Usaha / Lainnya</option>
+            </>
+          ) : (
+            <>
+              <option value="tk">TK</option>
+              <option value="sd">SD</option>
+              <option value="smp">SMP</option>
+              <option value="sma">SMA</option>
+              <option value="pesantren">Pesantren</option>
+            </>
+          )}
         </select>
         {errors.level && (
           <p className="mt-1 text-xs text-red-500">{errors.level.message}</p>

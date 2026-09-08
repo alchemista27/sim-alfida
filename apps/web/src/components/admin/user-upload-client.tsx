@@ -60,9 +60,9 @@ export function UserUploadClient() {
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={loading}
-        className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50 flex items-center shadow-sm"
+        className="bg-tertiary hover:opacity-90 text-on-tertiary px-[20px] py-[12px] rounded text-sm font-medium transition disabled:opacity-50 flex items-center shadow-sm"
       >
-        <span className="material-symbols-rounded mr-2">upload_file</span>
+        <span className="material-symbols-rounded mr-2 text-[20px]">upload_file</span>
         {loading ? "Memproses..." : "Upload Pegawai"}
       </button>
     </div>

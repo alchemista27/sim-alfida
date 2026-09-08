@@ -32,4 +32,19 @@ export class StrategicDepartmentService {
   async remove(id: string) {
     return this.prisma.department.delete({ where: { id } });
   }
+
+  async getDepartmentOverview() {
+    const workPrograms = await this.prisma.workProgram.groupBy({
+      by: ['status'],
+      _count: { id: true }
+    });
+    let planned = 0, ongoing = 0, completed = 0;
+    workPrograms.forEach((wp: any) => {
+      if (wp.status === 'planned') planned = wp._count.id;
+      if (wp.status === 'ongoing') ongoing = wp._count.id;
+      if (wp.status === 'completed') completed = wp._count.id;
+    });
+    const totalReports = await this.prisma.activityReport.count();
+    return { planned, ongoing, completed, totalReports };
+  }
 }

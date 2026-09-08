@@ -11,6 +11,9 @@ export default async function AdminUnitsPage() {
   await requireRole([UserRole.super_admin]);
 
   const unitsRaw = await prisma.unit.findMany({
+    where: {
+      level: { notIn: ['kantor_yayasan', 'non_pendidikan'] }
+    },
     include: {
       academicYears: {
         where: { ppdbActive: true },

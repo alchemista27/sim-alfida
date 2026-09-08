@@ -1,40 +1,28 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { apiFetch } from "@/lib/api";
 
 export async function getCurrentUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
+  const session = await auth.api.getSession({ headers: await headers() });
+  const user = session?.user;
   if (!user) return null;
 
-  // Coba ambil dari database berdasarkan ID
-  let dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    include: {
-      roles: {
-        include: { unit: true }
-      }
-    }
-  });
-
-  // Fallback: Jika ID Supabase berbeda dengan ID Prisma (akibat re-seed database),
-  // cari berdasarkan email.
-  if (!dbUser && user.email) {
-    dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      include: {
-        roles: {
-        include: { unit: true }
-      }
-      }
-    });
+  // Fetch enriched user (with roles) from NestJS
+  try {
+    const dbUser = await apiFetch("/auth/me");
+    return {
+      ...user,
+      name: dbUser?.fullName || user.name || user.email?.split("@")[0],
+      fullName: dbUser?.fullName,
+      roles: dbUser?.roles || [{ role: "orang_tua" }]
+    };
+  } catch {
+    return {
+      ...user,
+      name: user.name || user.email?.split("@")[0],
+      roles: [{ role: "orang_tua" }]
+    };
   }
-
-  return {
-    ...user,
-    name: dbUser?.fullName || user.user_metadata?.full_name || user.email?.split("@")[0],
-    roles: dbUser?.roles || [{ role: "orang_tua" }]
-  };
 }

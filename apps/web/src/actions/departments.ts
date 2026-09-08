@@ -1,112 +1,35 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@sim/database";
 import { revalidatePath } from "next/cache";
-import { DepartmentSchema, AssignDepartmentAdminSchema, type DepartmentInput, type AssignDepartmentAdminInput } from "@sim/shared";
+import { type DepartmentInput, type AssignDepartmentAdminInput } from "@sim/shared";
+import { apiFetch } from "@/lib/api";
 
 export async function getDepartments() {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian]);
-  
-  return await prisma.department.findMany({
-    include: {
-      unit: true,
-      admins: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-            }
-          }
-        }
-      }
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  return apiFetch("/hr/departments", { method: "GET" });
 }
 
 export async function upsertDepartment(data: DepartmentInput) {
-  await requireRole([UserRole.super_admin]);
-  const parsed = DepartmentSchema.parse(data);
-
-  if (parsed.id) {
-    await prisma.department.update({
-      where: { id: parsed.id },
-      data: {
-        name: parsed.name,
-        description: parsed.description,
-        unitId: parsed.unitId,
-        isActive: parsed.isActive,
-      },
-    });
-  } else {
-    await prisma.department.create({
-      data: {
-        name: parsed.name,
-        description: parsed.description,
-        unitId: parsed.unitId,
-        isActive: parsed.isActive,
-      },
-    });
-  }
-
+  await apiFetch("/hr/departments", {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
   revalidatePath("/admin/departments");
 }
 
 export async function deleteDepartment(id: string) {
-  await requireRole([UserRole.super_admin]);
-  await prisma.department.delete({ where: { id } });
+  await apiFetch(`/hr/departments/${id}`, { method: "DELETE" });
   revalidatePath("/admin/departments");
 }
 
 export async function assignDepartmentAdmin(data: AssignDepartmentAdminInput) {
-  await requireRole([UserRole.super_admin]);
-  const parsed = AssignDepartmentAdminSchema.parse(data);
-
-  // Periksa jika user sudah punya role admin_bidang, jika belum tambahkan
-  const existingRole = await prisma.userRoleAssignment.findFirst({
-    where: {
-      userId: parsed.userId,
-      role: UserRole.admin_bidang,
-    }
+  await apiFetch("/hr/departments/assign-admin", {
+    method: "POST",
+    body: JSON.stringify(data)
   });
-
-  if (!existingRole) {
-    await prisma.userRoleAssignment.create({
-      data: {
-        userId: parsed.userId,
-        role: UserRole.admin_bidang,
-      }
-    });
-  }
-
-  // Buat mapping admin ke departemen
-  await prisma.departmentAdmin.upsert({
-    where: {
-      departmentId_userId: {
-        departmentId: parsed.departmentId,
-        userId: parsed.userId,
-      }
-    },
-    update: {},
-    create: {
-      departmentId: parsed.departmentId,
-      userId: parsed.userId,
-    }
-  });
-
   revalidatePath("/admin/departments");
 }
 
 export async function removeDepartmentAdmin(departmentId: string, userId: string) {
-  await requireRole([UserRole.super_admin]);
-  await prisma.departmentAdmin.delete({
-    where: {
-      departmentId_userId: { departmentId, userId }
-    }
-  });
+  await apiFetch(`/hr/departments/${departmentId}/admin/${userId}`, { method: "DELETE" });
   revalidatePath("/admin/departments");
 }

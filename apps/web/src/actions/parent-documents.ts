@@ -1,37 +1,22 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { RegistrationStatus } from "@sim/database";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { apiFetch } from "@/lib/api";
+import { getActiveRegistration } from "./parent";
+import { RegistrationStatus } from "@sim/database";
 
-async function getParentUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  return { id: user.id };
-}
-
-// ── S5-04: Upload Required Documents (Batch) ──
 export async function uploadRequiredDocumentsAction(formData: FormData) {
-  const user = await getParentUser();
   const registrationId = formData.get("registrationId") as string;
-  
   if (!registrationId) throw new Error("Data tidak lengkap.");
 
-  const reg = await prisma.registration.findFirst({
-    where: { id: registrationId, parentId: user.id },
-    include: { academicYear: { include: { unit: true } } },
-  });
-
-  if (!reg || (reg.status !== RegistrationStatus.documents_uploaded && reg.status !== RegistrationStatus.medical_pending)) {
+  const reg = await getActiveRegistration();
+  if (!reg || reg.id !== registrationId || (reg.status !== RegistrationStatus.documents_uploaded && reg.status !== RegistrationStatus.medical_pending)) {
     throw new Error("Transisi status tidak diizinkan saat ini.");
   }
 
   const fileKeys = ["photo", "father_id", "mother_id", "birth_certificate", "family_card", "school_certificate"];
   const uploadPromises: Promise<any>[] = [];
-
   const { uploadToCloudinary } = await import("@/lib/cloudinary");
 
   for (const key of fileKeys) {
@@ -47,32 +32,17 @@ export async function uploadRequiredDocumentsAction(formData: FormData) {
             `${key}-${Date.now()}`
           );
           
-          const existingDoc = await prisma.document.findFirst({
-            where: { registrationId, type: key as any }
+          await apiFetch("/ppdb/documents/upsert", {
+            method: "POST",
+            body: JSON.stringify({
+              registrationId,
+              type: key,
+              fileUrl: uploadedUrl,
+              fileName: file.name,
+              fileSize: file.size,
+              mimeType: file.type,
+            })
           });
-          
-          if (existingDoc) {
-            await prisma.document.update({
-              where: { id: existingDoc.id },
-              data: {
-                fileUrl: uploadedUrl,
-                fileName: file.name,
-                fileSize: file.size,
-                mimeType: file.type,
-              }
-            });
-          } else {
-            await prisma.document.create({
-              data: {
-                registrationId,
-                type: key as any,
-                fileUrl: uploadedUrl,
-                fileName: file.name,
-                fileSize: file.size,
-                mimeType: file.type,
-              }
-            });
-          }
         })()
       );
     }
@@ -80,36 +50,20 @@ export async function uploadRequiredDocumentsAction(formData: FormData) {
 
   await Promise.all(uploadPromises);
 
-  // Check if all 5 required docs exist (school_certificate is optional for some)
-  const docsCount = await prisma.document.count({
-    where: { registrationId }
-  });
-
-  if (docsCount >= 5) {
-    await prisma.registration.update({
-      where: { id: registrationId },
-      data: { status: RegistrationStatus.medical_pending },
-    });
-  }
+  await apiFetch(`/ppdb/documents/finalize/${registrationId}`, { method: "POST" });
 
   revalidatePath("/parent/documents");
   redirect("/parent/medical");
 }
 
-// ── S5-07: Upload Medical Result (IMC) ──
 export async function uploadMedicalResultAction(formData: FormData) {
-  const user = await getParentUser();
   const registrationId = formData.get("registrationId") as string;
   const file = formData.get("file") as File;
   
   if (!registrationId || !file) throw new Error("Data tidak lengkap.");
 
-  const reg = await prisma.registration.findFirst({
-    where: { id: registrationId, parentId: user.id },
-    include: { academicYear: { include: { unit: true } } },
-  });
-
-  if (!reg || reg.status !== RegistrationStatus.medical_pending) {
+  const reg = await getActiveRegistration();
+  if (!reg || reg.id !== registrationId || reg.status !== RegistrationStatus.medical_pending) {
     throw new Error("Transisi status tidak valid untuk upload IMC.");
   }
 
@@ -123,46 +77,25 @@ export async function uploadMedicalResultAction(formData: FormData) {
     `medical_result-${Date.now()}`
   );
 
-  const existingDoc = await prisma.document.findFirst({
-    where: { registrationId, type: "medical_result" as any }
+  await apiFetch("/ppdb/documents/upsert", {
+    method: "POST",
+    body: JSON.stringify({
+      registrationId,
+      type: "medical_result",
+      fileUrl: uploadedUrl,
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+    })
   });
 
-  if (existingDoc) {
-    await prisma.document.update({
-      where: { id: existingDoc.id },
-      data: {
-        fileUrl: uploadedUrl,
-        fileName: file.name,
-        fileSize: file.size,
-        mimeType: file.type,
-      }
-    });
-  } else {
-    await prisma.document.create({
-      data: {
-        registrationId,
-        type: "medical_result" as any,
-        fileUrl: uploadedUrl,
-        fileName: file.name,
-        fileSize: file.size,
-        mimeType: file.type,
-      }
-    });
-  }
-
-  // Transition to verification
-  await prisma.registration.update({
-    where: { id: registrationId },
-    data: { status: RegistrationStatus.verification },
-  });
+  await apiFetch(`/ppdb/documents/medical-done/${registrationId}`, { method: "POST" });
 
   revalidatePath("/parent/medical");
   redirect("/parent/dashboard");
 }
 
-// ── NEW: Single Document Upload to avoid client timeout ──
 export async function uploadSingleDocumentAction(formData: FormData) {
-  const user = await getParentUser();
   const registrationId = formData.get("registrationId") as string;
   const key = formData.get("key") as string;
   const file = formData.get("file") as File | null;
@@ -171,12 +104,8 @@ export async function uploadSingleDocumentAction(formData: FormData) {
     throw new Error("Data tidak lengkap untuk file: " + key);
   }
 
-  const reg = await prisma.registration.findFirst({
-    where: { id: registrationId, parentId: user.id },
-    include: { academicYear: { include: { unit: true } } },
-  });
-
-  if (!reg || (reg.status !== RegistrationStatus.documents_uploaded && reg.status !== RegistrationStatus.medical_pending)) {
+  const reg = await getActiveRegistration();
+  if (!reg || reg.id !== registrationId || (reg.status !== RegistrationStatus.documents_uploaded && reg.status !== RegistrationStatus.medical_pending)) {
     throw new Error("Transisi status tidak diizinkan saat ini.");
   }
 
@@ -190,57 +119,23 @@ export async function uploadSingleDocumentAction(formData: FormData) {
     `${key}-${Date.now()}`
   );
   
-  const existingDoc = await prisma.document.findFirst({
-    where: { registrationId, type: key as any }
+  await apiFetch("/ppdb/documents/upsert", {
+    method: "POST",
+    body: JSON.stringify({
+      registrationId,
+      type: key,
+      fileUrl: uploadedUrl,
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+    })
   });
-  
-  if (existingDoc) {
-    await prisma.document.update({
-      where: { id: existingDoc.id },
-      data: {
-        fileUrl: uploadedUrl,
-        fileName: file.name,
-        fileSize: file.size,
-        mimeType: file.type,
-      }
-    });
-  } else {
-    await prisma.document.create({
-      data: {
-        registrationId,
-        type: key as any,
-        fileUrl: uploadedUrl,
-        fileName: file.name,
-        fileSize: file.size,
-        mimeType: file.type,
-      }
-    });
-  }
   
   return { success: true, url: uploadedUrl };
 }
 
-// ── NEW: Finalize Upload and Redirect ──
 export async function finalizeDocumentUploadAction(registrationId: string) {
-  const user = await getParentUser();
-  
-  const reg = await prisma.registration.findFirst({
-    where: { id: registrationId, parentId: user.id },
-  });
-
-  if (!reg) throw new Error("Registrasi tidak ditemukan");
-
-  const docsCount = await prisma.document.count({
-    where: { registrationId }
-  });
-
-  if (docsCount >= 5) {
-    await prisma.registration.update({
-      where: { id: registrationId },
-      data: { status: RegistrationStatus.medical_pending },
-    });
-  }
-
+  await apiFetch(`/ppdb/documents/finalize/${registrationId}`, { method: "POST" });
   revalidatePath("/parent/documents");
   redirect("/parent/medical");
 }

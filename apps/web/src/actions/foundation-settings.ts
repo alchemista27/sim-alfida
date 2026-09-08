@@ -1,27 +1,15 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-guard";
-import { UserRole } from "@sim/database";
 import { revalidatePath } from "next/cache";
+import { apiFetch } from "@/lib/api";
 
-// Force Vercel recompilation of this action
 export async function getFoundationSettings() {
-  await requireRole([UserRole.super_admin]);
-  let settings = await prisma.foundationSettings.findFirst();
-  if (!settings) {
-    settings = await prisma.foundationSettings.create({
-      data: {
-        foundationName: "Yayasan Alfida",
-      }
-    });
-  }
-  return settings;
+  return apiFetch("/admin/foundation-settings", {
+    method: "GET",
+  });
 }
 
 export async function updateFoundationSettings(formData: FormData) {
-  await requireRole([UserRole.super_admin]);
-  
   const id = formData.get("id") as string;
   const foundationName = formData.get("foundationName") as string;
   const chairmanName = formData.get("chairmanName") as string;
@@ -57,9 +45,9 @@ export async function updateFoundationSettings(formData: FormData) {
     );
   }
 
-  await prisma.foundationSettings.update({
-    where: { id },
-    data: {
+  await apiFetch(`/admin/foundation-settings/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({
       foundationName,
       chairmanName,
       logoUrl,
@@ -67,7 +55,7 @@ export async function updateFoundationSettings(formData: FormData) {
       bankName,
       bankAccountNumber,
       bankAccountHolder,
-    }
+    }),
   });
 
   revalidatePath("/admin/foundation-settings");

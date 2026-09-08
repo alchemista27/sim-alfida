@@ -34,7 +34,8 @@ export function DocumentUploadClient({ registrationId, existingDocs }: { registr
     });
   };
 
-  const handleUploadAll = async () => {
+  const handleUploadAll = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     const fileKeysToUpload = Object.keys(files).filter(k => files[k] !== null);
     
     if (fileKeysToUpload.length === 0) {

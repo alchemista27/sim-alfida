@@ -1,39 +1,18 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/actions/user";
-import { LeaveRequestSchema, type LeaveRequestInput } from "@sim/shared";
-import { UserRole } from "@sim/database";
-import { requireRole } from "@/lib/auth-guard";
+import { revalidatePath } from "next/cache";
+import { type LeaveRequestInput } from "@sim/shared";
+import { apiFetch } from "@/lib/api";
 
-export async function getMyLeaveRequests() {
-  const user = await getCurrentUser();
-  if (!user) throw new Error("Unauthorized");
-  await requireRole([UserRole.karyawan, UserRole.guru]);
-
-  return await prisma.leaveRequest.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
+export async function createLeaveRequest(data: LeaveRequestInput & { documentUrl?: string }) {
+  await apiFetch("/hr/leave/my", {
+    method: "POST",
+    body: JSON.stringify(data)
   });
+  revalidatePath("/staff/leave");
+  return { success: true };
 }
 
-export async function createLeaveRequest(data: LeaveRequestInput) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error("Unauthorized");
-  await requireRole([UserRole.karyawan, UserRole.guru]);
-
-  const parsed = LeaveRequestSchema.parse(data);
-
-  const leave = await prisma.leaveRequest.create({
-    data: {
-      userId: user.id,
-      type: parsed.type,
-      startDate: parsed.startDate,
-      endDate: parsed.endDate,
-      reason: parsed.reason,
-      attachmentUrl: parsed.attachmentUrl,
-    }
-  });
-
-  return { success: true, id: leave.id };
+export async function getMyLeaveRequests() {
+  return apiFetch("/hr/leave/my", { method: "GET" });
 }

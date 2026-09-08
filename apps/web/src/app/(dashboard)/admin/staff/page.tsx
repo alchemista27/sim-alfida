@@ -7,13 +7,13 @@ import { UserRole } from "@sim/database";
 import { getCurrentUser } from "@/actions/user";
 
 export default async function AdminStaffPage() {
-  await requireRole([UserRole.super_admin, UserRole.admin_kepegawaian, UserRole.admin_unit, UserRole.admin_unit_nondik]);
+  await requireRole([UserRole.super_admin, UserRole.admin_bidang, UserRole.admin_unit, UserRole.admin_unit_nondik]);
 
   const user = await getCurrentUser();
   if (!user) return null;
 
   const isSuperAdmin = user.roles.some((r: any) => r.role === "super_admin");
-  const isAdminKepegawaian = user.roles.some((r: any) => r.role === "admin_kepegawaian");
+  const isAdminKepegawaian = user.roles.some((r: any) => r.role === "admin_bidang");
 
   const adminUnitRoleIds = user.roles
     .filter((r: any) => (r.role === "admin_unit" || r.role === "admin_unit_nondik") && r.unitId)

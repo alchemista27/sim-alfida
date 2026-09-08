@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { UserRole } from "@sim/database";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -9,23 +10,24 @@ export interface UserRoleInfo {
 }
 
 export async function requireAuth() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!user) {
+  if (!session || !session.user) {
     redirect("/login");
   }
 
   // Get Prisma user with roles
   const prismaUser = await prisma.user.findUnique({
-    where: { id: user.id },
+    where: { id: session.user.id },
     include: { roles: true },
   });
 
   if (!prismaUser) {
     // Session is valid in Supabase but user profile is missing in DB
     // Clear session cookies and redirect
-    await supabase.auth.signOut();
+    // No supabase to sign out
     redirect("/login");
   }
 

@@ -470,9 +470,9 @@ CREATE INDEX idx_user_roles_role ON user_roles (role);
 
 ---
 
-### 5.3 `sessions`
+### 5.3 `sessions` (Better Auth)
 
-Sesi autentikasi (NextAuth database strategy).
+Sesi autentikasi untuk Better Auth.
 
 ```sql
 CREATE TABLE sessions (
@@ -481,6 +481,7 @@ CREATE TABLE sessions (
     session_token   VARCHAR(500)  NOT NULL,
     expires_at      TIMESTAMPTZ   NOT NULL,
     created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ,
 
     CONSTRAINT fk_sessions_user FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE,
@@ -491,13 +492,44 @@ CREATE INDEX idx_sessions_user ON sessions (user_id);
 CREATE INDEX idx_sessions_expires ON sessions (expires_at);
 ```
 
-| Kolom           | Tipe          | Nullable | Keterangan                     |
-| --------------- | ------------- | :------: | ------------------------------ |
-| `id`            | UUID          | ❌       | PK                             |
-| `user_id`       | UUID          | ❌       | FK → users.id                  |
-| `session_token` | VARCHAR(500)  | ❌       | Token sesi, UNIQUE             |
-| `expires_at`    | TIMESTAMPTZ   | ❌       | Waktu kedaluwarsa              |
-| `created_at`    | TIMESTAMPTZ   | ❌       | DEFAULT NOW()                  |
+### 5.4 `accounts` (Better Auth)
+
+Data akun OAuth atau kredensial yang di-link ke user (digunakan oleh Better Auth).
+
+```sql
+CREATE TABLE accounts (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id             UUID          NOT NULL,
+    account_id          VARCHAR(255)  NOT NULL,
+    provider_id         VARCHAR(255)  NOT NULL,
+    access_token        TEXT,
+    refresh_token       TEXT,
+    expires_at          TIMESTAMPTZ,
+    password            TEXT,
+    created_at          TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ,
+
+    CONSTRAINT fk_accounts_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_accounts_user ON accounts (user_id);
+```
+
+### 5.5 `verifications` (Better Auth)
+
+Data token verifikasi untuk email/password reset.
+
+```sql
+CREATE TABLE verifications (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    identifier  VARCHAR(255)  NOT NULL,
+    value       TEXT          NOT NULL,
+    expires_at  TIMESTAMPTZ   NOT NULL,
+    created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ
+);
+```
 
 ---
 

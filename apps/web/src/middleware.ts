@@ -1,32 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
-import { createServerClient } from "@supabase/ssr";
 
 const publicRoutes = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
-  // First, update the session to refresh tokens if needed
-  let response = await updateSession(request);
-
-  // Then create a lightweight client just to check the session without refreshing
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          // Ignore, already handled by updateSession
-        },
-      },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
+
+  const res = await fetch(new URL("/api/auth/get-session", request.url).toString(), {
+    headers: {
+      cookie: request.headers.get("cookie") || "",
+    },
+  });
+
+  const session = res.ok ? await res.json() : null;
+  const user = session?.user;
 
   if (pathname === "/") {
     if (user) {
@@ -49,7 +36,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/modules", request.url));
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

@@ -1,4 +1,5 @@
 "use client";
+import { authClient } from "@/lib/auth-client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -20,10 +21,7 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error: authError } = await authClient.signIn.email({
         email,
         password,
       });

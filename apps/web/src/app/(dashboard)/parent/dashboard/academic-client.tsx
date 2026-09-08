@@ -101,8 +101,11 @@ function PpdbDashboardView({ reg }: { reg: any }) {
         
         {/* Contextual Action Button based on State */}
         {reg.status === "pending_payment" && (
-          <Link href="/parent/payment">
-            <Button variant="primary">Lakukan Pembayaran</Button>
+          <Link 
+            href="/parent/payment"
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm"
+          >
+            Lakukan Pembayaran
           </Link>
         )}
         {reg.status === "payment_uploaded" && (
@@ -111,18 +114,27 @@ function PpdbDashboardView({ reg }: { reg: any }) {
           </div>
         )}
         {(reg.status === "payment_verified" || reg.status === "form_filling") && (
-          <Link href="/parent/form-student">
-            <Button variant="primary">Lengkapi Formulir</Button>
+          <Link 
+            href="/parent/form-student"
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm"
+          >
+            Lengkapi Formulir
           </Link>
         )}
         {reg.status === "documents_uploaded" && (
-          <Link href="/parent/documents">
-            <Button variant="primary">Upload Berkas</Button>
+          <Link 
+            href="/parent/documents"
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm"
+          >
+            Upload Berkas
           </Link>
         )}
         {reg.status === "medical_pending" && (
-          <Link href="/parent/medical">
-            <Button variant="primary">Proses Tes Medis (IMC)</Button>
+          <Link 
+            href="/parent/medical"
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm"
+          >
+            Proses Tes Medis (IMC)
           </Link>
         )}
         {reg.status === "medical_uploaded" && (
@@ -136,19 +148,34 @@ function PpdbDashboardView({ reg }: { reg: any }) {
           </div>
         )}
         {reg.status === "observation_scheduled" && !reg.observationBooking && (
-          <Link href="/parent/observation">
-            <Button variant="primary">Pilih Jadwal Observasi</Button>
+          <Link 
+            href="/parent/observation" 
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm"
+          >
+            Pilih Jadwal Observasi
           </Link>
         )}
         {reg.status === "observation_scheduled" && reg.observationBooking && (
-          <Link href="/parent/observation">
-            <Button variant="outline">Lihat Jadwal Observasi</Button>
+          <Link 
+            href="/parent/observation"
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none border border-tertiary text-tertiary bg-transparent hover:bg-tertiary/10 px-4 py-2 text-sm"
+          >
+            Lihat Jadwal Observasi
           </Link>
         )}
         {reg.status === "observation_done" && (
           <div className="px-4 py-2 bg-green-200/50 text-green-800 text-sm font-medium rounded-md flex items-center gap-2">
             <Icon name="check_circle" className="text-sm" /> Observasi Selesai
           </div>
+        )}
+        {(reg.status === "accepted" || reg.status === "enrolled") && (
+          <a 
+            href={`/api/pdf/acceptance?id=${reg.id}`}
+            target="_blank"
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm gap-2"
+          >
+            <Icon name="download" className="text-sm" /> Download Surat Kelulusan
+          </a>
         )}
       </div>
 
@@ -170,6 +197,8 @@ function PpdbDashboardView({ reg }: { reg: any }) {
           {reg.status === "observation_scheduled" && !reg.observationBooking && "Berkas Anda telah lolos! Silakan pilih jadwal observasi (tes dan wawancara) yang tersedia."}
           {reg.status === "observation_scheduled" && reg.observationBooking && "Jadwal observasi telah dikonfirmasi. Harap hadir tepat waktu sesuai jadwal."}
           {reg.status === "observation_done" && "Tahap observasi selesai. Harap pantau dashboard untuk pengumuman kelulusan."}
+          {reg.status === "accepted" && "Selamat! Calon siswa dinyatakan LULUS. Silakan unduh Surat Kelulusan dan lakukan Daftar Ulang."}
+          {reg.status === "enrolled" && "Siswa telah resmi terdaftar pada tahun ajaran ini."}
         </div>
       </Card>
     </div>

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: req.headers });
+  const user = session?.user;
 
   if (!user) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -52,19 +53,21 @@ export async function GET(req: NextRequest) {
     date: new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" }),
   };
 
-  // Panggil Supabase Edge Function untuk merender PDF
-  const { data: pdfBlob, error } = await supabase.functions.invoke("generate-pdf", {
-    body: { type: "acceptance", props },
-  });
+  // Hasilkan PDF secara lokal di Node.js daripada menggunakan Edge Function
+  const { renderToBuffer } = await import("@react-pdf/renderer");
+  const { AcceptanceLetterDocument } = await import("@/components/pdf/acceptance-letter");
 
-  if (error || !pdfBlob) {
+  let pdfBuffer: Buffer;
+  try {
+    pdfBuffer = await renderToBuffer(<AcceptanceLetterDocument {...props} />);
+  } catch (error) {
     console.error("PDF Generation Error:", error);
-    return new NextResponse("Gagal membuat PDF", { status: 500 });
+    return new NextResponse("Gagal membuat PDF secara internal", { status: 500 });
   }
 
   const headers = new Headers();
   headers.set("Content-Type", "application/pdf");
   headers.set("Content-Disposition", `attachment; filename="Surat_Kelulusan_${reg.registrationNumber}.pdf"`);
 
-  return new NextResponse(pdfBlob, { headers });
+  return new NextResponse(pdfBuffer as any, { headers });
 }

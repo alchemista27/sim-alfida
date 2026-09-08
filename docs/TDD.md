@@ -43,8 +43,8 @@ graph TB
     end
 
     subgraph External["External Services"]
-        SupaAuth["Supabase Auth"]
-        Storage["Cloudinary"]
+        BetterAuth["Better Auth"]
+        Storage["MinIO"]
         PG["Payment Gateway (Future)"]
     end
 
@@ -52,7 +52,7 @@ graph TB
     MW --> Pages
     Pages --> ClientFetch
     ClientFetch -->|REST API calls| Guards
-    Guards -->|Verify Supabase JWT| SupaAuth
+    Guards -->|Verify Session| BetterAuth
     Guards --> Controllers
     Controllers --> NestServices
     NestServices --> NestModules
@@ -70,10 +70,10 @@ graph TB
 | Backend                            | NestJS               | Dependency Injection, modular architecture, Guards, Interceptors, hemat memori              |
 | ORM                                | Prisma               | Type-safe, Developer experience (DX) sangat baik, migrasi otomatis                         |
 | Database                           | PostgreSQL           | Relasional, mendukung multi-tenant, open source                                             |
-| Object Storage                     | S3-compatible (Cloudinary)| Untuk file upload (berkas PPDB, logo, TTD). Cloudinary untuk dev, S3 untuk prod                  |
+| Object Storage                     | MinIO (S3-compatible) | Untuk file upload (berkas PPDB, logo, TTD). Dijalankan lokal via Docker                          |
 | PDF Generation                     | `@react-pdf/renderer`| React-based, server-side rendering, sesuai dengan stack                                     |
 | Validasi                           | Zod                  | Type inference TypeScript, composable schemas, standar di ekosistem Next.js                 |
-| Auth                               | Supabase Auth (JWT)  | Lightweight, managed auth, SSR cookie integration, JWT verification di NestJS               |
+| Auth                               | Better Auth (Session)| Lightweight, session-based auth via Prisma adapter, di-verify via NestJS                    |
 | Multi-tenant                       | Shared DB + tenant_id| Sederhana, satu database, isolasi data via tenant column + RLS                              |
 
 ---
@@ -937,8 +937,8 @@ export const UploadDocumentSchema = z.object({
 
 | Aspek                | Detail                                                              |
 | -------------------- | ------------------------------------------------------------------- |
-| **Storage**          | S3-compatible (Cloudinary untuk dev, AWS S3 / Cloudflare R2 untuk prod)  |
-| **Upload Method**    | Presigned URL — client upload langsung ke storage, server hanya generate URL |
+| **Storage**          | MinIO (S3-compatible object storage via Docker)                     |
+| **Upload Method**    | Direct server upload via AWS SDK ke MinIO                           |
 | **Max File Size**    | 5 MB per file                                                       |
 | **Allowed Types**    | `image/jpeg`, `image/png`, `application/pdf`                        |
 | **Path Convention**  | `{unit_id}/{academic_year}/{registration_id}/{doc_type}/{filename}` |
@@ -949,19 +949,15 @@ export const UploadDocumentSchema = z.object({
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant S as Server Action
-    participant ST as Object Storage
+    participant S as NestJS API
+    participant ST as MinIO Storage
 
-    C->>S: Request presigned upload URL (doc_type, mime_type)
+    C->>S: POST multipart/form-data upload file
     S->>S: Validasi auth, role, file constraints
-    S->>ST: Generate presigned PUT URL (expires 5 min)
-    ST-->>S: Presigned URL
-    S-->>C: Presigned URL + file key
-    C->>ST: PUT file ke presigned URL
-    ST-->>C: 200 OK
-    C->>S: Confirm upload (file key)
+    S->>ST: Upload file (PutObject via AWS SDK)
+    ST-->>S: 200 OK
     S->>S: Update database (documents table)
-    S-->>C: Success
+    S-->>C: Success + file URL
 ```
 
 ---
@@ -1197,13 +1193,15 @@ NEXT_PUBLIC_APP_NAME="SIM-Alfida"
 DATABASE_URL=postgresql://user:password@localhost:5432/sim_alfida
 
 # ── Auth ─────────────────────────────────────
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=generate-a-secure-random-string
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=generate-a-secure-random-string
 
-# ── Object Storage (Cloudinary) ───────────
-CLOUDINARY_CLOUD_NAME=hb1ropwm
-CLOUDINARY_API_KEY=219453755147514
-CLOUDINARY_API_SECRET=QSQ-HbPN10B20hHzIz-sZ9LgJvo1
+# ── Object Storage (MinIO) ───────────
+MINIO_ENDPOINT=localhost
+MINIO_PORT=9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=sim-alfida-bucket
 
 # ── Email (future) ──────────────────────────
 # SMTP_HOST=

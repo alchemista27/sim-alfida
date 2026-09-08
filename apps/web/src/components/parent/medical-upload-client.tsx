@@ -20,7 +20,8 @@ export function MedicalUploadClient({ registrationId }: { registrationId: string
     setFile(f || null);
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!file) {
       setError("Silakan pilih file hasil lab terlebih dahulu.");
       return;

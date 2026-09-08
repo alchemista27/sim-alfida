@@ -7,7 +7,7 @@ import { removeAdminUnitAction } from "@/actions/admin";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 
-export function RemoveAdminButton({ userId, unitId }: { userId: string, unitId: string }) {
+export function RemoveAdminButton({ userId, unitId, isNondik = false }: { userId: string, unitId: string, isNondik?: boolean }) {
   const [isRemoving, setIsRemoving] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const router = useRouter();
@@ -15,7 +15,7 @@ export function RemoveAdminButton({ userId, unitId }: { userId: string, unitId: 
   const handleRemove = async () => {
     setIsRemoving(true);
     try {
-      await removeAdminUnitAction(userId, unitId);
+      await removeAdminUnitAction(userId, unitId, isNondik);
       setShowConfirm(false);
       router.refresh();
     } catch (e) {

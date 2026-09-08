@@ -11,9 +11,10 @@ Sistem informasi Manajemen Yayasan Alfida adalah sistem pengelolaan unit dan sum
 
 ## Tech Stack
 - **Frontend / Framework**: Next.js 15 (React 19, App Router)
-- **Database & Auth**: Supabase (PostgreSQL & Supabase Auth)
+- **Database**: PostgreSQL (lokal)
+- **Auth**: Better Auth
 - **ORM**: Prisma
-- **Storage**: Cloudinary
+- **Storage**: MinIO (S3-compatible)
 - **Styling**: TailwindCSS
 
 Secara keseluruhan sistem ini akan memiliki sistem multi tenant dengan pembagian peran sebagai berikut:
