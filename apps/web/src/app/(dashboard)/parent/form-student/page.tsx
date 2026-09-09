@@ -6,9 +6,10 @@ import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { FormStudentClient } from "@/components/parent/form-student-client";
 
-export default async function ParentFormStudentPage() {
+export default async function ParentFormStudentPage(props: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireRole([UserRole.orang_tua]);
-  const reg = await getActiveRegistration();
+  const reg = await getActiveRegistration(searchParams.id);
 
   if (!reg || (reg.status !== "form_filling" && reg.status !== "payment_verified")) {
     redirect("/parent/dashboard");
@@ -20,7 +21,7 @@ export default async function ParentFormStudentPage() {
     nickname: reg.studentData.nickname,
     gender: reg.studentData.gender,
     birthPlace: reg.studentData.birthPlace,
-    birthDate: reg.studentData.birthDate.toISOString().split("T")[0],
+    birthDate: new Date(reg.studentData.birthDate).toISOString().split("T")[0],
     religion: reg.studentData.religion,
     nisn: reg.studentData.nisn ?? undefined,
     siblingsCount: reg.studentData.siblingsCount,

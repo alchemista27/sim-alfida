@@ -28,7 +28,7 @@ export function FormStudentClient({
     setError(null);
     try {
       await submitStudentFormAction(registrationId, data);
-      router.push("/parent/form-parents");
+      router.push(`/parent/form-parents?id=${registrationId}`);
     } catch (e: any) {
       setError(e.message || "Terjadi kesalahan saat menyimpan data.");
     }

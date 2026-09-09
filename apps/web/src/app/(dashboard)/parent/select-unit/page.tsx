@@ -10,13 +10,13 @@ import { Icon } from "@/components/ui/icon";
 import { redirect } from "next/navigation";
 
 export default async function ParentSelectUnitPage() {
-  await requireRole([UserRole.orang_tua]);
+  const user = await requireRole([UserRole.orang_tua]);
 
-  // If already registered, redirect to dashboard
-  const existingReg = await getActiveRegistration();
-  if (existingReg) {
-    redirect("/parent/dashboard");
-  }
+  const userRegistrations = await prisma.registration.findMany({
+    where: { parentId: user.id },
+    select: { academicYear: { select: { unitId: true } } }
+  });
+  const registeredUnitIds = new Set(userRegistrations.map(r => r.academicYear.unitId));
 
   // Fetch units that have an active PPDB academic year
   const units = await prisma.unit.findMany({
@@ -82,19 +82,27 @@ export default async function ParentSelectUnitPage() {
                 </div>
               </div>
 
-              <form action={async () => {
-                "use server";
-                await createRegistrationAction(unit.id);
-              }}>
-                <Button 
-                  type="submit" 
-                  variant="primary" 
-                  className="w-full"
-                  disabled={isFull}
-                >
-                  {isFull ? "Penuh" : "Daftar Sekarang"}
-                </Button>
-              </form>
+              {registeredUnitIds.has(unit.id) ? (
+                <a href="/parent/dashboard" className="w-full">
+                  <Button type="button" variant="secondary" className="w-full">
+                    Lanjutkan Pendaftaran
+                  </Button>
+                </a>
+              ) : (
+                <form action={async () => {
+                  "use server";
+                  await createRegistrationAction(unit.id);
+                }}>
+                  <Button 
+                    type="submit" 
+                    variant="primary" 
+                    className="w-full"
+                    disabled={isFull}
+                  >
+                    {isFull ? "Penuh" : "Daftar Sekarang"}
+                  </Button>
+                </form>
+              )}
             </Card>
           );
         })}

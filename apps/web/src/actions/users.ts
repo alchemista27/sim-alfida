@@ -61,3 +61,15 @@ export async function deleteUser(userId: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function resetUserPassword(userId: string, newPassword: string) {
+  try {
+    const res = await apiFetch(`/admin/users/${userId}/password`, {
+      method: "PUT",
+      body: JSON.stringify({ newPassword }),
+    });
+    return res;
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

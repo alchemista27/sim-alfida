@@ -126,9 +126,14 @@ export class PpdbService {
   }
 
   // ================= PARENT & REGISTRATION =================
-  async getActiveRegistration(parentId: string) {
+  async getActiveRegistration(parentId: string, registrationId?: string) {
+    const whereClause: any = { parentId };
+    if (registrationId) {
+      whereClause.id = registrationId;
+    }
+    
     return this.prisma.registration.findFirst({
-      where: { parentId },
+      where: whereClause,
       include: {
         academicYear: { include: { unit: true } },
         studentData: true,

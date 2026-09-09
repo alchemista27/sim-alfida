@@ -23,6 +23,7 @@ export function UserCreateClient() {
     e.preventDefault();
     setLoading(true);
     const groups = groupsInput.split(",").map(g => g.trim()).filter(g => g);
+    groups.push("created_by_admin");
     
     const res = await createUserManual({
       ...formData,

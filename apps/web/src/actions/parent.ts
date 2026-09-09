@@ -7,8 +7,9 @@ import { studentDataSchema, parentDataSchema } from "@/lib/validations/ppdb";
 import { revalidatePath } from "next/cache";
 import { apiFetch } from "@/lib/api";
 
-export async function getActiveRegistration(): Promise<any> {
-  return apiFetch("/ppdb/parent/registration/active", { method: "GET" });
+export async function getActiveRegistration(id?: string): Promise<any> {
+  const url = id ? `/ppdb/parent/registration/active?id=${id}` : "/ppdb/parent/registration/active";
+  return apiFetch(url, { method: "GET" });
 }
 
 export async function createRegistrationAction(unitId: string) {

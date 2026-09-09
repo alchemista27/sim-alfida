@@ -6,9 +6,10 @@ import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { FormParentsClient } from "@/components/parent/form-parents-client";
 
-export default async function ParentFormParentsPage() {
+export default async function ParentFormParentsPage(props: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireRole([UserRole.orang_tua]);
-  const reg = await getActiveRegistration();
+  const reg = await getActiveRegistration(searchParams.id);
 
   if (!reg || reg.status !== "form_filling") {
     redirect("/parent/dashboard");
@@ -27,12 +28,12 @@ export default async function ParentFormParentsPage() {
     parentDataDefault = {
       father: father ? {
         ...father,
-        birthDate: father.birthDate ? father.birthDate.toISOString().split("T")[0] : "",
+        birthDate: father.birthDate ? new Date(father.birthDate).toISOString().split("T")[0] : "",
         nik: father.nik ?? "",
       } : undefined,
       mother: mother ? {
         ...mother,
-        birthDate: mother.birthDate ? mother.birthDate.toISOString().split("T")[0] : "",
+        birthDate: mother.birthDate ? new Date(mother.birthDate).toISOString().split("T")[0] : "",
         nik: mother.nik ?? "",
       } : undefined,
     };

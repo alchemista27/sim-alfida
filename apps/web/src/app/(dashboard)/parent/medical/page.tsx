@@ -6,8 +6,9 @@ import { redirect } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { MedicalUploadClient } from "@/components/parent/medical-upload-client";
 
-export default async function ParentMedicalPage() {
-  const reg = await getActiveRegistration();
+export default async function ParentMedicalPage(props: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await props.searchParams;
+  const reg = await getActiveRegistration(searchParams.id);
 
   if (!reg) {
     redirect("/parent/select-unit");

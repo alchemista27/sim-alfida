@@ -8,9 +8,10 @@ import { Icon } from "@/components/ui/icon";
 import { PaymentUploadClient } from "@/components/parent/payment-upload-client";
 import { redirect } from "next/navigation";
 
-export default async function ParentPaymentPage() {
+export default async function ParentPaymentPage(props: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireRole([UserRole.orang_tua]);
-  const reg = await getActiveRegistration();
+  const reg = await getActiveRegistration(searchParams.id);
 
   if (!reg) {
     redirect("/parent/select-unit");

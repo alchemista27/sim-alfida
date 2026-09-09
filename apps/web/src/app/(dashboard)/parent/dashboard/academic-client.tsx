@@ -142,25 +142,30 @@ function PpdbDashboardView({ reg }: { reg: any }) {
             <Icon name="hourglass_empty" className="text-sm" /> Antrian Verifikasi Berkas
           </div>
         )}
+        {(reg.status === "payment_verified" || reg.status === "payment_uploaded") && (
+          <div className="inline-flex items-center justify-center font-body font-medium transition-colors rounded px-4 py-2 text-sm gap-2 bg-gray-100 text-gray-500 cursor-not-allowed">
+            <Icon name="pending" className="text-sm animate-pulse" /> Menunggu Verifikasi
+          </div>
+        )}
         {reg.status === "verification" && (
-          <div className="px-4 py-2 bg-amber-200/50 text-amber-800 text-sm font-medium rounded-md flex items-center gap-2">
-            <Icon name="hourglass_empty" className="text-sm" /> Menunggu Verifikasi PPDB
+          <div className="inline-flex items-center justify-center font-body font-medium transition-colors rounded px-4 py-2 text-sm gap-2 bg-gray-100 text-gray-500 cursor-not-allowed">
+            <Icon name="verified_user" className="text-sm animate-pulse" /> Berkas Sedang Diverifikasi
           </div>
         )}
         {reg.status === "observation_scheduled" && !reg.observationBooking && (
           <Link 
-            href="/parent/observation" 
-            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm"
+            href={`/parent/observation?id=${reg.id}`} 
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none bg-tertiary text-on-tertiary hover:bg-tertiary/90 px-4 py-2 text-sm gap-2"
           >
-            Pilih Jadwal Observasi
+            Pilih Jadwal Observasi <Icon name="arrow_forward" className="text-sm" />
           </Link>
         )}
         {reg.status === "observation_scheduled" && reg.observationBooking && (
           <Link 
-            href="/parent/observation"
-            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded focus:outline-none border border-tertiary text-tertiary bg-transparent hover:bg-tertiary/10 px-4 py-2 text-sm"
+            href={`/parent/observation?id=${reg.id}`} 
+            className="inline-flex items-center justify-center font-body font-medium transition-colors rounded px-4 py-2 text-sm gap-2 bg-teal-50 text-tertiary border border-teal-200"
           >
-            Lihat Jadwal Observasi
+            <Icon name="event" className="text-sm" /> Lihat Tiket Observasi
           </Link>
         )}
         {reg.status === "observation_done" && (

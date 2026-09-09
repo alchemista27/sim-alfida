@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { UserRole } from "@sim/database";
-import { updateUserRoles, deleteUser } from "@/actions/users";
+import { updateUserRoles, deleteUser, resetUserPassword } from "@/actions/users";
 import { useAuth } from "@/components/providers/auth-provider";
+import { Icon } from "@/components/ui/icon";
 
 const ALL_ROLES = [
   "super_admin", "admin_unit", "admin_unit_nondik", "guru", "karyawan", 
@@ -13,6 +14,9 @@ const ALL_ROLES = [
 export function UserListClient({ users }: { users: any[] }) {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [deletingUser, setDeletingUser] = useState<any>(null);
+  const [resettingUser, setResettingUser] = useState<any>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [groupsInput, setGroupsInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,6 +52,20 @@ export function UserListClient({ users }: { users: any[] }) {
       alert("Gagal update: " + res.error);
     }
     setLoading(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!resettingUser || !newPassword) return;
+    setResetLoading(true);
+    const res = await resetUserPassword(resettingUser.id, newPassword);
+    if (res.success) {
+      setResettingUser(null);
+      setNewPassword("");
+      alert("Password berhasil diubah!");
+    } else {
+      alert("Gagal mereset password: " + res.error);
+    }
+    setResetLoading(false);
   };
 
   return (
@@ -91,13 +109,21 @@ export function UserListClient({ users }: { users: any[] }) {
                   ))}
                   {(!user.roles || user.roles.length === 0) && <span className="opacity-50">Default (Orang Tua)</span>}
                 </td>
-                <td className="p-4 flex gap-2">
+                <td className="p-4 flex gap-2 flex-wrap">
                   <button 
                     onClick={() => openEdit(user)}
                     className="text-tertiary hover:opacity-80 font-medium text-xs bg-transparent border border-tertiary px-3 py-1 rounded"
                   >
                     Edit
                   </button>
+                  {user.groups?.includes("created_by_admin") && (
+                    <button 
+                      onClick={() => { setResettingUser(user); setNewPassword(""); }}
+                      className="text-blue-600 hover:opacity-80 font-medium text-xs bg-transparent border border-blue-600 px-3 py-1 rounded"
+                    >
+                      Reset Pass
+                    </button>
+                  )}
                   {currentUser?.id !== user.id && (
                     <button 
                       onClick={() => setDeletingUser(user)}
@@ -205,6 +231,48 @@ export function UserListClient({ users }: { users: any[] }) {
                 className="px-[20px] py-[12px] text-sm font-medium text-white bg-red-600 hover:opacity-90 rounded disabled:opacity-50"
               >
                 {deleteLoading ? 'Menghapus...' : 'Hapus'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resettingUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-surface rounded-md shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-bold text-primary font-heading">Reset Password</h3>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <p className="text-sm font-body text-primary">
+                Ganti password untuk akun <span className="font-bold">{resettingUser.fullName}</span> ({resettingUser.username || resettingUser.email}).
+              </p>
+              <div>
+                <label className="block text-xs font-semibold text-primary mb-1 font-body">PASSWORD BARU</label>
+                <input 
+                  type="text" 
+                  value={newPassword} 
+                  onChange={e => setNewPassword(e.target.value)} 
+                  className="w-full border-border rounded px-3 py-2 text-sm bg-surface text-primary" 
+                  placeholder="Masukkan password baru" 
+                />
+              </div>
+            </div>
+
+            <div className="bg-neutral px-6 py-4 flex justify-end gap-3">
+              <button 
+                onClick={() => setResettingUser(null)}
+                className="px-[20px] py-[12px] text-sm font-medium text-tertiary bg-transparent rounded hover:bg-black/5"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={handleResetPassword}
+                disabled={resetLoading || !newPassword}
+                className="px-[20px] py-[12px] text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded disabled:opacity-50"
+              >
+                {resetLoading ? 'Menyimpan...' : 'Simpan Password'}
               </button>
             </div>
           </div>

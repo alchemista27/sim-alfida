@@ -6,8 +6,9 @@ import { redirect } from "next/navigation";
 import { DocumentUploadClient } from "@/components/parent/document-upload-client";
 import { prisma } from "@/lib/prisma";
 
-export default async function ParentDocumentsPage() {
-  const reg = await getActiveRegistration();
+export default async function ParentDocumentsPage(props: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await props.searchParams;
+  const reg = await getActiveRegistration(searchParams.id);
 
   if (!reg) {
     redirect("/parent/select-unit");

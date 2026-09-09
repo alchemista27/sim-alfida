@@ -6,9 +6,10 @@ import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 
-export default async function ParentResultPage() {
+export default async function ParentResultPage(props: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireRole([UserRole.orang_tua]);
-  const reg = await getActiveRegistration();
+  const reg = await getActiveRegistration(searchParams.id);
 
   if (!reg) {
     redirect("/parent/dashboard");

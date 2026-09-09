@@ -64,7 +64,9 @@ export class PpdbController {
 
   @Get('parent/registration/active')
   @Roles(UserRole.orang_tua)
-  async getActiveRegistration(@Req() req: any) { return this.ppdbService.getActiveRegistration(req.user.id); }
+  async getActiveRegistration(@Req() req: any, @Query('id') id?: string) { 
+    return this.ppdbService.getActiveRegistration(req.user.id, id); 
+  }
 
   @Post('parent/registration')
   @Roles(UserRole.orang_tua)

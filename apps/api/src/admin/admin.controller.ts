@@ -29,6 +29,12 @@ export class AdminController {
     return this.adminService.createUserManual(body);
   }
 
+  @Put('users/:id/password')
+  @Roles(UserRole.super_admin)
+  async resetUserPassword(@Param('id') id: string, @Body() body: any) {
+    return this.adminService.resetUserPassword(id, body.newPassword);
+  }
+
   @Delete('users/:id')
   @Roles(UserRole.super_admin)
   async deleteUser(@Param('id') id: string) {

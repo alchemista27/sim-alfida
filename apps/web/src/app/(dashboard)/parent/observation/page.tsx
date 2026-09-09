@@ -8,9 +8,10 @@ import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { ObservationBookingClient } from "@/components/parent/observation-booking-client";
 
-export default async function ParentObservationPage() {
+export default async function ParentObservationPage(props: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireRole([UserRole.orang_tua]);
-  const reg = await getActiveRegistration();
+  const reg = await getActiveRegistration(searchParams.id);
 
   if (!reg) {
     redirect("/parent/dashboard");

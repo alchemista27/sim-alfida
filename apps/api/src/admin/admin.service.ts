@@ -132,6 +132,24 @@ export class AdminService {
     return { success: true };
   }
 
+  async resetUserPassword(userId: string, newPassword: string) {
+    const hashedPassword = await this.hashPassword(newPassword);
+    
+    // Update password in both User table and Account table for credential provider
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: hashedPassword }
+      }),
+      this.prisma.account.updateMany({
+        where: { userId, providerId: 'credential' },
+        data: { password: hashedPassword }
+      })
+    ]);
+    
+    return { success: true };
+  }
+
   async searchUsers(query: string) {
     if (!query || query.length < 1) return [];
     return this.prisma.user.findMany({

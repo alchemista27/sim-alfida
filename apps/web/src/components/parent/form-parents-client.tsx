@@ -111,7 +111,7 @@ export function FormParentsClient({
       <ParentSection prefix="mother" title="Data Ibu / Wali Perempuan" />
 
       <div className="flex justify-between pt-4 border-t border-border">
-        <Link href="/parent/form-student">
+        <Link href={`/parent/form-student?id=${registrationId}`}>
           <Button type="button" variant="ghost">
             <Icon name="arrow_back" className="mr-1" /> Kembali ke Data Siswa
           </Button>
